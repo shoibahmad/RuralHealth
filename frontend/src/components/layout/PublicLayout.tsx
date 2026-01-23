@@ -27,17 +27,17 @@ export function PublicLayout() {
                     {!isAuthPage && (
                         <nav className="hidden md:flex items-center gap-1 bg-white/5 px-2 py-1 rounded-full border border-white/5 backdrop-blur-md">
                             {[
-                                { name: "How it Works", href: "/#how-it-works" },
-                                { name: "Features", href: "/#features" },
-                                { name: "About", href: "/#" }
+                                { name: "How it Works", href: "/how-it-works" },
+                                { name: "Features", href: "/features" },
+                                { name: "About", href: "/about" }
                             ].map((item) => (
-                                <a
+                                <Link
                                     key={item.name}
-                                    href={item.href}
+                                    to={item.href}
                                     className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/10 rounded-full transition-all duration-200"
                                 >
                                     {item.name}
-                                </a>
+                                </Link>
                             ))}
                         </nav>
                     )}
@@ -75,18 +75,18 @@ export function PublicLayout() {
                     <div className="md:hidden glass border-t border-white/5 absolute top-20 left-0 w-full animate-in slide-in-from-top-4 fade-in duration-200">
                         <nav className="flex flex-col p-4 gap-2">
                             {[
-                                { name: "How it Works", href: "/#how-it-works" },
-                                { name: "Features", href: "/#features" },
-                                { name: "About", href: "/#" }
+                                { name: "How it Works", href: "/how-it-works" },
+                                { name: "Features", href: "/features" },
+                                { name: "About", href: "/about" }
                             ].map((item) => (
-                                <a
+                                <Link
                                     key={item.name}
-                                    href={item.href}
+                                    to={item.href}
                                     onClick={() => setMobileMenuOpen(false)}
                                     className="px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
                                 >
                                     {item.name}
-                                </a>
+                                </Link>
                             ))}
                             <div className="h-px bg-white/5 my-2" />
                             <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="sm:hidden">

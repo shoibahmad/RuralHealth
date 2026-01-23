@@ -13,6 +13,9 @@ import { useAuth } from "./context/AuthContext";
 const queryClient = new QueryClient();
 
 import { DashboardHome } from "./pages/DashboardHome";
+import { HowItWorksPage } from "./pages/HowItWorksPage";
+import { FeaturesPage } from "./pages/FeaturesPage";
+import { AboutPage } from "./pages/AboutPage";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
@@ -30,6 +33,9 @@ function App() {
             {/* Public Routes */}
             <Route element={<PublicLayout />}>
               <Route path="/" element={<LandingPage />} />
+              <Route path="/how-it-works" element={<HowItWorksPage />} />
+              <Route path="/features" element={<FeaturesPage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
             </Route>
