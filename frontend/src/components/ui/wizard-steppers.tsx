@@ -11,9 +11,9 @@ export function WizardSteppers({ steps, currentStep }: WizardSteppersProps) {
         <div className="w-full py-6">
             <div className="flex items-center justify-between relative">
                 {/* Progress Line */}
-                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-200 -z-10" />
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-700/50 -z-10 rounded-full" />
                 <div
-                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-primary -z-10 transition-all duration-500 ease-in-out"
+                    className="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-teal-500 to-blue-500 -z-10 transition-all duration-500 ease-in-out rounded-full"
                     style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                 />
 
@@ -22,21 +22,24 @@ export function WizardSteppers({ steps, currentStep }: WizardSteppersProps) {
                     const isCurrent = index === currentStep;
 
                     return (
-                        <div key={index} className="flex flex-col items-center bg-white px-2">
-                            <div
-                                className={cn(
-                                    "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                                    isCompleted ? "bg-primary border-primary text-white" :
-                                        isCurrent ? "bg-white border-primary text-primary" : "bg-white border-slate-300 text-slate-300"
-                                )}
-                            >
-                                {isCompleted ? <Check className="h-6 w-6" /> : <span>{index + 1}</span>}
+                        <div key={index} className="flex flex-col items-center px-2">
+                            {/* Small background patch to hide the line behind the circle */}
+                            <div className="bg-slate-900 rounded-full p-1 -my-1 z-0">
+                                <div
+                                    className={cn(
+                                        "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 relative z-10 font-bold",
+                                        isCompleted ? "bg-teal-500 border-teal-500 text-white shadow-lg shadow-teal-500/25" :
+                                            isCurrent ? "bg-slate-900 border-teal-500 text-teal-400 shadow-md shadow-teal-500/10" : "bg-slate-900 border-slate-700 text-slate-500"
+                                    )}
+                                >
+                                    {isCompleted ? <Check className="h-5 w-5" /> : <span>{index + 1}</span>}
+                                </div>
                             </div>
-                            <div className="absolute top-12 w-32 text-center mt-2">
-                                <p className={cn("text-sm font-semibold", isCurrent ? "text-slate-900" : "text-slate-500")}>
+                            <div className="absolute top-14 w-32 text-center mt-2">
+                                <p className={cn("text-sm font-semibold transition-colors duration-300", isCurrent ? "text-white" : "text-slate-500")}>
                                     {step.label}
                                 </p>
-                                <p className="text-xs text-slate-400 hidden sm:block">{step.description}</p>
+                                <p className="text-[10px] uppercase tracking-wider font-medium text-slate-500 hidden sm:block mt-1">{step.description}</p>
                             </div>
                         </div>
                     )
