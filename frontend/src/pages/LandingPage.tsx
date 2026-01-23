@@ -4,7 +4,7 @@ import { Card, CardContent } from "../components/ui/card";
 import { Link } from "react-router-dom";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 export function LandingPage() {
     const [isLoading, setIsLoading] = useState(true);
