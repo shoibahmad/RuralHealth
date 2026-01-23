@@ -12,8 +12,7 @@ import { useAuth } from "./context/AuthContext";
 
 const queryClient = new QueryClient();
 
-// Placeholder components for dashboard
-const DashboardHome = () => <div className="p-4">Dashboard Overview Stats</div>;
+import { DashboardHome } from "./pages/DashboardHome";
 
 // Protected Route Wrapper
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {

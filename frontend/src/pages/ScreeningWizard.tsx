@@ -8,6 +8,7 @@ import { PatientDemographicsForm } from "../components/screening/PatientDemograp
 import { VitalsEntryForm } from "../components/screening/VitalsEntryForm";
 import { LifestyleSurveyForm } from "../components/screening/LifestyleSurveyForm";
 import { LabResultsUploadForm } from "../components/screening/LabResultsUploadForm";
+import { RiskAssessmentReview } from "../components/screening/RiskAssessmentReview";
 import { motion } from "framer-motion";
 
 
@@ -109,6 +110,8 @@ export function ScreeningWizard() {
                 return <LifestyleSurveyForm data={formData} updateData={updateFormData} />;
             case 3:
                 return <LabResultsUploadForm data={formData} updateData={updateFormData} />;
+            case 4:
+                return <RiskAssessmentReview data={formData} />;
             default:
                 return <div className="p-8 text-center text-slate-500">Coming Soon... Step {currentStep + 1}</div>;
         }
