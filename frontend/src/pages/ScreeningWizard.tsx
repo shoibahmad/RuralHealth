@@ -128,8 +128,8 @@ export function ScreeningWizard() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">New Screening</h1>
-                    <p className="text-slate-400">Complete the workflow to assess health risk.</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-white">New Screening</h1>
+                    <p className="text-sm md:text-base text-slate-400">Complete the workflow to assess health risk.</p>
                 </div>
             </div>
 

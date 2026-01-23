@@ -22,7 +22,7 @@ export function WizardSteppers({ steps, currentStep }: WizardSteppersProps) {
                     const isCurrent = index === currentStep;
 
                     return (
-                        <div key={index} className="flex flex-col items-center px-2">
+                        <div key={index} className="flex flex-col items-center px-2 relative">
                             {/* Small background patch to hide the line behind the circle */}
                             <div className="bg-slate-900 rounded-full p-1 -my-1 z-0">
                                 <div
@@ -35,11 +35,11 @@ export function WizardSteppers({ steps, currentStep }: WizardSteppersProps) {
                                     {isCompleted ? <Check className="h-5 w-5" /> : <span>{index + 1}</span>}
                                 </div>
                             </div>
-                            <div className="absolute top-14 w-32 text-center mt-2">
-                                <p className={cn("text-sm font-semibold transition-colors duration-300", isCurrent ? "text-white" : "text-slate-500")}>
+                            <div className="absolute top-14 left-1/2 -translate-x-1/2 w-32 text-center mt-2">
+                                <p className={cn("text-xs md:text-sm font-semibold transition-colors duration-300 hidden md:block", isCurrent ? "block text-white" : "text-slate-500")}>
                                     {step.label}
                                 </p>
-                                <p className="text-[10px] uppercase tracking-wider font-medium text-slate-500 hidden sm:block mt-1">{step.description}</p>
+                                <p className="text-[10px] uppercase tracking-wider font-medium text-slate-500 hidden lg:block mt-1">{step.description}</p>
                             </div>
                         </div>
                     )
