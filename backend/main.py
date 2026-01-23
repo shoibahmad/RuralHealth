@@ -1,8 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 import os
+import traceback
+import logging
 from backend.app.core.config import settings
 from backend.app.api.api import api_router
 from backend.app.db.base import Base
@@ -33,6 +35,15 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    error_msg = "".join(traceback.format_exception(None, exc, exc.__traceback__))
+    logging.error(f"Global exception: {error_msg}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "traceback": error_msg},
+    )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
 
