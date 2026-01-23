@@ -1,11 +1,9 @@
-import { useMemo } from "react";
 import { motion } from "framer-motion";
 import {
     Users,
     Activity,
     AlertTriangle,
     TrendingUp,
-    Calendar,
     ArrowUpRight,
     Search
 } from "lucide-react";
@@ -224,8 +222,8 @@ export function DashboardHome() {
                                     <td className="p-6">{patient.age}</td>
                                     <td className="p-6">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${patient.risk === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                patient.risk === 'Moderate' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                                            patient.risk === 'Moderate' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
+                                                'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                             }`}>
                                             {patient.risk}
                                         </span>
