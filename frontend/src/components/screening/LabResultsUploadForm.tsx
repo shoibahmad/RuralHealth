@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, FileImage, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";

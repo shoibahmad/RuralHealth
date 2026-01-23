@@ -1,15 +1,15 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Save } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Card, CardContent, CardHeader } from "../components/ui/card";
 import { WizardSteppers } from "../components/ui/wizard-steppers";
 import { PatientDemographicsForm } from "../components/screening/PatientDemographicsForm";
 import { VitalsEntryForm } from "../components/screening/VitalsEntryForm";
 import { LifestyleSurveyForm } from "../components/screening/LifestyleSurveyForm";
 import { LabResultsUploadForm } from "../components/screening/LabResultsUploadForm";
-import { useMutation } from "@tanstack/react-query";
-import { useAuth } from "../context/AuthContext";
+
+
 
 const STEPS = [
     { label: "Patient Identity", description: "Demographics & Location" },
@@ -36,7 +36,7 @@ export function ScreeningWizard() {
         heart_rate: "",
     });
     const navigate = useNavigate();
-    const { token } = useAuth(); // for API calls
+    // const { token } = useAuth(); // for API calls
 
     const updateFormData = (newData: any) => {
         setFormData(newData);

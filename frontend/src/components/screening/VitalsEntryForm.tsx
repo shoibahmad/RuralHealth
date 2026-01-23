@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Mic, MicOff, Activity } from "lucide-react";
+import { Mic, Activity } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";

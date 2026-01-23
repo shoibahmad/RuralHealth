@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { Check, Activity, Wine, Cigarette } from "lucide-react";
+import { Activity, Wine, Cigarette } from "lucide-react";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
