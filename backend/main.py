@@ -42,7 +42,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     logging.error(f"Global exception: {error_msg}")
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal Server Error", "traceback": error_msg},
+        content={"detail": f"Internal Server Error: {error_msg}", "traceback": error_msg},
     )
 
 app.include_router(api_router, prefix=settings.API_V1_STR)
