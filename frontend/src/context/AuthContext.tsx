@@ -22,7 +22,21 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(() => {
+        const storedToken = localStorage.getItem("token");
+        if (storedToken) {
+            try {
+                const decoded = jwtDecode<User>(storedToken);
+                if (decoded.exp * 1000 < Date.now()) {
+                    return null;
+                }
+                return decoded;
+            } catch (e) {
+                return null;
+            }
+        }
+        return null;
+    });
 
     useEffect(() => {
         if (token) {
