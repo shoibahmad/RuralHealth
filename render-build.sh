@@ -18,4 +18,12 @@ rm -rf backend/static
 mkdir -p backend/static
 cp -r frontend/dist/* backend/static/
 
+echo "Running Django migrations..."
+cd backend
+python manage.py migrate --noinput
+
+echo "Collecting static files..."
+python manage.py collectstatic --noinput
+cd ..
+
 echo "Build successful!"

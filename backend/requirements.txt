@@ -1,15 +1,26 @@
-fastapi
-uvicorn
-sqlalchemy
+# Django and REST Framework
+Django>=4.2
+djangorestframework>=3.14
+djangorestframework-simplejwt>=5.3
+django-cors-headers>=4.3
+whitenoise>=6.6
+
+# Database
 psycopg2-binary
-pydantic[email]
-pydantic-settings
-python-multipart
-python-jose[cryptography]
-passlib[bcrypt]
+
+# Security
 bcrypt==3.2.2
+
+# AI/ML
+google-generativeai>=0.3.0
 scikit-learn
 pandas
 numpy
+
+# Testing
 pytest
 httpx
+
+# Production Server
+gunicorn>=21.2
+
