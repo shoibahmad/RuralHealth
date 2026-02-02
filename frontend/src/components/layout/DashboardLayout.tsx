@@ -3,12 +3,12 @@ import { Outlet, Link, useLocation } from "react-router-dom";
 import {
     Users,
     LayoutDashboard,
-    FileText,
     Settings,
     LogOut,
     Menu,
     PlusCircle,
-    BarChart3
+    BarChart3,
+    Calendar
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
@@ -19,7 +19,7 @@ const SIDEBAR_ITEMS = [
     { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { label: "New Screening", href: "/dashboard/screen", icon: PlusCircle },
     { label: "Patients", href: "/dashboard/patients", icon: Users },
-    { label: "Reports", href: "/dashboard/reports", icon: FileText },
+    { label: "Appointments", href: "/dashboard/appointments", icon: Calendar },
     { label: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
 ];
 
