@@ -29,7 +29,8 @@ export function PublicLayout() {
                             {[
                                 { name: "How it Works", href: "/how-it-works" },
                                 { name: "Features", href: "/features" },
-                                { name: "About", href: "/about" }
+                                { name: "About", href: "/about" },
+                                { name: "API Docs", href: "/api-docs" }
                             ].map((item) => (
                                 <Link
                                     key={item.name}
@@ -77,7 +78,8 @@ export function PublicLayout() {
                             {[
                                 { name: "How it Works", href: "/how-it-works" },
                                 { name: "Features", href: "/features" },
-                                { name: "About", href: "/about" }
+                                { name: "About", href: "/about" },
+                                { name: "API Docs", href: "/api-docs" }
                             ].map((item) => (
                                 <Link
                                     key={item.name}
@@ -141,8 +143,8 @@ export function PublicLayout() {
                     <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
                         <p>© 2026 RuralHealthAI. All rights reserved.</p>
                         <div className="flex gap-6">
-                            <a href="#" className="hover:text-slate-300">Privacy Policy</a>
-                            <a href="#" className="hover:text-slate-300">Terms of Service</a>
+                            <Link to="/privacy-policy" className="hover:text-slate-300">Privacy Policy</Link>
+                            <Link to="/terms-conditions" className="hover:text-slate-300">Terms & Conditions</Link>
                         </div>
                     </div>
                 </div>

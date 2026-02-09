@@ -25,58 +25,43 @@ def analyze_health_data(screening_data: dict) -> dict:
         recommendations, and health insights
     """
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""
-        You are a healthcare AI assistant helping rural health workers assess patient health risks.
-        
-        Analyze the following patient health data and provide:
-        1. Overall health risk assessment (Low, Medium, or High)
-        2. Key health concerns identified
-        3. Personalized health recommendations
-        4. Suggested follow-up actions
+        You are an expert medical AI assistant for rural health workers.
+        Analyze this patient's screening data and provide a clinical assessment.
         
         Patient Data:
-        - Age: {screening_data.get('age', 'Unknown')} years
-        - Gender: {screening_data.get('gender', 'Unknown')}
-        - Height: {screening_data.get('height_cm', 'N/A')} cm
-        - Weight: {screening_data.get('weight_kg', 'N/A')} kg
-        - Systolic Blood Pressure: {screening_data.get('systolic_bp', 'N/A')} mmHg
-        - Diastolic Blood Pressure: {screening_data.get('diastolic_bp', 'N/A')} mmHg
-        - Heart Rate: {screening_data.get('heart_rate', 'N/A')} bpm
-        - Glucose Level: {screening_data.get('glucose_level', 'N/A')} mg/dL
-        - Cholesterol Level: {screening_data.get('cholesterol_level', 'N/A')} mg/dL
-        - Smoking Status: {screening_data.get('smoking_status', 'Unknown')}
-        - Alcohol Usage: {screening_data.get('alcohol_usage', 'Unknown')}
-        - Physical Activity: {screening_data.get('physical_activity', 'Unknown')}
+        - Age: {screening_data.get('age')} | Gender: {screening_data.get('gender')}
+        - Vitals: BP {screening_data.get('systolic_bp')}/{screening_data.get('diastolic_bp')}, HR {screening_data.get('heart_rate')}
+        - BMI Data: Height {screening_data.get('height_cm')}cm, Weight {screening_data.get('weight_kg')}kg
+        - Lab: Glucose {screening_data.get('glucose_level')} mg/dL
+        - Lifestyle: Smoking: {screening_data.get('smoking_status')}, Activity: {screening_data.get('physical_activity')}
+        - Computed Risk: {screening_data.get('risk_level')} (Score: {screening_data.get('risk_score')})
         
-        Respond in the following JSON format:
-        {{
-            "risk_level": "Low/Medium/High",
-            "risk_score": 0-100,
-            "summary": "Brief overall assessment",
-            "concerns": ["concern1", "concern2"],
-            "recommendations": [
-                {{"category": "diet/exercise/lifestyle/medication", "title": "Title", "description": "Detailed advice"}}
-            ],
-            "follow_up": "Suggested follow-up timeline and actions"
-        }}
+        Output valid JSON with these fields:
+        1. "summary": A professional clinical summary (2-3 sentences).
+        2. "concerns": List of strings for key health risks.
+        3. "recommendations": List of strings for actionable advice.
+        4. "formatted_insights": A markdown string exactly matching this structure:
+           "**AI Health Assessment**\\n\\nBased on the screening data, the patient is categorized as **[Risk Level] Risk**.\\n\\n**Key Observations:**\\n- [Observation 1]\\n- [Observation 2]\\n\\n**Recommendations:**\\n1. [Action 1]\\n2. [Action 2]"
         """
         
         response = model.generate_content(prompt)
-        
-        # Parse the response
         response_text = response.text
         
-        # Try to extract JSON from response
         import json
         import re
         
-        # Find JSON in the response
         json_match = re.search(r'\{[\s\S]*\}', response_text)
         if json_match:
             try:
                 ai_analysis = json.loads(json_match.group())
+                
+                # Ensure formatted_insights exists
+                if 'formatted_insights' not in ai_analysis:
+                     ai_analysis['formatted_insights'] = f"**AI Health Assessment**\n\n{ai_analysis.get('summary', 'Analysis completed.')}"
+                
                 return {
                     'success': True,
                     'analysis': ai_analysis
@@ -84,20 +69,14 @@ def analyze_health_data(screening_data: dict) -> dict:
             except json.JSONDecodeError:
                 pass
         
-        # Fallback: return raw text analysis
         return {
-            'success': True,
-            'analysis': {
-                'risk_level': 'Medium',
-                'risk_score': 50,
-                'summary': response_text[:500] if response_text else 'Analysis completed',
-                'concerns': [],
-                'recommendations': [],
-                'follow_up': 'Schedule follow-up in 2 weeks'
-            }
+            'success': False,
+            'error': 'Failed to parse AI response',
+            'analysis': None
         }
         
     except Exception as e:
+        print(f"AI Error: {e}")
         return {
             'success': False,
             'error': str(e),
@@ -172,3 +151,80 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
     except Exception as e:
         print(f"AI recommendation error: {e}")
         return []
+
+def extract_vitals_from_audio(audio_file_path: str) -> dict:
+    """
+    Extract vitals from an audio file using Gemini 1.5 Flash.
+    
+    Args:
+        audio_file_path: Path to the temporary audio file
+        
+    Returns:
+        Dictionary containing extracted vitals
+    """
+    try:
+        # Upload the file to Gemini
+        # Note: In a production environment with high volume, consider managing file lifecycle 
+        # (deleting after processing) or using inline data if supported/small enough.
+        # For 1.5 Flash, File API is standard for multimodal.
+        audio_file = genai.upload_file(path=audio_file_path)
+        
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        
+        prompt = """
+        Listen to this audio recording of a health worker dictating patient vitals.
+        Extract the following information and return it as a JSON object:
+        - height_cm (number)
+        - weight_kg (number)
+        - systolic_bp (number)
+        - diastolic_bp (number)
+        - heart_rate (number)
+
+        If a value is not mentioned, use null.
+        
+        Example JSON format:
+        {
+            "height_cm": 175,
+            "weight_kg": 70,
+            "systolic_bp": 120,
+            "diastolic_bp": 80,
+            "heart_rate": 72
+        }
+        """
+        
+        response = model.generate_content([prompt, audio_file])
+        response_text = response.text
+        
+        # Clean up the file from Gemini storage (good practice)
+        # try:
+        #     audio_file.delete()
+        # except:
+        #     pass
+
+        import json
+        import re
+        
+        # Find JSON in the response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            try:
+                vitals = json.loads(json_match.group())
+                return {
+                    'success': True,
+                    'data': vitals
+                }
+            except json.JSONDecodeError:
+                pass
+                
+        return {
+            'success': False,
+            'error': 'Failed to parse AI response',
+            'raw_response': response_text
+        }
+        
+    except Exception as e:
+        print(f"Voice extraction error: {e}")
+        return {
+            'success': False,
+            'error': str(e)
+        }

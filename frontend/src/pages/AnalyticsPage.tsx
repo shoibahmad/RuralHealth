@@ -22,7 +22,8 @@ import {
     Area,
     AreaChart
 } from "recharts";
-import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/AuthContext";
+import { firestoreService } from "../services/firestoreService";
 
 interface AnalyticsData {
     village_stats: { village: string; patient_count: number }[];
@@ -35,7 +36,7 @@ interface AnalyticsData {
 const COLORS = ['#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 export function AnalyticsPage() {
-    const { token } = useAuth();
+    // const { token } = useAuth(); // Unused
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -45,15 +46,64 @@ export function AnalyticsPage() {
 
     const fetchAnalytics = async () => {
         try {
-            const response = await fetch("/api/stats/analytics", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
+            const [patients, screenings] = await Promise.all([
+                firestoreService.getPatients(),
+                firestoreService.getScreenings()
+            ]);
+
+            // Village Stats
+            const villageMap: Record<string, number> = {};
+            // Age Distribution
+            const ageMap: Record<string, number> = {};
+            // Gender Distribution
+            const genderMap: Record<string, number> = {};
+
+            patients.forEach(p => {
+                // Village
+                const v = p.village || 'Unknown';
+                villageMap[v] = (villageMap[v] || 0) + 1;
+
+                // Age (Group by 10s)
+                const a = p.age ? Math.floor(p.age / 10) * 10 : 0;
+                const ageKey = `${a}-${a + 9}`;
+                ageMap[ageKey] = (ageMap[ageKey] || 0) + 1;
+
+                // Gender
+                const g = p.gender || 'Unknown';
+                genderMap[g] = (genderMap[g] || 0) + 1;
             });
-            if (response.ok) {
-                const data = await response.json();
-                setAnalytics(data);
-            }
+
+            // Monthly Trend
+            const trendMap: Record<string, number> = {};
+            const riskMap: Record<string, number> = {
+                'Smoking': 0,
+                'Alcohol': 0,
+                'Inactivity': 0,
+                'High BP': 0
+            };
+
+            screenings.forEach(s => {
+                // Trend
+                const date = new Date(s.created_at as string); // Cast timestamp
+                const month = date.toLocaleString('default', { month: 'short' });
+                trendMap[month] = (trendMap[month] || 0) + 1;
+
+                // Risks
+                if (s.smoking_status && s.smoking_status !== 'Never') riskMap['Smoking']++;
+                if (s.alcohol_usage && s.alcohol_usage !== 'None') riskMap['Alcohol']++;
+                if (s.physical_activity === 'Sedentary') riskMap['Inactivity']++;
+                if ((s.systolic_bp || 0) > 140) riskMap['High BP']++;
+            });
+
+            const data: AnalyticsData = {
+                village_stats: Object.entries(villageMap).map(([k, v]) => ({ village: k, patient_count: v })),
+                age_distribution: ageMap,
+                gender_distribution: Object.entries(genderMap).map(([k, v]) => ({ gender: k, count: v })),
+                monthly_trend: Object.entries(trendMap).map(([k, v]) => ({ month: k, count: v })),
+                risk_factor_counts: riskMap
+            };
+
+            setAnalytics(data);
         } catch (error) {
             console.error("Error fetching analytics:", error);
         } finally {

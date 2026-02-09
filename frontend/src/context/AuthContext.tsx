@@ -1,75 +1,92 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import { jwtDecode } from "jwt-decode";
+import {
+    onAuthStateChanged,
+    signOut
+} from "firebase/auth";
+import type { User as FirebaseUser } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
 
-interface User {
-    email: string;
-    sub: string;
-    exp: number;
-    full_name?: string;
+export interface User extends FirebaseUser {
+    uid: string;
+    email: string | null;
+    displayName: string | null;
+    photoURL: string | null;
     role?: string;
+    full_name?: string;
+    phone?: string;
 }
 
 interface AuthContextType {
     user: User | null;
-    token: string | null;
-    login: (token: string) => void;
-    logout: () => void;
+    loading: boolean;
+    logout: () => Promise<void>;
     isAuthenticated: boolean;
+    isHealthOfficer: boolean;
+    isHealthWorker: boolean;
+    isPatient: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [token, setToken] = useState<string | null>(localStorage.getItem("token"));
-    const [user, setUser] = useState<User | null>(() => {
-        const storedToken = localStorage.getItem("token");
-        if (storedToken) {
-            try {
-                const decoded = jwtDecode<User>(storedToken);
-                if (decoded.exp * 1000 < Date.now()) {
-                    return null;
-                }
-                return decoded;
-            } catch (e) {
-                return null;
-            }
-        }
-        return null;
-    });
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (token) {
-            try {
-                const decoded = jwtDecode<User>(token);
-                // Check expiry
-                if (decoded.exp * 1000 < Date.now()) {
-                    logout();
-                } else {
-                    setUser(decoded);
-                    localStorage.setItem("token", token);
+        const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+            if (firebaseUser) {
+                try {
+                    // Fetch additional user data from Firestore
+                    const userDocRef = doc(db, "users", firebaseUser.uid);
+                    const userDoc = await getDoc(userDocRef);
+
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        setUser({
+                            ...firebaseUser,
+                            role: userData.role,
+                            full_name: userData.full_name,
+                            phone: userData.phone
+                        });
+                    } else {
+                        // Fallback if user doc doesn't exist yet
+                        setUser(firebaseUser);
+                    }
+                } catch (error) {
+                    console.error("Error fetching user role:", error);
+                    setUser(firebaseUser);
                 }
-            } catch (e) {
-                logout();
+            } else {
+                setUser(null);
             }
-        } else {
-            localStorage.removeItem("token");
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+    const logout = async () => {
+        try {
+            await signOut(auth);
             setUser(null);
+        } catch (error) {
+            console.error("Logout error:", error);
         }
-    }, [token]);
-
-    const login = (newToken: string) => {
-        setToken(newToken);
-    };
-
-    const logout = () => {
-        setToken(null);
-        localStorage.removeItem("token");
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, isAuthenticated: !!user }}>
-            {children}
+        <AuthContext.Provider value={{
+            user,
+            loading,
+            logout,
+            isAuthenticated: !!user,
+            isHealthOfficer: user?.role === 'health_officer' || user?.role === 'admin',
+            isHealthWorker: user?.role === 'health_worker' || !user?.role, // Default to worker if undefined for now
+            isPatient: user?.role === 'patient'
+        }}>
+            {!loading && children}
         </AuthContext.Provider>
     );
 }

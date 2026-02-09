@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { HeartPulse, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
+import { auth, db } from "../lib/firebase";
 
 export function RegisterPage() {
     const [formData, setFormData] = useState({
@@ -15,38 +17,52 @@ export function RegisterPage() {
         role: "health_worker"
     });
     const [error, setError] = useState("");
+    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const registerMutation = useMutation({
-        mutationFn: async () => {
-            const res = await fetch("/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(formData),
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setError("");
+        setLoading(true);
+
+        try {
+            // 1. Create user in Firebase Auth
+            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            const user = userCredential.user;
+
+            // 2. Create user document in Firestore
+            await setDoc(doc(db, "users", user.uid), {
+                email: formData.email,
+                full_name: formData.full_name,
+                role: formData.role,
+                created_at: new Date().toISOString(),
+                is_active: true
             });
 
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.detail || "Failed to register");
+            // 3. Redirect based on role
+            if (formData.role === 'health_officer') {
+                navigate("/officer/dashboard");
+            } else if (formData.role === 'patient') {
+                navigate("/patient/dashboard");
+            } else {
+                navigate("/dashboard");
             }
-            return res.json();
-        },
-        onSuccess: () => {
-            navigate("/login");
-        },
-        onError: (err: any) => {
-            setError(err.message);
-        }
-    });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        registerMutation.mutate();
+        } catch (err: any) {
+            console.error(err);
+            if (err.code === 'auth/email-already-in-use') {
+                setError("Email is already registered.");
+            } else if (err.code === 'auth/weak-password') {
+                setError("Password should be at least 6 characters.");
+            } else {
+                setError("Failed to create account. Please try again.");
+            }
+        } finally {
+            setLoading(false);
+        }
     };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
@@ -102,6 +118,19 @@ export function RegisterPage() {
                                 className="bg-slate-900/50 border-white/10 text-white focus:border-teal-500/50 focus:ring-teal-500/20"
                             />
                         </div>
+                        <div className="space-y-2">
+                            <Label htmlFor="role" className="text-slate-300">Select Role</Label>
+                            <select
+                                id="role"
+                                value={formData.role}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 rounded-lg bg-slate-900/50 border border-white/10 text-white focus:border-teal-500/50 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+                            >
+                                <option value="health_worker">Health Worker</option>
+                                <option value="health_officer">Health Officer</option>
+                                <option value="patient">Patient</option>
+                            </select>
+                        </div>
 
                         {error && (
                             <div className="p-3 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm text-center">
@@ -112,9 +141,9 @@ export function RegisterPage() {
                         <Button
                             className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white border-0 shadow-lg shadow-teal-500/25 py-6 font-medium transition-all duration-300"
                             type="submit"
-                            disabled={registerMutation.isPending}
+                            disabled={loading}
                         >
-                            {registerMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Create Account"}
+                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Create Account"}
                         </Button>
 
                         <div className="text-center text-sm text-slate-500 mt-6">

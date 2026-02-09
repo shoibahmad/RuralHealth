@@ -13,27 +13,12 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useAuth } from "../context/AuthContext";
-
-interface Appointment {
-    id: number;
-    patient: number;
-    patient_name: string;
-    health_worker: number;
-    health_worker_name: string;
-    scheduled_date: string;
-    reason: string;
-    notes: string | null;
-    status: string;
-    created_at: string;
-}
-
-interface Patient {
-    id: number;
-    full_name: string;
-}
+import { firestoreService, type Appointment, type Patient } from "../services/firestoreService";
+import { doc, updateDoc } from "firebase/firestore";
+import { db } from "../lib/firebase";
 
 export function AppointmentsPage() {
-    const { token } = useAuth();
+    const { user } = useAuth();
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,22 +33,29 @@ export function AppointmentsPage() {
     });
 
     useEffect(() => {
-        fetchAppointments();
-        fetchPatients();
-    }, [statusFilter]);
+        if (user) {
+            fetchAppointments();
+            fetchPatients();
+        }
+    }, [user, statusFilter]);
 
     const fetchAppointments = async () => {
+        if (!user) return;
         try {
-            let url = "/api/appointments";
-            if (statusFilter) url += `?status=${statusFilter}`;
+            const data = await firestoreService.getAppointments(
+                user.uid,
+                user.role || 'health_worker'
+            );
 
-            const response = await fetch(url, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setAppointments(data);
-            }
+            // Client-side filtering for now
+            const filtered = statusFilter
+                ? data.filter(a => a.status === statusFilter)
+                : data;
+
+            // Sort by date desc
+            filtered.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
+
+            setAppointments(filtered);
         } catch (error) {
             console.error("Error fetching appointments:", error);
         } finally {
@@ -73,56 +65,41 @@ export function AppointmentsPage() {
 
     const fetchPatients = async () => {
         try {
-            const response = await fetch("/api/screening/patients", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setPatients(data);
-            }
+            // If HW, get only their patients
+            const data = await firestoreService.getPatients(
+                user?.role === 'health_worker' ? user.uid : undefined
+            );
+            setPatients(data);
         } catch (error) {
             console.error("Error fetching patients:", error);
         }
     };
 
     const createAppointment = async () => {
+        if (!user) return;
         try {
-            const response = await fetch("/api/appointments", {
-                method: "POST",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    patient: parseInt(newAppointment.patient),
-                    scheduled_date: newAppointment.scheduled_date,
-                    reason: newAppointment.reason,
-                    notes: newAppointment.notes || null
-                })
+            await firestoreService.addAppointment({
+                patient_id: newAppointment.patient,
+                health_worker_id: user.uid,
+                scheduled_date: newAppointment.scheduled_date,
+                reason: newAppointment.reason,
+                notes: newAppointment.notes || undefined,
+                status: 'scheduled'
             });
-            if (response.ok) {
-                setShowCreateModal(false);
-                setNewAppointment({ patient: "", scheduled_date: "", reason: "", notes: "" });
-                fetchAppointments();
-            }
+
+            setShowCreateModal(false);
+            setNewAppointment({ patient: "", scheduled_date: "", reason: "", notes: "" });
+            fetchAppointments();
         } catch (error) {
             console.error("Error creating appointment:", error);
         }
     };
 
-    const updateStatus = async (id: number, status: string) => {
+    const updateStatus = async (id: string, status: 'completed' | 'cancelled') => {
         try {
-            const response = await fetch(`/api/appointments/${id}`, {
-                method: "PATCH",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ status })
-            });
-            if (response.ok) {
-                fetchAppointments();
-            }
+            const docRef = doc(db, "appointments", id);
+            await updateDoc(docRef, { status });
+            fetchAppointments();
         } catch (error) {
             console.error("Error updating appointment:", error);
         }
@@ -183,7 +160,7 @@ export function AppointmentsPage() {
                         onClick={() => setStatusFilter(status)}
                         className={statusFilter === status
                             ? "bg-teal-500 text-white"
-                            : "border-white/10 text-slate-300 hover:bg-white/5"
+                            : "border-white/10 text-slate-300 hover:bg-white/5 bg-transparent"
                         }
                     >
                         {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'All'}
@@ -205,7 +182,7 @@ export function AppointmentsPage() {
                         <p className="text-slate-400">No appointments found</p>
                         <Button
                             onClick={() => setShowCreateModal(true)}
-                            className="mt-4"
+                            className="mt-4 border-white/20 text-white hover:bg-white/10 bg-transparent"
                             variant="outline"
                         >
                             Schedule Your First Appointment
@@ -226,7 +203,10 @@ export function AppointmentsPage() {
                                             <User className="h-5 w-5" />
                                         </div>
                                         <div>
-                                            <h3 className="text-white font-medium">{appointment.patient_name}</h3>
+                                            <h3 className="text-white font-medium">
+                                                {/* In a real app we'd join, but for now we look up in patients list or expect denormalized name */}
+                                                {patients.find(p => p.id === appointment.patient_id)?.full_name || 'Unknown Patient'}
+                                            </h3>
                                             <p className="text-slate-400 text-sm mt-1">{appointment.reason}</p>
                                             <div className="flex items-center gap-4 mt-3">
                                                 <span className="text-xs text-slate-500 flex items-center gap-1">
@@ -248,7 +228,7 @@ export function AppointmentsPage() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => updateStatus(appointment.id, 'completed')}
+                                                onClick={() => updateStatus(appointment.id!, 'completed')}
                                                 className="border-green-500/30 text-green-400 hover:bg-green-500/10"
                                             >
                                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -257,7 +237,7 @@ export function AppointmentsPage() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => updateStatus(appointment.id, 'cancelled')}
+                                                onClick={() => updateStatus(appointment.id!, 'cancelled')}
                                                 className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                                             >
                                                 <XCircle className="h-4 w-4 mr-1" />
@@ -340,7 +320,7 @@ export function AppointmentsPage() {
                         </div>
 
                         <div className="p-6 border-t border-white/5 flex justify-end gap-3">
-                            <Button variant="outline" onClick={() => setShowCreateModal(false)}>
+                            <Button variant="outline" onClick={() => setShowCreateModal(false)} className="border-white/20 text-white hover:bg-white/10 bg-transparent">
                                 Cancel
                             </Button>
                             <Button

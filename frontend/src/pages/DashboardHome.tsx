@@ -29,8 +29,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useAuth } from "../context/AuthContext";
+import { firestoreService } from "../services/firestoreService";
 import { useOffline } from "../context/OfflineContext";
-import { syncService } from "../services/syncService";
 
 interface DashboardStats {
     total_patients: number;
@@ -43,45 +43,34 @@ interface DashboardStats {
 }
 
 export function DashboardHome() {
-    const { token } = useAuth();
-    const navigate = useNavigate();
+    const { user } = useAuth();
     const { isOnline, pendingSyncCount, syncStatus, syncNow } = useOffline();
+    const navigate = useNavigate();
     const [stats, setStats] = useState<DashboardStats | null>(null);
-    const [localStats, setLocalStats] = useState({ localPatients: 0, localScreenings: 0, pendingSync: 0 });
+
+    // Mock local stats for now
+    const localStats = { localPatients: 0, localScreenings: 0 };
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
-        fetchDashboardStats();
-        fetchLocalStats();
-    }, []);
-
-    const fetchDashboardStats = async () => {
-        try {
-            const response = await fetch("/api/stats/dashboard", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
+        const loadStats = async () => {
+            // Pass user ID only if it's a health worker to filter data
+            // If user is Admin/Officer, they see global stats (conceptually)
+            // For now, firestoreService.getDashboardStats handles some of this logic
+            try {
+                const data: any = await firestoreService.getDashboardStats(
+                    user?.role === 'health_worker' ? user.uid : undefined
+                );
                 setStats(data);
+            } catch (error) {
+                console.error("Failed to load dashboard stats", error);
+            } finally {
+                setLoading(false);
             }
-        } catch (error) {
-            console.error("Error fetching dashboard stats:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchLocalStats = async () => {
-        try {
-            const stats = await syncService.getLocalStats();
-            setLocalStats(stats);
-        } catch (error) {
-            console.error("Error fetching local stats:", error);
-        }
-    };
+        };
+        loadStats();
+    }, [user]);
 
     if (loading) {
         return (
@@ -118,8 +107,8 @@ export function DashboardHome() {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     className={`p-4 rounded-xl border ${!isOnline
-                            ? 'bg-amber-500/10 border-amber-500/20'
-                            : 'bg-blue-500/10 border-blue-500/20'
+                        ? 'bg-amber-500/10 border-amber-500/20'
+                        : 'bg-blue-500/10 border-blue-500/20'
                         }`}
                 >
                     <div className="flex items-center justify-between">
@@ -163,14 +152,14 @@ export function DashboardHome() {
             )}
 
             {/* Welcome Section */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white">Dashboard Overview</h1>
-                    <p className="text-slate-400 mt-1">Welcome back! Here's what's happening today.</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-white">Dashboard Overview</h1>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">Welcome back! Here's what's happening today.</p>
                 </div>
                 <Button
                     onClick={() => navigate('/dashboard/screen')}
-                    className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
+                    className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 w-full sm:w-auto"
                 >
                     <Plus className="h-4 w-4 mr-2" />
                     New Screening
@@ -207,23 +196,23 @@ export function DashboardHome() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4 }}
-                    className="lg:col-span-2 glass-card p-6 rounded-2xl border border-white/5"
+                    className="lg:col-span-2 glass-card p-4 md:p-6 rounded-2xl border border-white/5"
                 >
-                    <div className="flex items-center justify-between mb-6">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
                         <div>
-                            <h2 className="text-lg font-bold text-white">Screening Activity</h2>
-                            <p className="text-sm text-slate-400">Weekly screening volume (last 7 days)</p>
+                            <h2 className="text-base md:text-lg font-bold text-white">Screening Activity</h2>
+                            <p className="text-xs md:text-sm text-slate-400">Weekly screening volume (last 7 days)</p>
                         </div>
                         <Button
                             variant="ghost"
                             size="sm"
                             onClick={() => navigate('/dashboard/analytics')}
-                            className="text-teal-400 hover:text-white hover:bg-teal-500/10"
+                            className="text-teal-400 hover:text-white hover:bg-teal-500/10 w-full sm:w-auto"
                         >
                             View Analytics <ArrowUpRight className="ml-2 h-4 w-4" />
                         </Button>
                     </div>
-                    <div className="h-[300px] w-full">
+                    <div className="h-[250px] md:h-[300px] w-full">
                         {stats?.weekly_screenings && stats.weekly_screenings.length > 0 ? (
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={stats.weekly_screenings}>
@@ -251,7 +240,7 @@ export function DashboardHome() {
                                 </AreaChart>
                             </ResponsiveContainer>
                         ) : (
-                            <div className="h-full flex items-center justify-center text-slate-500">
+                            <div className="h-full flex items-center justify-center text-slate-500 text-sm text-center px-4">
                                 No screening data yet. Start by creating a new screening.
                             </div>
                         )}
@@ -263,10 +252,10 @@ export function DashboardHome() {
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.5 }}
-                    className="glass-card p-6 rounded-2xl border border-white/5 flex flex-col"
+                    className="glass-card p-4 md:p-6 rounded-2xl border border-white/5 flex flex-col"
                 >
-                    <h2 className="text-lg font-bold text-white mb-2">Risk Distribution</h2>
-                    <p className="text-sm text-slate-400 mb-6">Current patient risk levels</p>
+                    <h2 className="text-base md:text-lg font-bold text-white mb-2">Risk Distribution</h2>
+                    <p className="text-xs md:text-sm text-slate-400 mb-6">Current patient risk levels</p>
 
                     <div className="flex-1 min-h-[200px] relative">
                         {totalRisk > 0 ? (
@@ -297,15 +286,15 @@ export function DashboardHome() {
                         )}
                         {totalRisk > 0 && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-3xl font-bold text-white">{totalRisk}</span>
+                                <span className="text-2xl md:text-3xl font-bold text-white">{totalRisk}</span>
                                 <span className="text-xs text-slate-400 uppercase tracking-widest">Screenings</span>
                             </div>
                         )}
                     </div>
-                    <div className="flex justify-center gap-4 mt-6">
+                    <div className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6">
                         {riskDistribution.map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
                                 <span className="text-xs text-slate-300">{item.name}</span>
                             </div>
                         ))}
@@ -320,12 +309,12 @@ export function DashboardHome() {
                 transition={{ delay: 0.6 }}
                 className="glass-card rounded-2xl border border-white/5 overflow-hidden"
             >
-                <div className="p-6 border-b border-white/5 flex items-center justify-between">
+                <div className="p-4 md:p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-lg font-bold text-white">Recent Screenings</h2>
                         <p className="text-sm text-slate-400">Latest health assessments performed</p>
                     </div>
-                    <div className="relative w-64">
+                    <div className="relative w-full sm:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                         <Input
                             placeholder="Search patients..."
@@ -344,43 +333,45 @@ export function DashboardHome() {
                             }
                         </div>
                     ) : (
-                        <table className="w-full text-left border-collapse">
+                        <table className="w-full text-left border-collapse min-w-[640px]">
                             <thead>
                                 <tr className="border-b border-white/5 text-xs font-semibold text-slate-400 uppercase tracking-wider">
-                                    <th className="p-6">Patient Name</th>
-                                    <th className="p-6">Blood Pressure</th>
-                                    <th className="p-6">Glucose</th>
-                                    <th className="p-6">Risk Score</th>
-                                    <th className="p-6">Risk Category</th>
-                                    <th className="p-6">Date</th>
+                                    <th className="p-4 md:p-6">Patient Name</th>
+                                    <th className="p-4 md:p-6">Blood Pressure</th>
+                                    <th className="p-4 md:p-6">Glucose</th>
+                                    <th className="p-4 md:p-6">Risk Score</th>
+                                    <th className="p-4 md:p-6">Risk Category</th>
+                                    <th className="p-4 md:p-6">Date</th>
                                 </tr>
                             </thead>
                             <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                                 {filteredRecentScreenings.map((screening: any) => (
                                     <tr key={screening.id} className="hover:bg-white/5 transition-colors">
-                                        <td className="p-6 font-medium text-white flex items-center gap-3">
-                                            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-xs border border-white/10">
-                                                {screening.patient_name?.charAt(0) || '?'}
+                                        <td className="p-4 md:p-6 font-medium text-white">
+                                            <div className="flex items-center gap-3">
+                                                <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-xs border border-white/10 flex-shrink-0">
+                                                    {screening.patient_name?.charAt(0) || '?'}
+                                                </div>
+                                                <span className="truncate">{screening.patient_name || 'Unknown'}</span>
                                             </div>
-                                            {screening.patient_name || 'Unknown'}
                                         </td>
-                                        <td className="p-6">
+                                        <td className="p-4 md:p-6 whitespace-nowrap">
                                             {screening.systolic_bp && screening.diastolic_bp
                                                 ? `${screening.systolic_bp}/${screening.diastolic_bp}`
                                                 : '-'
                                             }
                                         </td>
-                                        <td className="p-6">{screening.glucose_level || '-'} mg/dL</td>
-                                        <td className="p-6">{screening.risk_score || 0}</td>
-                                        <td className="p-6">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${screening.risk_level === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
+                                        <td className="p-4 md:p-6 whitespace-nowrap">{screening.glucose_level || '-'} mg/dL</td>
+                                        <td className="p-4 md:p-6">{screening.risk_score || 0}</td>
+                                        <td className="p-4 md:p-6">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${screening.risk_level === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
                                                 screening.risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                                                     'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                                                 }`}>
                                                 {screening.risk_level || 'Low'}
                                             </span>
                                         </td>
-                                        <td className="p-6 text-slate-500">
+                                        <td className="p-4 md:p-6 text-slate-500 whitespace-nowrap">
                                             {new Date(screening.created_at).toLocaleDateString()}
                                         </td>
                                     </tr>

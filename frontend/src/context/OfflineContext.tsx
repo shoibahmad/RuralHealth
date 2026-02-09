@@ -17,15 +17,17 @@ interface OfflineContextType {
 const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
-    const { token } = useAuth();
+    const { user } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [pendingSyncCount, setPendingSyncCount] = useState(0);
     const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error' | 'success'>('idle');
 
-    // Update sync service token when auth changes
+    // Update sync service token when auth changes - DEPRECATED for Firebase
+    /*
     useEffect(() => {
         syncService.setToken(token);
     }, [token]);
+    */
 
     // Listen for online/offline events
     useEffect(() => {
@@ -33,7 +35,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             console.log('Device is online');
             setIsOnline(true);
             // Auto-sync when coming online
-            if (token) {
+            if (user) {
                 syncNow();
             }
         };
@@ -50,7 +52,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [token]);
+    }, [user]);
 
     // Subscribe to sync status changes
     useEffect(() => {
@@ -79,14 +81,14 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const syncNow = useCallback(async () => {
-        if (!isOnline || !token) return;
+        if (!isOnline || !user) return;
 
         try {
             await syncService.syncAll();
         } catch (error) {
             console.error('Sync failed:', error);
         }
-    }, [isOnline, token]);
+    }, [isOnline, user]);
 
     return (
         <OfflineContext.Provider

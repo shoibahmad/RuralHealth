@@ -14,28 +14,21 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useAuth } from "../context/AuthContext";
-
-interface Patient {
-    id: number;
-    full_name: string;
-    age: number;
-    gender: string;
-    village: string;
-    phone: string | null;
-    created_at: string;
-    screening_count: number;
-    latest_risk_level: string | null;
-}
+// import { useAuth } from "../context/AuthContext";
+import { firestoreService, type Patient } from "../services/firestoreService";
+import { useToast } from "../context/ToastContext";
+import { ConfirmationModal } from "../components/ui/confirmation-modal";
 
 interface PatientDetail extends Patient {
     screenings: any[];
     appointments: any[];
     recommendations: any[];
+    latest_risk_level?: string | null; // Add this if missing in base
+    screening_count?: number; // Add if missing
 }
 
 export function PatientsPage() {
-    const { token } = useAuth();
+    const { showToast } = useToast();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
@@ -43,27 +36,33 @@ export function PatientsPage() {
     const [showDetailModal, setShowDetailModal] = useState(false);
     const [riskFilter, setRiskFilter] = useState<string>("");
 
+    // Confirmation Modal State
+    const [deleteId, setDeleteId] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
     useEffect(() => {
         fetchPatients();
     }, [searchTerm, riskFilter]);
 
     const fetchPatients = async () => {
         try {
-            let url = "/api/screening/patients";
-            const params = new URLSearchParams();
-            if (searchTerm) params.append("search", searchTerm);
-            if (riskFilter) params.append("risk", riskFilter);
-            if (params.toString()) url += `?${params.toString()}`;
+            const allPatients = await firestoreService.getPatients();
 
-            const response = await fetch(url, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setPatients(data);
+            let filtered = allPatients;
+            if (searchTerm) {
+                const lower = searchTerm.toLowerCase();
+                filtered = filtered.filter(p =>
+                    p.full_name.toLowerCase().includes(lower) ||
+                    p.village.toLowerCase().includes(lower) ||
+                    (p.phone && p.phone.includes(lower))
+                );
             }
+
+            if (riskFilter) {
+                filtered = filtered.filter((p: any) => p.latest_risk_level === riskFilter);
+            }
+
+            setPatients(filtered);
         } catch (error) {
             console.error("Error fetching patients:", error);
         } finally {
@@ -71,16 +70,21 @@ export function PatientsPage() {
         }
     };
 
-    const fetchPatientDetail = async (id: number) => {
+    const fetchPatientDetail = async (id: string) => {
         try {
-            const response = await fetch(`/api/screening/patients/${id}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                const data = await response.json();
-                setSelectedPatient(data);
+            const patient = await firestoreService.getPatient(id);
+            if (patient) {
+                const screenings = await firestoreService.getScreenings(id);
+                const appointments = await firestoreService.getAppointmentsForPatient(id);
+
+                setSelectedPatient({
+                    ...patient,
+                    screenings,
+                    appointments,
+                    recommendations: [],
+                    latest_risk_level: (patient as any).latest_risk_level,
+                    screening_count: (patient as any).screening_count
+                });
                 setShowDetailModal(true);
             }
         } catch (error) {
@@ -88,21 +92,23 @@ export function PatientsPage() {
         }
     };
 
-    const deletePatient = async (id: number) => {
-        if (!confirm("Are you sure you want to delete this patient?")) return;
+    const handleDeleteClick = (id: string) => {
+        setDeleteId(id);
+    };
 
+    const confirmDelete = async () => {
+        if (!deleteId) return;
+        setIsDeleting(true);
         try {
-            const response = await fetch(`/api/screening/patients/${id}`, {
-                method: "DELETE",
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-            if (response.ok) {
-                fetchPatients();
-            }
+            await firestoreService.deletePatient(deleteId);
+            showToast("Patient deleted successfully", "success");
+            fetchPatients();
         } catch (error) {
             console.error("Error deleting patient:", error);
+            showToast("Failed to delete patient", "error");
+        } finally {
+            setIsDeleting(false);
+            setDeleteId(null);
         }
     };
 
@@ -170,9 +176,9 @@ export function PatientsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
                     { label: "Total Patients", value: patients.length, color: "text-blue-400" },
-                    { label: "High Risk", value: patients.filter(p => p.latest_risk_level === "High").length, color: "text-red-400" },
-                    { label: "Medium Risk", value: patients.filter(p => p.latest_risk_level === "Medium").length, color: "text-amber-400" },
-                    { label: "Low Risk", value: patients.filter(p => p.latest_risk_level === "Low").length, color: "text-emerald-400" },
+                    { label: "High Risk", value: patients.filter(p => (p as any).latest_risk_level === "High").length, color: "text-red-400" },
+                    { label: "Medium Risk", value: patients.filter(p => (p as any).latest_risk_level === "Medium").length, color: "text-amber-400" },
+                    { label: "Low Risk", value: patients.filter(p => (p as any).latest_risk_level === "Low").length, color: "text-emerald-400" },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -237,16 +243,25 @@ export function PatientsPage() {
                                         <td className="p-4 text-slate-500">{patient.phone || "-"}</td>
                                         <td className="p-4">
                                             <span className="px-2 py-1 bg-slate-800 rounded text-xs">
-                                                {patient.screening_count}
+                                                {(patient as any).screening_count || 0}
                                             </span>
                                         </td>
-                                        <td className="p-4">{getRiskBadge(patient.latest_risk_level)}</td>
+                                        <td className="p-4">{getRiskBadge((patient as any).latest_risk_level)}</td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => fetchPatientDetail(patient.id)}
+                                                    onClick={() => window.location.href = `/dashboard/patients/${patient.id}/history`}
+                                                    className="text-blue-400 hover:text-white hover:bg-blue-500/10"
+                                                >
+                                                    <Activity className="h-4 w-4 mr-1" />
+                                                    History
+                                                </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => fetchPatientDetail(patient.id!)}
                                                     className="text-teal-400 hover:text-white hover:bg-teal-500/10"
                                                 >
                                                     <Eye className="h-4 w-4" />
@@ -254,7 +269,7 @@ export function PatientsPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => deletePatient(patient.id)}
+                                                    onClick={() => handleDeleteClick(patient.id!)}
                                                     className="text-red-400 hover:text-white hover:bg-red-500/10"
                                                 >
                                                     <Trash2 className="h-4 w-4" />
@@ -268,6 +283,17 @@ export function PatientsPage() {
                     </div>
                 )}
             </motion.div>
+
+            <ConfirmationModal
+                isOpen={!!deleteId}
+                onClose={() => setDeleteId(null)}
+                onConfirm={confirmDelete}
+                title="Delete Patient"
+                message="Are you sure you want to delete this patient? This action cannot be undone and will delete all associated screenings and data."
+                confirmText="Delete Patient"
+                variant="danger"
+                isLoading={isDeleting}
+            />
 
             {/* Patient Detail Modal */}
             {showDetailModal && selectedPatient && (

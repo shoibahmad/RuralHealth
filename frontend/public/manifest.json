@@ -1,42 +1,26 @@
 {
-    "name": "RuralHealthAI",
-    "short_name": "RuralHealth",
-    "description": "AI-powered rural health screening and management system",
-    "start_url": "/",
-    "display": "standalone",
-    "background_color": "#0f172a",
-    "theme_color": "#14b8a6",
-    "orientation": "portrait-primary",
-    "icons": [
-        {
-            "src": "/icons/icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "any maskable"
-        },
-        {
-            "src": "/icons/icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "any maskable"
-        }
-    ],
-    "categories": [
-        "health",
-        "medical",
-        "utilities"
-    ],
-    "screenshots": [],
-    "shortcuts": [
-        {
-            "name": "New Screening",
-            "url": "/dashboard/screen",
-            "description": "Start a new patient screening"
-        },
-        {
-            "name": "Dashboard",
-            "url": "/dashboard",
-            "description": "View dashboard"
-        }
-    ]
+  "name": "RuralHealthAI",
+  "short_name": "RuralHealth",
+  "description": "Smart Health Screening for Rural Communities",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#14b8a6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/vite.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/vite.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["health", "medical", "productivity"],
+  "screenshots": []
 }

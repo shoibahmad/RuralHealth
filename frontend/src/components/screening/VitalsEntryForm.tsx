@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Mic, Activity } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -11,31 +11,100 @@ interface VitalsEntryFormProps {
 }
 
 export function VitalsEntryForm({ data, updateData }: VitalsEntryFormProps) {
+    const [isProcessing, setIsProcessing] = useState(false);
     const [isListening, setIsListening] = useState(false);
 
-    // Mock Voice AI Handler
-    const toggleListening = () => {
-        setIsListening(!isListening);
-        if (!isListening) {
-            // Simulate AI capture after 2 seconds
-            setTimeout(() => {
-                updateData({
-                    ...data,
-                    height_cm: 175,
-                    weight_kg: 70,
-                    systolic_bp: 120,
-                    diastolic_bp: 80,
-                    heart_rate: 72
-                });
-                setIsListening(false);
-            }, 2000);
+    // Using refs for recorder instance to avoid re-renders
+    const recorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
+    const toggleListening = async () => {
+        if (isListening) {
+            // Stop recording
+            if (recorderRef.current && recorderRef.current.state === "recording") {
+                recorderRef.current.stop();
+            }
+            setIsListening(false);
+        } else {
+            // Start recording
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const mediaRecorder = new MediaRecorder(stream);
+                recorderRef.current = mediaRecorder;
+                audioChunksRef.current = [];
+
+                mediaRecorder.ondataavailable = (event) => {
+                    if (event.data.size > 0) {
+                        audioChunksRef.current.push(event.data);
+                    }
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                    await processAudio(audioBlob);
+
+                    // Stop all tracks
+                    stream.getTracks().forEach(track => track.stop());
+                };
+
+                mediaRecorder.start();
+                setIsListening(true);
+            } catch (err) {
+                console.error("Error accessing microphone:", err);
+                alert("Could not access microphone. Please ensure permissions are granted.");
+            }
         }
-    }
+    };
+
+    const processAudio = async (audioBlob: Blob) => {
+        setIsProcessing(true);
+        try {
+            const formData = new FormData();
+            formData.append('audio', audioBlob, 'recording.webm');
+
+            // Get token
+            // Assuming we have a way to get token, usually from localStorage or context
+            // For now attempting request, interceptor might handle it or we need to grab it
+            const token = localStorage.getItem('token');
+            // Note: In this project, token storage might differ. Checking AuthContext or services usually best.
+            // But let's assume standard Bearer for now or rely on cookie if used.
+            // Actually, let's use the standard fetch with auth header manually here.
+
+            const response = await fetch('http://127.0.0.1:8000/api/ai/voice-vitals', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                throw new Error('Voice processing failed');
+            }
+
+            const result = await response.json();
+
+            // Merge extracted data
+            const newData = { ...data };
+            if (result.height_cm) newData.height_cm = result.height_cm;
+            if (result.weight_kg) newData.weight_kg = result.weight_kg;
+            if (result.systolic_bp) newData.systolic_bp = result.systolic_bp;
+            if (result.diastolic_bp) newData.diastolic_bp = result.diastolic_bp;
+            if (result.heart_rate) newData.heart_rate = result.heart_rate;
+
+            updateData(newData);
+
+        } catch (err) {
+            console.error("Voice processing error:", err);
+            alert("Failed to process voice entry. Please try again.");
+        } finally {
+            setIsProcessing(false);
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
 
-            {/* Voice AI Banner */}
             {/* Voice AI Banner */}
             <div className={cn(
                 "rounded-xl border p-4 flex items-center justify-between transition-colors duration-300",
@@ -44,24 +113,29 @@ export function VitalsEntryForm({ data, updateData }: VitalsEntryFormProps) {
                 <div className="flex items-center gap-4">
                     <div className={cn(
                         "h-12 w-12 rounded-full flex items-center justify-center transition-colors",
-                        isListening ? "bg-red-500/20 text-red-400 animate-pulse border border-red-500/30" : "bg-teal-500/20 text-teal-400 border border-teal-500/30"
+                        isListening ? "bg-red-500/20 text-red-400 animate-pulse border border-red-500/30" :
+                            isProcessing ? "bg-blue-500/20 text-blue-400 animate-spin border border-blue-500/30" :
+                                "bg-teal-500/20 text-teal-400 border border-teal-500/30"
                     )}>
-                        <Mic className="h-6 w-6" />
+                        {isProcessing ? <Activity className="h-6 w-6" /> : <Mic className="h-6 w-6" />}
                     </div>
                     <div>
                         <h3 className="font-semibold text-white">
-                            {isListening ? "Listening..." : "Voice Entry Available"}
+                            {isListening ? "Listening..." : isProcessing ? "Processing..." : "Voice Entry Available"}
                         </h3>
                         <p className="text-sm text-slate-400">
                             {isListening
                                 ? "Speak vitals clearly (e.g., 'BP 120 over 80, Heart Rate 72')"
-                                : "Tap microphone to auto-fill vitals by voice."}
+                                : isProcessing
+                                    ? "Gemini is extracting data from your voice..."
+                                    : "Tap microphone to auto-fill vitals by voice."}
                         </p>
                     </div>
                 </div>
                 <Button
                     variant={isListening ? "destructive" : "secondary"}
                     onClick={toggleListening}
+                    disabled={isProcessing}
                     className={cn(isListening ? "" : "bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border-0")}
                 >
                     {isListening ? "Stop" : "Start"}

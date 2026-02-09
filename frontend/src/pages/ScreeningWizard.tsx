@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle, Sparkles, WifiOff, Cloud } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
-import { useOffline } from "../context/OfflineContext";
-import { syncService } from "../services/syncService";
+import { firestoreService } from "../services/firestoreService";
+import { riskUtils } from "../lib/riskUtils";
 
 import { WizardSteppers } from "../components/ui/wizard-steppers";
 import { PatientDemographicsForm } from "../components/screening/PatientDemographicsForm";
@@ -24,11 +24,13 @@ const STEPS = [
     { label: "Risk Assessment", description: "Final Analysis" }
 ];
 
+import { useToast } from "../context/ToastContext";
+
 export function ScreeningWizard() {
+    const { showToast } = useToast();
     const [currentStep, setCurrentStep] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
-    const [savedOffline, setSavedOffline] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
     const [formData, setFormData] = useState<any>({
@@ -53,8 +55,8 @@ export function ScreeningWizard() {
         cholesterol_level: "",
     });
     const navigate = useNavigate();
-    const { token } = useAuth();
-    const { isOnline, refreshPendingCount } = useOffline();
+    const { user } = useAuth();
+    const isOnline = true; // Force online for UI rendering during migration
 
     const updateFormData = (newData: any) => {
         setFormData(newData);
@@ -62,108 +64,128 @@ export function ScreeningWizard() {
 
     const handleSubmitOnline = async () => {
         try {
-            // Step 1: Create patient
-            const patientResponse = await fetch("/api/screening/patients", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
+            // Step 1: Handle Patient Identity
+            let patientId = user?.uid;
+            let patientName = formData.full_name;
+
+            // If user is a health worker, they are creating a NEW patient record
+            // If user is a patient, they are screening THEMSELVES (use their own UID)
+            if (user?.role !== 'patient') {
+                const patientData = {
                     full_name: formData.full_name,
                     age: parseInt(formData.age) || 0,
                     gender: formData.gender,
                     village: formData.village,
-                    phone: formData.phone || null,
-                }),
-            });
-
-            if (!patientResponse.ok) {
-                const errorData = await patientResponse.json();
-                throw new Error(errorData.detail || "Failed to create patient");
+                    phone: formData.phone || undefined,
+                    health_worker_id: user?.uid
+                };
+                const newPatient = await firestoreService.addPatient(patientData);
+                patientId = newPatient.id;
+                console.log("New patient created:", newPatient);
+            } else {
+                console.log("Self-screening for patient:", patientId);
+                // Optionally update patient profile in 'users' or 'patients' here if needed
             }
 
-            const patient = await patientResponse.json();
-            console.log("Patient created:", patient);
-
-            // Step 2: Create screening with vitals and lab data
-            const screeningResponse = await fetch("/api/screening/screenings", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    patient_id: patient.id,
-                    height_cm: parseFloat(formData.height_cm) || null,
-                    weight_kg: parseFloat(formData.weight_kg) || null,
-                    systolic_bp: parseInt(formData.systolic_bp) || null,
-                    diastolic_bp: parseInt(formData.diastolic_bp) || null,
-                    heart_rate: parseInt(formData.heart_rate) || null,
-                    smoking_status: formData.smoking_status || null,
-                    alcohol_usage: formData.alcohol_usage || null,
-                    physical_activity: formData.physical_activity || null,
-                    glucose_level: parseFloat(formData.glucose_level) || null,
-                    cholesterol_level: parseFloat(formData.cholesterol_level) || null,
-                }),
+            // Step 2: Calculate Risk (Client-side)
+            const riskResult = riskUtils.calculateRisk({
+                age: parseInt(formData.age) || 0,
+                systolic_bp: parseInt(formData.systolic_bp) || undefined,
+                diastolic_bp: parseInt(formData.diastolic_bp) || undefined,
+                smoking_status: formData.smoking_status
             });
 
-            if (!screeningResponse.ok) {
-                const errorData = await screeningResponse.json();
-                throw new Error(errorData.detail || "Failed to create screening");
-            }
+            const bmi = riskUtils.calculateBMI(parseFloat(formData.height_cm), parseFloat(formData.weight_kg));
 
-            const screening = await screeningResponse.json();
+            // Step 3: Create screening in Firestore
+            const screeningData = {
+                patient_id: patientId!,
+                patient_name: patientName, // Denormalized
+                height_cm: parseFloat(formData.height_cm) || undefined,
+                weight_kg: parseFloat(formData.weight_kg) || undefined,
+                systolic_bp: parseInt(formData.systolic_bp) || undefined,
+                diastolic_bp: parseInt(formData.diastolic_bp) || undefined,
+                heart_rate: parseInt(formData.heart_rate) || undefined,
+                smoking_status: formData.smoking_status || undefined,
+                alcohol_usage: formData.alcohol_usage || undefined,
+                physical_activity: formData.physical_activity || undefined,
+                glucose_level: parseFloat(formData.glucose_level) || undefined,
+                cholesterol_level: parseFloat(formData.cholesterol_level) || undefined,
+                risk_score: riskResult.score,
+                risk_level: riskResult.level,
+                risk_notes: riskResult.notes,
+                // ai_insights: insights // Will be updated via backend API
+            };
+
+            const screening = await firestoreService.addScreening(screeningData);
             console.log("Screening created:", screening);
 
-            // Step 3: Get AI analysis
+            // --- CRITICAL FIXES FOR DISPLAY & AI ---
+
+            // 1. Update Patient Stats (so they show up in Patient List)
             try {
-                const aiResponse = await fetch("/api/ai/analyze", {
-                    method: "POST",
+                const currentPatient = await firestoreService.getPatient(patientId!);
+                const currentCount = (currentPatient as any)?.screening_count || 0;
+
+                await firestoreService.updatePatient(patientId!, {
+                    // @ts-ignore
+                    screening_count: currentCount + 1,
+                    latest_risk_level: riskResult.level
+                });
+            } catch (updateErr) {
+                console.error("Failed to update patient stats:", updateErr);
+            }
+
+            // 2. Trigger Real Gemini AI Analysis via Backend
+            let finalInsights = "Analysis queued...";
+            try {
+                const token = localStorage.getItem('token');
+                // Prepare data for backend analysis (similar to what view expects)
+                const analysisPayload = {
+                    ...screeningData,
+                    age: parseInt(formData.age) || 0, // Ensure age is sent
+                    gender: formData.gender
+                };
+
+                const aiResponse = await fetch('http://127.0.0.1:8000/api/ai/analyze', {
+                    method: 'POST',
                     headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({
-                        ...formData,
-                        age: parseInt(formData.age) || 0,
-                    }),
+                    body: JSON.stringify(analysisPayload)
                 });
 
                 if (aiResponse.ok) {
-                    const aiData = await aiResponse.json();
-                    if (aiData.success) {
-                        setAiAnalysis(aiData.analysis);
+                    const aiResult = await aiResponse.json();
+                    if (aiResult.success && aiResult.analysis?.formatted_insights) {
+                        finalInsights = aiResult.analysis.formatted_insights;
+
+                        // Update the screening in Firestore with real insights
+                        if (screening.id) {
+                            try {
+                                await firestoreService.updateScreening(screening.id, {
+                                    ai_insights: finalInsights
+                                });
+                            } catch (err) {
+                                console.error("Failed to save AI insights to Firestore:", err);
+                            }
+                        }
                     }
                 }
-            } catch (aiError) {
-                console.log("AI analysis not available:", aiError);
+            } catch (aiErr) {
+                console.error("AI Analysis failed:", aiErr);
             }
 
-            return true;
-        } catch (err: any) {
-            throw err;
-        }
-    };
-
-    const handleSubmitOffline = async () => {
-        try {
-            // Save patient locally
-            const patientLocalId = await syncService.savePatientLocally({
-                full_name: formData.full_name,
-                age: formData.age,
-                gender: formData.gender,
-                village: formData.village,
-                phone: formData.phone,
+            // Update UI with real analysis
+            setAiAnalysis({
+                risk_level: riskResult.level,
+                summary: finalInsights
             });
 
-            // Save screening locally
-            await syncService.saveScreeningLocally(formData, patientLocalId);
+            // Allow time for async updates (a bit hacky but ensures firestore syncs before redirect)
+            await new Promise(r => setTimeout(r, 500));
 
-            // Update pending count
-            await refreshPendingCount();
-
-            setSavedOffline(true);
             return true;
         } catch (err: any) {
             throw err;
@@ -175,13 +197,10 @@ export function ScreeningWizard() {
         setError(null);
 
         try {
-            if (isOnline) {
-                await handleSubmitOnline();
-            } else {
-                await handleSubmitOffline();
-            }
+            await handleSubmitOnline();
 
             setIsSuccess(true);
+            showToast("Screening submitted successfully", "success");
 
             // Redirect after showing success
             setTimeout(() => {
@@ -189,7 +208,10 @@ export function ScreeningWizard() {
             }, 3000);
         } catch (err: any) {
             console.error("Submission error:", err);
-            setError(err.message || "An error occurred while saving data");
+            const msg = err.message || "An error occurred while saving data";
+            setError(msg);
+            showToast(msg, "error");
+        } finally {
             setIsSubmitting(false);
         }
     };
@@ -211,32 +233,17 @@ export function ScreeningWizard() {
         if (isSuccess) {
             return (
                 <div className="flex flex-col items-center justify-center h-full py-12 animate-in fade-in zoom-in duration-500">
-                    <div className={`h-20 w-20 ${savedOffline ? 'bg-amber-500/20 text-amber-400' : 'bg-green-500/20 text-green-400'} rounded-full flex items-center justify-center mb-6`}>
-                        {savedOffline ? <WifiOff className="h-10 w-10" /> : <CheckCircle2 className="h-10 w-10" />}
+                    <div className="h-20 w-20 bg-green-500/20 text-green-400 rounded-full flex items-center justify-center mb-6">
+                        <CheckCircle2 className="h-10 w-10" />
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">
-                        {savedOffline ? 'Saved Locally!' : 'Screening Completed!'}
+                        Screening Completed!
                     </h2>
                     <p className="text-slate-400 mb-6">
-                        {savedOffline
-                            ? 'Data saved to your device. It will sync automatically when online.'
-                            : 'Patient and screening data saved successfully.'}
+                        Patient and screening data saved successfully.
                     </p>
 
-                    {savedOffline && (
-                        <div className="w-full max-w-md glass-card rounded-xl p-6 border border-amber-500/20 mt-4">
-                            <div className="flex items-center gap-2 mb-4">
-                                <Cloud className="h-5 w-5 text-amber-400" />
-                                <h3 className="font-semibold text-white">Offline Mode</h3>
-                            </div>
-                            <p className="text-sm text-slate-300">
-                                Your screening has been securely saved to this device.
-                                When you're back online, it will automatically sync to the server.
-                            </p>
-                        </div>
-                    )}
-
-                    {aiAnalysis && !savedOffline && (
+                    {aiAnalysis && (
                         <div className="w-full max-w-md glass-card rounded-xl p-6 border border-white/10 mt-4">
                             <div className="flex items-center gap-2 mb-4">
                                 <Sparkles className="h-5 w-5 text-teal-400" />
@@ -246,8 +253,8 @@ export function ScreeningWizard() {
                                 <div className="flex justify-between">
                                     <span className="text-slate-400">Risk Level:</span>
                                     <span className={`font-medium ${aiAnalysis.risk_level === 'High' ? 'text-red-400' :
-                                            aiAnalysis.risk_level === 'Medium' ? 'text-amber-400' :
-                                                'text-green-400'
+                                        aiAnalysis.risk_level === 'Medium' ? 'text-amber-400' :
+                                            'text-green-400'
                                         }`}>{aiAnalysis.risk_level}</span>
                                 </div>
                                 {aiAnalysis.summary && (
@@ -330,12 +337,7 @@ export function ScreeningWizard() {
                     <p className="text-sm md:text-base text-slate-400">Complete the workflow to assess health risk.</p>
                 </div>
                 {/* Offline indicator */}
-                {!isOnline && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/20 text-amber-400 text-sm font-medium">
-                        <WifiOff className="h-4 w-4" />
-                        <span>Offline Mode</span>
-                    </div>
-                )}
+                {/* Offline indicator */}
             </div>
 
             <div className="glass-card rounded-2xl shadow-xl overflow-hidden border border-white/5">

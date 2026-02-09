@@ -5,10 +5,17 @@ from django.db import models
 class User(AbstractUser):
     """Custom user model for RuralHealthAI."""
     
+    ROLE_CHOICES = [
+        ('patient', 'Patient'),
+        ('health_worker', 'Health Worker'),
+        ('health_officer', 'Health Officer'),
+        ('admin', 'Admin'),
+    ]
+    
     # Use email as the username field
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255, blank=True, null=True)
-    role = models.CharField(max_length=50, default='health_worker')  # health_worker, admin
+    role = models.CharField(max_length=50, choices=ROLE_CHOICES, default='health_worker')
     is_active = models.BooleanField(default=True)
     
     USERNAME_FIELD = 'email'
@@ -19,6 +26,15 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+    
+    def is_health_officer(self):
+        return self.role in ['health_officer', 'admin']
+    
+    def is_health_worker(self):
+        return self.role == 'health_worker'
+    
+    def is_patient(self):
+        return self.role == 'patient'
 
 
 class Patient(models.Model):
@@ -30,9 +46,18 @@ class Patient(models.Model):
         ('Other', 'Other'),
     ]
     
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name='patient_profile',
+        null=True,
+        blank=True
+    )
     health_worker = models.ForeignKey(
         User, 
-        on_delete=models.CASCADE, 
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
         related_name='patients'
     )
     full_name = models.CharField(max_length=255, db_index=True)
@@ -94,6 +119,7 @@ class Screening(models.Model):
         default='Low'
     )
     risk_notes = models.TextField(blank=True, null=True)
+    ai_insights = models.TextField(blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     

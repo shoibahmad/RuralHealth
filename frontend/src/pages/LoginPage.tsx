@@ -1,50 +1,61 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../lib/firebase";
 
 import { HeartPulse, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 
+import { useToast } from "../context/ToastContext";
+
 export function LoginPage() {
+    const { showToast } = useToast();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const { login } = useAuth();
+    const [loading, setLoading] = useState(false);
+    const { user } = useAuth();
     const navigate = useNavigate();
 
-    const loginMutation = useMutation({
-        mutationFn: async () => {
-            const formData = new FormData();
-            formData.append("username", email);
-            formData.append("password", password);
-
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                body: formData,
-            });
-
-            if (!res.ok) {
-                const data = await res.json();
-                throw new Error(data.detail || "Failed to login");
-            }
-            return res.json();
-        },
-        onSuccess: (data) => {
-            login(data.access_token);
+    // Redirect if already logged in
+    if (user) {
+        if (user.role === 'health_officer' || user.role === 'admin') {
+            navigate("/officer/dashboard");
+        } else if (user.role === 'patient') {
+            navigate("/patient/dashboard");
+        } else {
             navigate("/dashboard");
-        },
-        onError: (err: any) => {
-            setError(err.message);
         }
-    });
+    }
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        loginMutation.mutate();
+        setError("");
+        setLoading(true);
+
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+            // Navigation handled by AuthContext or the redirect check above/useEffect
+            navigate("/dashboard");
+        } catch (err: any) {
+            console.error(err);
+            if (err.code === 'auth/invalid-credential') {
+                setError("Invalid email or password.");
+            } else if (err.code === 'auth/user-not-found') {
+                setError("No user found with this email.");
+            } else if (err.code === 'auth/wrong-password') {
+                setError("Incorrect password.");
+            } else {
+                setError("Failed to sign in. Please try again.");
+            }
+            showToast(error || "Failed to sign in", "error");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -100,9 +111,9 @@ export function LoginPage() {
                         <Button
                             className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white border-0 shadow-lg shadow-teal-500/25 py-6 font-medium transition-all duration-300"
                             type="submit"
-                            disabled={loginMutation.isPending}
+                            disabled={loading}
                         >
-                            {loginMutation.isPending ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
+                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
                         </Button>
 
                         <div className="text-center text-sm text-slate-500 mt-6">
