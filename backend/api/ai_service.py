@@ -99,7 +99,7 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         List of recommendation dictionaries
     """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = f"""
         As a healthcare AI, generate 3-5 specific, actionable health recommendations for this patient.
@@ -172,7 +172,7 @@ def extract_vitals_from_audio(audio_file_path: str) -> dict:
         # For 1.5 Flash, File API is standard for multimodal.
         audio_file = genai.upload_file(path=audio_file_path)
         
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = """
         Listen to this audio recording of a health worker dictating patient vitals.
