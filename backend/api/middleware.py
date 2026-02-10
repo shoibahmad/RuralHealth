@@ -12,7 +12,7 @@ class RequestLogMiddleware:
         start_time = time.time()
         
         # Process the request
-        response = request.get_response(request)
+        response = self.get_response(request)
         
         duration = time.time() - start_time
         
