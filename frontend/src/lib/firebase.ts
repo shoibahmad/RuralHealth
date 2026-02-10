@@ -5,13 +5,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyB6h1ZR_NIbPFtEVgdNxL3EZadUrvFTURo",
-    authDomain: "ruralhealth-fe3c0.firebaseapp.com",
-    projectId: "ruralhealth-fe3c0",
-    storageBucket: "ruralhealth-fe3c0.firebasestorage.app",
-    messagingSenderId: "303524159956",
-    appId: "1:303524159956:web:9c19a4c5faaa2436093641",
-    measurementId: "G-XZB0RH1T5Z"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase

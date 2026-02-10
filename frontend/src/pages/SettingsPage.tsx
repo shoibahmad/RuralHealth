@@ -240,24 +240,14 @@ export function SettingsPage() {
                             variant="ghost"
                             onClick={() => {
                                 if (user) {
-                                    if (user) {
-                                        setProfileData({
-                                            full_name: user.displayName || user.full_name || "",
-                                            email: user.email || "",
-                                            age: profileData.age, // Keep existing or reset? Better to keep current or re-fetch.
-                                            // For "Cancel", we ideally want to revert to original. 
-                                            // But here, let's just properly satisfy the type by keeping current edits or empty
-                                            // A true revert would require storing 'originalData'. 
-                                            // For now, let's just satisfy the type using existing state values to prevent crash, 
-                                            // or better, just reset to empty if we don't have originals.
-                                            // Actually, the Cancel button is for the 'Auth' fields section.
-                                            // Let's just fill with empty strings or current values to satisfy type.
-                                            age: "",
-                                            gender: "",
-                                            village: "",
-                                            phone: ""
-                                        });
-                                    }
+                                    setProfileData({
+                                        full_name: user.displayName || user.full_name || "",
+                                        email: user.email || "",
+                                        age: "",
+                                        gender: "",
+                                        village: "",
+                                        phone: ""
+                                    });
                                 }
                             }}
                             className="text-slate-400 hover:text-white"

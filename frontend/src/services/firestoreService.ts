@@ -159,11 +159,20 @@ export const firestoreService = {
 
     async setPatient(id: string, data: Partial<Patient>) {
         const docRef = doc(db, "patients", id);
-        // Use setDoc with merge to create if not exists or update if exists
-        await setDoc(docRef, {
-            ...data,
-            updated_at: new Date().toISOString()
-        }, { merge: true });
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+            await updateDoc(docRef, {
+                ...data,
+                updated_at: new Date().toISOString()
+            } as any);
+        } else {
+            await setDoc(docRef, {
+                ...data,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString()
+            });
+        }
         return { id, ...data };
     },
 
