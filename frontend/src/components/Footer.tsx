@@ -1,7 +1,9 @@
 import { Link } from "react-router-dom";
 import { Activity } from "lucide-react";
+import { useOffline } from "../context/OfflineContext";
 
 export function Footer() {
+    const { isOnline } = useOffline();
     return (
         <footer className="glass-card border-t border-white/5 mt-16">
             <div className="container mx-auto px-4 py-12">
@@ -98,6 +100,12 @@ export function Footer() {
                     <p className="text-sm text-slate-400">
                         © {new Date().getFullYear()} RuralHealthAI. All rights reserved. Built with ❤️ for rural communities.
                     </p>
+                    <div className="flex items-center justify-center gap-2 mt-4">
+                        <div className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'} shadow-[0_0_8px_rgba(0,0,0,0.5)]`} />
+                        <span className={`text-xs font-medium ${isOnline ? 'text-emerald-400/80' : 'text-rose-400/80'}`}>
+                            {isOnline ? 'System Online' : 'Offline Mode Active'}
+                        </span>
+                    </div>
                 </div>
             </div>
         </footer>

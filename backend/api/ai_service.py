@@ -25,7 +25,7 @@ def analyze_health_data(screening_data: dict) -> dict:
         recommendations, and health insights
     """
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""
         You are an expert medical AI assistant for rural health workers.
@@ -69,6 +69,7 @@ def analyze_health_data(screening_data: dict) -> dict:
             except json.JSONDecodeError:
                 pass
         
+        print(f"AI Analysis JSON Parse Error. Response text: {response_text}")
         return {
             'success': False,
             'error': 'Failed to parse AI response',
@@ -76,7 +77,9 @@ def analyze_health_data(screening_data: dict) -> dict:
         }
         
     except Exception as e:
-        print(f"AI Error: {e}")
+        import traceback
+        print(f"AI Analysis Error: {str(e)}")
+        print(traceback.format_exc())
         return {
             'success': False,
             'error': str(e),
@@ -96,7 +99,7 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         List of recommendation dictionaries
     """
     try:
-        model = genai.GenerativeModel('gemini-pro')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         
         prompt = f"""
         As a healthcare AI, generate 3-5 specific, actionable health recommendations for this patient.

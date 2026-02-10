@@ -1,7 +1,8 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { HeartPulse, Github, Twitter, Menu, X } from "lucide-react";
+import { HeartPulse, Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
+import { Footer } from "../Footer";
 
 
 export function PublicLayout() {
@@ -107,48 +108,8 @@ export function PublicLayout() {
             </main>
 
             {/* Footer */}
-            <footer className="bg-slate-950/50 border-t border-white/5 py-12 relative overflow-hidden">
-                {/* Background Decor */}
-                <div className="absolute inset-0 bg-gradient-to-t from-teal-900/10 to-transparent pointer-events-none" />
-
-                <div className="container mx-auto px-6 relative z-10">
-                    <div className="grid md:grid-cols-4 gap-8 mb-8">
-                        <div className="col-span-1 md:col-span-2">
-                            <div className="flex items-center gap-2 mb-4">
-                                <div className="bg-teal-500/10 p-1.5 rounded-lg">
-                                    <HeartPulse className="h-5 w-5 text-teal-400" />
-                                </div>
-                                <span className="font-bold text-lg text-slate-200">RuralHealthAI</span>
-                            </div>
-                            <p className="text-slate-400 text-sm leading-relaxed max-w-sm">
-                                Bridging the gap in rural healthcare access through intelligent, offline-first screening technology.
-                            </p>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-slate-200 mb-4">Platform</h4>
-                            <ul className="space-y-2 text-sm text-slate-400">
-                                <li><a href="#" className="hover:text-teal-400 transition-colors">Risk Assessment</a></li>
-                                <li><a href="#" className="hover:text-teal-400 transition-colors">Offline Capabilities</a></li>
-                                <li><a href="#" className="hover:text-teal-400 transition-colors">Privacy & Security</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 className="font-semibold text-slate-200 mb-4">Connect</h4>
-                            <div className="flex gap-4">
-                                <a href="#" className="text-slate-400 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-teal-500/20"><Github className="h-5 w-5" /></a>
-                                <a href="#" className="text-slate-400 hover:text-white transition-colors bg-white/5 p-2 rounded-full hover:bg-blue-500/20"><Twitter className="h-5 w-5" /></a>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-slate-500">
-                        <p>© 2026 RuralHealthAI. All rights reserved.</p>
-                        <div className="flex gap-6">
-                            <Link to="/privacy-policy" className="hover:text-slate-300">Privacy Policy</Link>
-                            <Link to="/terms-conditions" className="hover:text-slate-300">Terms & Conditions</Link>
-                        </div>
-                    </div>
-                </div>
-            </footer>
+            {/* Footer */}
+            <Footer />
         </div>
     )
 }

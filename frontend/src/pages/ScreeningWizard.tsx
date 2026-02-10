@@ -139,19 +139,17 @@ export function ScreeningWizard() {
             // 2. Trigger Real Gemini AI Analysis via Backend
             let finalInsights = "Analysis queued...";
             try {
-                const token = localStorage.getItem('token');
-                // Prepare data for backend analysis (similar to what view expects)
+                // Prepare data for backend analysis
                 const analysisPayload = {
                     ...screeningData,
-                    age: parseInt(formData.age) || 0, // Ensure age is sent
+                    age: parseInt(formData.age) || 0,
                     gender: formData.gender
                 };
 
-                const aiResponse = await fetch('http://127.0.0.1:8000/api/ai/analyze', {
+                const aiResponse = await fetch('/api/ai/analyze', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify(analysisPayload)
                 });

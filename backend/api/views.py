@@ -655,7 +655,7 @@ class AnalyticsView(APIView):
 class AIAnalysisView(APIView):
     """Get AI-powered health analysis for screening data."""
     
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     
     def post(self, request):
         """Analyze health data using Gemini AI."""
@@ -692,7 +692,7 @@ class AIAnalysisView(APIView):
 class AIVoiceVitalsView(APIView):
     """Process voice input to extract vitals using AI."""
     
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
     from rest_framework.parsers import MultiPartParser, FormParser
     parser_classes = [MultiPartParser, FormParser]
     

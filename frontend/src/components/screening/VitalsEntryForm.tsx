@@ -65,16 +65,12 @@ export function VitalsEntryForm({ data, updateData }: VitalsEntryFormProps) {
             // Get token
             // Assuming we have a way to get token, usually from localStorage or context
             // For now attempting request, interceptor might handle it or we need to grab it
-            const token = localStorage.getItem('token');
             // Note: In this project, token storage might differ. Checking AuthContext or services usually best.
             // But let's assume standard Bearer for now or rely on cookie if used.
             // Actually, let's use the standard fetch with auth header manually here.
 
-            const response = await fetch('http://127.0.0.1:8000/api/ai/voice-vitals', {
+            const response = await fetch('/api/ai/voice-vitals', {
                 method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
                 body: formData
             });
 
