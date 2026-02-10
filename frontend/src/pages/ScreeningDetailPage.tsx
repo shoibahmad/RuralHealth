@@ -5,7 +5,6 @@ import { ArrowLeft, Activity, FileText, Share2, Printer, Sparkles } from "lucide
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 import { firestoreService } from "../services/firestoreService";
-import { useAuth } from "../context/AuthContext";
 import { riskUtils } from "../lib/riskUtils";
 
 export function ScreeningDetailPage() {

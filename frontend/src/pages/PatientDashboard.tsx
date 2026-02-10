@@ -47,34 +47,8 @@ export function PatientDashboard() {
     const [data, setData] = useState<DashboardData | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    
-    // Appointment Modal State
-    const [showAppointmentModal, setShowAppointmentModal] = useState(false);
-    const [newAppointment, setNewAppointment] = useState({
-        date: '',
-        reason: 'Regular Checkup',
-        notes: ''
-    });
 
-    const handleRequestAppointment = async () => {
-        if (!user || !newAppointment.date) return;
-        try {
-            await firestoreService.addAppointment({
-                patient_id: user.uid,
-                health_worker_id: 'pending_assignment', // Logic to assign to specific HW could be added
-                scheduled_date: new Date(newAppointment.date).toISOString(),
-                reason: newAppointment.reason,
-                notes: newAppointment.notes,
-                status: 'scheduled'
-            });
-            setShowAppointmentModal(false);
-            setNewAppointment({ date: '', reason: 'Regular Checkup', notes: '' });
-            fetchDashboard(); // Refresh data
-        } catch (err) {
-            console.error("Failed to request appointment:", err);
-            alert("Failed to request appointment. Please try again.");
-        }
-    };
+    // Appointment Modal State - Removed unused code
 
     useEffect(() => {
         if (user) {

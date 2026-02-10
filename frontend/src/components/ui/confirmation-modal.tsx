@@ -2,7 +2,7 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './button'; // Adjust path if needed (it's in . currently)
-import { AlertTriangle, X } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmationModalProps {
     isOpen: boolean;

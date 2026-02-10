@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Activity, Calendar, FileText, TrendingUp, AlertCircle } from "lucide-react";
-import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { firestoreService } from "../services/firestoreService";
 import {
@@ -88,7 +87,7 @@ export function PatientScreeningHistory() {
 
     if (!data) return null;
 
-    const { patient, screenings, appointments } = data;
+    const { screenings } = data;
 
     // Prepare chart data
     const chartData = screenings.slice().reverse().map((s: any) => ({

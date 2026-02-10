@@ -95,7 +95,7 @@ export function ScreeningWizard() {
                 smoking_status: formData.smoking_status
             });
 
-            const bmi = riskUtils.calculateBMI(parseFloat(formData.height_cm), parseFloat(formData.weight_kg));
+            // BMI calculation removed as unused variable 'bmi'
 
             // Step 3: Create screening in Firestore
             const screeningData = {
