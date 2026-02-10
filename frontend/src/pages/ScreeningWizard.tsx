@@ -12,6 +12,7 @@ import { VitalsEntryForm } from "../components/screening/VitalsEntryForm";
 import { LifestyleSurveyForm } from "../components/screening/LifestyleSurveyForm";
 import { LabResultsUploadForm } from "../components/screening/LabResultsUploadForm";
 import { RiskAssessmentReview } from "../components/screening/RiskAssessmentReview";
+import { AIAnalysisModal } from "../components/screening/AIAnalysisModal";
 import { motion } from "framer-motion";
 
 
@@ -33,6 +34,7 @@ export function ScreeningWizard() {
     const [isSuccess, setIsSuccess] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
+    const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const [formData, setFormData] = useState<any>({
         // Patient
         full_name: "",
@@ -156,14 +158,21 @@ export function ScreeningWizard() {
 
                 if (aiResponse.ok) {
                     const aiResult = await aiResponse.json();
-                    if (aiResult.success && aiResult.analysis?.formatted_insights) {
-                        finalInsights = aiResult.analysis.formatted_insights;
+                    if (aiResult.success && aiResult.analysis) {
+                        const analysis = aiResult.analysis;
+                        finalInsights = analysis.formatted_insights || analysis.summary;
+
+                        setAiAnalysis({
+                            ...analysis,
+                            risk_level: riskResult.level // Ensure client side risk is preserved or use AI's
+                        });
+                        setIsAiModalOpen(true);
 
                         // Update the screening in Firestore with real insights
                         if (screening.id) {
                             try {
                                 await firestoreService.updateScreening(screening.id, {
-                                    ai_insights: finalInsights
+                                    ai_insights: analysis
                                 });
                             } catch (err) {
                                 console.error("Failed to save AI insights to Firestore:", err);
@@ -176,10 +185,11 @@ export function ScreeningWizard() {
             }
 
             // Update UI with real analysis
-            setAiAnalysis({
-                risk_level: riskResult.level,
-                summary: finalInsights
-            });
+            if (finalInsights !== "Analysis queued...") {
+                // If we got real structured data back (depends on how we updated backend)
+                // Ideally backend returns full object. For now we might just have formatted text.
+                // NOTE: We should check if we can parse it or if backend returns it structurally.
+            }
 
             // Allow time for async updates (a bit hacky but ensures firestore syncs before redirect)
             await new Promise(r => setTimeout(r, 500));
@@ -201,9 +211,13 @@ export function ScreeningWizard() {
             showToast("Screening submitted successfully", "success");
 
             // Redirect after showing success
-            setTimeout(() => {
-                navigate("/dashboard");
-            }, 3000);
+            // Only redirect if modal is NOT open (i.e. if AI failed or user closed it)
+            // But we want them to see the modal. So we won't auto-redirect immediately if AI success.
+            if (!isAiModalOpen) {
+                setTimeout(() => {
+                    navigate("/dashboard");
+                }, 3000);
+            }
         } catch (err: any) {
             console.error("Submission error:", err);
             const msg = err.message || "An error occurred while saving data";
@@ -375,6 +389,17 @@ export function ScreeningWizard() {
                     )}
                 </div>
             </div>
-        </motion.div>
+
+
+            <AIAnalysisModal
+                isOpen={isAiModalOpen}
+                onClose={() => {
+                    setIsAiModalOpen(false);
+                    navigate("/dashboard");
+                }}
+                analysis={aiAnalysis}
+                patientName={formData.full_name}
+            />
+        </motion.div >
     )
 }

@@ -13,6 +13,30 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 
+def try_generate_content(prompt, models=['gemini-3-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash']):
+    """
+    Attempt to generate content using a list of models in priority order.
+    Returns the first successful response object.
+    Raises Exception if all models fail.
+    """
+    last_error = None
+    for model_name in models:
+        try:
+            print(f"Attempting AI generation with model: {model_name}")
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(prompt)
+            return response
+        except Exception as e:
+            print(f"Model {model_name} failed: {e}")
+            last_error = e
+            continue
+    
+    raise last_error or Exception("All AI models failed")
+
+
+
+
+
 def analyze_health_data(screening_data: dict) -> dict:
     """
     Use Gemini AI to analyze patient health data and provide insights.
@@ -25,8 +49,6 @@ def analyze_health_data(screening_data: dict) -> dict:
         recommendations, and health insights
     """
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        
         prompt = f"""
         You are an expert medical AI assistant for rural health workers.
         Analyze this patient's screening data and provide a clinical assessment.
@@ -47,7 +69,8 @@ def analyze_health_data(screening_data: dict) -> dict:
            "**AI Health Assessment**\\n\\nBased on the screening data, the patient is categorized as **[Risk Level] Risk**.\\n\\n**Key Observations:**\\n- [Observation 1]\\n- [Observation 2]\\n\\n**Recommendations:**\\n1. [Action 1]\\n2. [Action 2]"
         """
         
-        response = model.generate_content(prompt)
+        # Use fallback mechanism
+        response = try_generate_content(prompt)
         response_text = response.text
         
         import json
@@ -99,8 +122,6 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         List of recommendation dictionaries
     """
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        
         prompt = f"""
         As a healthcare AI, generate 3-5 specific, actionable health recommendations for this patient.
         
@@ -126,7 +147,8 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         ]
         """
         
-        response = model.generate_content(prompt)
+        # Use fallback mechanism
+        response = try_generate_content(prompt)
         response_text = response.text
         
         import json
@@ -172,7 +194,7 @@ def extract_vitals_from_audio(audio_file_path: str) -> dict:
         # For 1.5 Flash, File API is standard for multimodal.
         audio_file = genai.upload_file(path=audio_file_path)
         
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-3-flash-preview')
         
         prompt = """
         Listen to this audio recording of a health worker dictating patient vitals.
