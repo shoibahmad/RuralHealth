@@ -1,113 +1,232 @@
-# RuralHealthAI
+# RuralHealthAI: AI-Powered Digital Health Screening
 
-RuralHealthAI is a production-ready "Digital Health Survey & Risk Screening Tool" designed for community health workers to screen rural populations for health risks using WHO algorithms.
+<div align="center">
+  <img src="frontend/public/logo.svg" alt="RuralHealthAI Logo" width="120" height="120" />
+  <br />
+  <p>
+    <b>Democratizing access to preventative healthcare with intelligent, offline-capable digital tools.</b>
+  </p>
+  <br />
 
-## Tech Stack
+  ![React](https://img.shields.io/badge/React-18-blue?logo=react)
+  ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
+  ![Django](https://img.shields.io/badge/Django-5.x-green?logo=django)
+  ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange?logo=firebase)
+  ![Gemini AI](https://img.shields.io/badge/AI-Gemini%20Pro-purple?logo=google)
 
-- **Frontend:** React (Vite), TypeScript, Tailwind CSS, ShadCN UI, Lucide React, React Query, Firebase (Auth & Firestore)
-- **Backend:** Python Django, Django REST Framework, SQLite (Dev) / PostgreSQL (Prod)
-- **Authentication:** Firebase Auth (Identity Platform) & Django REST Framework
-- **AI/ML:** Google Gemini AI, OpenAI Whisper, Tesseract/PaddleOCR, Scikit-Learn
+</div>
 
-## Project Structure
+---
 
+## 📋 Table of Contents
+
+-   [Overview](#-overview)
+-   [Key Features](#-key-features)
+-   [System Architecture](#-system-architecture)
+-   [Tech Stack](#-tech-stack)
+-   [Getting Started](#-getting-started)
+    -   [Prerequisites](#prerequisites)
+    -   [Backend Setup](#backend-setup)
+    -   [Frontend Setup](#frontend-setup)
+-   [Configuration](#-configuration)
+-   [API Documentation](#-api-documentation)
+-   [Roadmap](#-roadmap)
+-   [License](#-license)
+-   [Contact](#-contact)
+
+---
+
+## 🏥 Overview
+
+**RuralHealthAI** is a comprehensive digital health screening platform designed to empower frontline health workers (ASHAs) in rural areas. By conducting simple screenings for Non-Communicable Diseases (NCDs) like Diabetes and Hypertension, health workers can identify risks early and connect patients to care.
+
+Key challenges addressed:
+-   **Lack of Specialists:** Bridging the gap where doctors are scarce.
+-   **Late Diagnosis:** Identifying "silent killers" before they become critical.
+-   **Manual Records:** Digitizing health data for better tracking and analysis.
+
+---
+
+## ✨ Key Features
+
+-   **🤖 AI-Powered Analysis:** Integration with **Google Gemini AI** to analyze vitals and provide instant risk assessments and lifestyle recommendations.
+-   **📱 Role-Based Access:** tailored interfaces for **Health Workers** (screening), **Health Officers** (monitoring), and **Admins**.
+-   **🔒 Secure & Private:** Robust authentication via **Firebase Auth** and secure data storage in **Firestore**.
+-   **📊 Interactive Dashboard:** Visual analytics for screening trends and high-risk case tracking.
+-   **⚡ Modern UI:** Fast, responsive interface built with React, Tailwind CSS, and Framer Motion.
+-   **📝 Digital Health Records:** Comprehensive patient history tracking.
+
+---
+
+## 🏗 System Architecture
+
+The project follows a modern Client-Server architecture:
+
+```mermaid
+graph TD
+    Client[React Frontend] -->|REST API| Server[Django Backend]
+    Server -->|Auth & Data| Firebase[Firebase Auth & Firestore]
+    Server -->|Analysis| AI[Google Gemini API]
+    
+    subgraph "Frontend Layer"
+        Client
+    end
+    
+    subgraph "Backend Layer"
+        Server
+        Firebase
+        AI
+    end
 ```
-├── frontend/          # React application (Vite + TypeScript)
-│   ├── .env.example   # Template for environment variables
-│   └── src/           # Source code
-├── backend/           # Django REST API
-│   ├── api/           # API app (models, views, serializers)
-│   ├── ruralhealth/   # Django project settings
-│   └── manage.py      # Django management script
-├── render-build.sh    # Deployment build script
-└── DEPLOYMENT_GUIDE.md# Detailed deployment instructions
-```
 
-## Getting Started
+---
+
+## 💻 Tech Stack
+
+### Frontend
+-   **Framework:** React 18 (Vite)
+-   **Language:** TypeScript
+-   **Styling:** Tailwind CSS, ShadCN UI
+-   **State:** React Context API, React Query
+-   **Icons:** Lucide React
+
+### Backend
+-   **Framework:** Django + Django REST Framework (DRF)
+-   **Language:** Python 3.10+
+-   **Request Handling:** `requests` (for external APIs), `django-cors-headers`
+
+### Database & Cloud
+-   **Database:** Google Firebase Firestore (NoSQL)
+-   **Authentication:** Firebase Authentication
+-   **AI Model:** Google Gemini Pro
+
+---
+
+## 🚀 Getting Started
+
+Follow these steps to set up the project locally.
 
 ### Prerequisites
+-   **Node.js** (v18+)
+-   **Python** (v3.10+)
+-   **Firebase Account** (for API keys)
 
-- Python 3.10+
-- Node.js 18+
-- npm or yarn
+### Backend Setup
 
-### 1. Backend Setup
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/RuralHealthAI.git
+    cd RuralHealthAI/backend
+    ```
 
-```bash
-cd backend
+2.  **Create a virtual environment:**
+    ```bash
+    python -m venv venv
+    
+    # Windows
+    venv\Scripts\activate
+    
+    # Mac/Linux
+    source venv/bin/activate
+    ```
 
-# Create virtual environment
-python -m venv venv
+3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Linux/Mac:
-source venv/bin/activate
+4.  **Configure Environment Variables:**
+    Create a `.env` file in the `backend/` directory (see [Configuration](#-configuration)).
 
-# Install dependencies (including dj-database-url for prod)
-pip install -r requirements.txt
+5.  **Run Migrations:**
+    ```bash
+    python manage.py migrate
+    ```
 
-# Run migrations
-python manage.py migrate
+6.  **Start the Server:**
+    ```bash
+    python manage.py runserver
+    ```
 
-# Start development server
-python manage.py runserver 0.0.0.0:8000
+### Frontend Setup
+
+1.  **Navigate to frontend directory:**
+    ```bash
+    cd ../frontend
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment Variables:**
+    Copy `.env.example` to `.env` and fill in your Firebase credentials.
+
+4.  **Start the Development Server:**
+    ```bash
+    npm run dev
+    ```
+
+---
+
+## ⚙ Configuration
+
+### Backend (`backend/.env`)
+```env
+SECRET_KEY=your_django_secret_key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+GEMINI_API_KEY=your_google_gemini_api_key
 ```
-
-### 2. Frontend Setup
-
-First, configure your environment variables:
-1.  Copy `.env.example` to `.env` in the `frontend` directory.
-2.  Fill in your Firebase API keys (see `DEPLOYMENT_GUIDE.md` for security best practices).
-
-```bash
-cd frontend
-
-# Install dependencies
-npm install
-
-# Start development server
-npm run dev
-```
-
-## API Endpoints & Features
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/auth/register` | POST | User registration |
-| `/api/auth/login` | POST | JWT token login (Backend) |
-| `/api/auth/me` | GET | Get current user |
-| `/api/screening/patients` | GET, POST | List/create patients (Syncs with Firestore) |
-| `/api/screening/screenings` | GET, POST | List/create screenings |
-| `/health` | GET | Health check |
-
-## Environment Variables
-
-### Backend (`backend/.env` or OS Environment)
-- `SECRET_KEY`: Django secret key
-- `DEBUG`: `True` for dev, `False` for prod
-- `ALLOWED_HOSTS`: Comma-separated list of hosts
-- `GEMINI_API_KEY`: Google Gemini API Key
 
 ### Frontend (`frontend/.env`)
-All variables must start with `VITE_`.
-- `VITE_FIREBASE_API_KEY`: Firebase API Key
-- `VITE_FIREBASE_AUTH_DOMAIN`: Auth Domain
-- ... (see `.env.example`)
+```env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+VITE_FIREBASE_APP_ID=your_app_id
+```
 
-## Deployment
+---
 
-The project is configured for deployment on **Render**. 
+## 📖 API Documentation
 
-👉 **Read [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for step-by-step instructions.**
+The backend exposes a RESTful API. Key endpoints include:
 
-The `render-build.sh` script handles the full build process:
-1.  Installs Python dependencies.
-2.  Builds the React frontend.
-3.  Copies the frontend build to `backend/static/` for serving via Django.
-4.  Runs migrations and collects static files.
+| Method | Endpoint | Description |
+| :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Register a new user |
+| **POST** | `/api/auth/login` | Authenticate user |
+| **GET** | `/api/patients` | List all patients |
+| **POST** | `/api/patients` | Add a new patient |
+| **POST** | `/api/screenings` | Submit screening data for AI analysis |
 
-## License
+For detailed documentation, visit the `/api-docs` route on the frontend.
 
-MIT License
+---
+
+## 🗺 Roadmap
+
+- [x] MVP Development (Screening & AI Analysis)
+- [x] **New:** Forgot Password & Visibility Toggle
+- [ ] Offline Mode (PWA)
+- [ ] Voice-Based Vitals Screening
+- [ ] Multi-language Support (Hindi/Vernacular)
+- [ ] SMS/WhatsApp Report Integration
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+## 📞 Contact
+
+**Alisha Shad** - [LinkedIn](https://www.linkedin.com/in/alisha-shad-983456380/) - [GitHub](https://github.com/alishashad) - [Email](mailto:alishasshad@gmail.com)
+
+Project Link: [https://github.com/alishashad/RuralHealthAI](https://github.com/alishashad/RuralHealthAI)

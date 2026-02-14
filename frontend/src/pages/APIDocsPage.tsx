@@ -1,290 +1,322 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Code, Lock, Zap } from "lucide-react";
+import { Code, Lock, Zap, Server, Shield, Database, Activity, Menu, X, ChevronRight } from "lucide-react";
+import { cn } from "../lib/utils";
 
-export function APIDocsPage() {
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 py-16">
-            <div className="container mx-auto px-4 max-w-6xl">
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="space-y-8"
-                >
-                    {/* Header */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <div className="flex items-center gap-4 mb-4">
-                            <div className="h-12 w-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
-                                <Code className="h-6 w-6" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold text-white">API Documentation</h1>
-                                <p className="text-slate-400">RESTful API for RuralHealthAI Platform</p>
-                            </div>
-                        </div>
-                        <div className="flex gap-4 mt-6">
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20">
-                                <div className="h-2 w-2 rounded-full bg-emerald-400"></div>
-                                <span className="text-xs text-emerald-400 font-medium">v1.0.0</span>
-                            </div>
-                            <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20">
-                                <span className="text-xs text-blue-400 font-medium">Base URL: /api</span>
-                            </div>
-                        </div>
-                    </div>
+// API Documentation Data
+const sections = [
+    { id: "intro", title: "Introduction", icon: Server },
+    { id: "auth", title: "Authentication", icon: Lock },
+    { id: "patients", title: "Patients", icon: UsersIcon },
+    { id: "screening", title: "Screening & AI", icon: Activity },
+    { id: "officer", title: "Health Officer", icon: Shield },
+    { id: "errors", title: "Errors & Limits", icon: Zap },
+];
 
-                    {/* Authentication */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Lock className="h-6 w-6 text-teal-400" />
-                            <h2 className="text-2xl font-bold text-white">Authentication</h2>
-                        </div>
-                        <p className="text-slate-300 mb-4">
-                            All API requests require authentication using JWT Bearer tokens.
-                        </p>
-                        <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5 font-mono text-sm">
-                            <span className="text-slate-500">Authorization:</span> <span className="text-teal-400">Bearer YOUR_JWT_TOKEN</span>
-                        </div>
-
-                        <div className="mt-6 space-y-4">
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-2">POST /auth/register</h3>
-                                <p className="text-slate-400 text-sm mb-3">Register a new user account</p>
-                                <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                    <pre className="text-xs text-slate-300 overflow-x-auto">
-{`{
-  "email": "worker@example.com",
-  "password": "securepassword",
-  "full_name": "John Doe",
-  "role": "health_worker"
-}`}
-                                    </pre>
-                                </div>
-                            </div>
-
-                            <div>
-                                <h3 className="text-lg font-semibold text-white mb-2">POST /auth/login</h3>
-                                <p className="text-slate-400 text-sm mb-3">Login and receive JWT token</p>
-                                <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                    <pre className="text-xs text-slate-300 overflow-x-auto">
-{`Form Data:
-username: worker@example.com
-password: securepassword
-
-Response:
-{
-  "access_token": "eyJhbGciOiJIUzI1NiIs...",
-  "token_type": "bearer"
-}`}
-                                    </pre>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Patient Endpoints */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Zap className="h-6 w-6 text-blue-400" />
-                            <h2 className="text-2xl font-bold text-white">Patient Management</h2>
-                        </div>
-
-                        <div className="space-y-6">
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/screening/patients</code>
-                                </div>
-                                <p className="text-slate-400 text-sm mb-3">List all patients (filtered by health worker)</p>
-                                <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                    <pre className="text-xs text-slate-300 overflow-x-auto">
-{`Query Parameters:
-- search: string (optional)
-- village: string (optional)
-- risk: "Low" | "Medium" | "High" (optional)
-
-Response: Array of Patient objects`}
-                                    </pre>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold">POST</span>
-                                    <code className="text-slate-300">/screening/patients</code>
-                                </div>
-                                <p className="text-slate-400 text-sm mb-3">Create a new patient</p>
-                                <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                    <pre className="text-xs text-slate-300 overflow-x-auto">
-{`{
-  "full_name": "Jane Smith",
-  "age": 45,
-  "gender": "Female",
-  "village": "Rampur",
-  "phone": "+91-9876543210"
-}`}
-                                    </pre>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/screening/patients/:id/history</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">Get complete patient screening history</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Screening Endpoints */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <h2 className="text-2xl font-bold text-white mb-6">Health Screening</h2>
-
-                        <div className="space-y-6">
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-blue-500/20 text-blue-400 text-xs font-bold">POST</span>
-                                    <code className="text-slate-300">/screening/screenings</code>
-                                </div>
-                                <p className="text-slate-400 text-sm mb-3">Submit new screening data with automatic risk calculation</p>
-                                <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                    <pre className="text-xs text-slate-300 overflow-x-auto">
-{`{
-  "patient_id": 1,
-  "height_cm": 165,
-  "weight_kg": 70,
-  "systolic_bp": 140,
-  "diastolic_bp": 90,
-  "heart_rate": 75,
-  "glucose_level": 120,
-  "cholesterol_level": 200,
-  "smoking_status": "Never",
-  "alcohol_usage": "Occasional",
-  "physical_activity": "Moderate"
+function UsersIcon({ className }: { className?: string }) {
+    return <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
 }
 
-Response includes:
-- risk_score: 0-100
-- risk_level: "Low" | "Medium" | "High"
-- risk_notes: Detailed analysis
-- Auto-generated recommendations`}
-                                    </pre>
-                                </div>
-                            </div>
+export function APIDocsPage() {
+    const [activeSection, setActiveSection] = useState("intro");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/screening/screenings</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">List all screenings (filtered by health worker)</p>
-                            </div>
-                        </div>
+    const scrollToSection = (id: string) => {
+        setActiveSection(id);
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+        setIsSidebarOpen(false);
+    };
+
+    return (
+        <div className="min-h-screen bg-slate-950 flex pt-16">
+
+            {/* Mobile Menu Button */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden fixed bottom-6 right-6 z-50 h-14 w-14 rounded-full bg-teal-500 text-white flex items-center justify-center shadow-lg hover:bg-teal-600 transition-colors"
+            >
+                {isSidebarOpen ? <X /> : <Menu />}
+            </button>
+
+            {/* Sidebar Navigation */}
+            <aside className={cn(
+                "fixed lg:sticky top-16 left-0 h-[calc(100vh-4rem)] w-72 bg-slate-900 border-r border-white/5 z-40 transform transition-transform duration-300 ease-in-out lg:translate-x-0 overflow-y-auto",
+                isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+            )}>
+                <div className="p-6">
+                    <div className="flex items-center gap-2 mb-8 text-teal-400">
+                        <Code className="h-6 w-6" />
+                        <span className="font-bold text-lg">API Reference</span>
                     </div>
+                    <nav className="space-y-1">
+                        {sections.map((section) => (
+                            <button
+                                key={section.id}
+                                onClick={() => scrollToSection(section.id)}
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                                    activeSection === section.id
+                                        ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                        : "text-slate-400 hover:text-white hover:bg-white/5"
+                                )}
+                            >
+                                <section.icon className="h-4 w-4" />
+                                {section.title}
+                                {activeSection === section.id && (
+                                    <ChevronRight className="h-3 w-3 ml-auto opacity-50" />
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            </aside>
 
-                    {/* Health Officer Endpoints */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <h2 className="text-2xl font-bold text-white mb-6">Health Officer Endpoints</h2>
-                        <p className="text-amber-400 text-sm mb-4">⚠️ Requires health_officer or admin role</p>
+            {/* Main Content */}
+            <main className="flex-1 w-full max-w-5xl mx-auto p-6 lg:p-12 space-y-24">
 
-                        <div className="space-y-6">
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/officer/dashboard</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">Get system-wide dashboard statistics</p>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/officer/workers</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">List all health workers with performance stats</p>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-amber-500/20 text-amber-400 text-xs font-bold">PATCH</span>
-                                    <code className="text-slate-300">/officer/patients/:id/update</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">Update patient information</p>
-                            </div>
-
-                            <div>
-                                <div className="flex items-center gap-3 mb-2">
-                                    <span className="px-2 py-1 rounded bg-emerald-500/20 text-emerald-400 text-xs font-bold">GET</span>
-                                    <code className="text-slate-300">/officer/analytics</code>
-                                </div>
-                                <p className="text-slate-400 text-sm">Get comprehensive system analytics</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Response Codes */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <h2 className="text-2xl font-bold text-white mb-6">HTTP Response Codes</h2>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-emerald-400 font-bold">200</span>
-                                    <span className="text-slate-300">OK</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Request successful</p>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-emerald-400 font-bold">201</span>
-                                    <span className="text-slate-300">Created</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Resource created successfully</p>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-amber-400 font-bold">400</span>
-                                    <span className="text-slate-300">Bad Request</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Invalid request data</p>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-red-400 font-bold">401</span>
-                                    <span className="text-slate-300">Unauthorized</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Authentication required</p>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-red-400 font-bold">403</span>
-                                    <span className="text-slate-300">Forbidden</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Insufficient permissions</p>
-                            </div>
-                            <div className="bg-slate-900/50 p-4 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-2">
-                                    <span className="text-red-400 font-bold">404</span>
-                                    <span className="text-slate-300">Not Found</span>
-                                </div>
-                                <p className="text-slate-400 text-xs">Resource not found</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Rate Limiting */}
-                    <div className="glass-card p-8 rounded-2xl border border-white/5">
-                        <h2 className="text-2xl font-bold text-white mb-4">Rate Limiting</h2>
-                        <p className="text-slate-300 mb-4">
-                            API requests are limited to prevent abuse:
+                {/* Introduction */}
+                <section id="intro" className="scroll-mt-24 space-y-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                    >
+                        <h1 className="text-4xl font-bold text-white mb-4">RuralHealthAI API</h1>
+                        <p className="text-xl text-slate-400 leading-relaxed">
+                            Welcome to the developer documentation. This REST API allows you to integrate health screening, patient management, and AI analysis features into your own applications.
                         </p>
-                        <ul className="space-y-2 text-slate-300">
-                            <li>• <strong>Standard users:</strong> 100 requests per minute</li>
-                            <li>• <strong>Health officers:</strong> 500 requests per minute</li>
-                            <li>• <strong>Bulk operations:</strong> 10 requests per minute</li>
-                        </ul>
+                    </motion.div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="p-4 rounded-lg bg-slate-900 border border-white/5 flex items-center gap-3">
+                            <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+                            <span className="text-slate-300 font-mono text-sm">Base URL:</span>
+                            <code className="text-emerald-400 font-mono bg-emerald-950/30 px-2 py-1 rounded">https://api.ruralhealth.ai/api</code>
+                        </div>
+                        <div className="p-4 rounded-lg bg-slate-900 border border-white/5 flex items-center gap-3">
+                            <Database className="h-4 w-4 text-blue-400" />
+                            <span className="text-slate-300 font-mono text-sm">Version:</span>
+                            <span className="text-blue-400 font-mono">v1.0.0</span>
+                        </div>
                     </div>
-                </motion.div>
-            </div>
+                </section>
+
+                {/* Authentication */}
+                <section id="auth" className="scroll-mt-24 space-y-8">
+                    <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                        <Lock className="h-6 w-6 text-teal-400" />
+                        <h2 className="text-2xl font-bold text-white">Authentication</h2>
+                    </div>
+
+                    <div className="prose prose-invert max-w-none text-slate-400">
+                        <p>
+                            The API uses <span className="text-white font-medium">JWT (JSON Web Tokens)</span> for authentication. You must include the token in the Authorization header of every request.
+                        </p>
+                    </div>
+
+                    <div className="space-y-4">
+                        <Endpoint
+                            method="POST"
+                            path="/auth/login"
+                            title="Obtain Access Token"
+                            description="Exchange user credentials for a JWT access token."
+                        />
+                        <CodeBlock
+                            language="bash"
+                            code={`curl -X POST https://api.ruralhealth.ai/api/auth/login \\
+  -H "Content-Type: application/json" \\
+  -d '{
+    "username": "worker@example.com",
+    "password": "secure_password"
+  }'`}
+                        />
+                        <CodeBlock
+                            language="json"
+                            title="Response"
+                            code={`{
+  "access_token": "eyJhbGciOiJIUzI1NiIs...",
+  "token_type": "bearer",
+  "expires_in": 3600
+}`}
+                        />
+                    </div>
+                </section>
+
+                {/* Patients */}
+                <section id="patients" className="scroll-mt-24 space-y-8">
+                    <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                        <UsersIcon className="h-6 w-6 text-blue-400" />
+                        <h2 className="text-2xl font-bold text-white">Patients</h2>
+                    </div>
+
+                    <div className="space-y-8">
+                        <div>
+                            <Endpoint
+                                method="GET"
+                                path="/screening/patients"
+                                title="List Patients"
+                                description="Retrieve a paginated list of patients. Uses filtering by village or risk."
+                            />
+                            <CodeBlock
+                                language="bash"
+                                code={`curl -X GET "https://api.ruralhealth.ai/api/screening/patients?risk=High" \\
+  -H "Authorization: Bearer YOUR_TOKEN"`}
+                            />
+                        </div>
+
+                        <div>
+                            <Endpoint
+                                method="POST"
+                                path="/screening/patients"
+                                title="Create Patient"
+                                description="Register a new patient in the system."
+                            />
+                            <div className="grid lg:grid-cols-2 gap-6">
+                                <div className="space-y-4 text-sm text-slate-400">
+                                    <h4 className="text-white font-medium">Body Parameters</h4>
+                                    <ul className="space-y-2">
+                                        <Param name="full_name" type="string" required>Full legal name</Param>
+                                        <Param name="age" type="integer" required>Age in years</Param>
+                                        <Param name="gender" type="string" required>Male, Female, or Other</Param>
+                                        <Param name="village" type="string" required>Village name</Param>
+                                    </ul>
+                                </div>
+                                <CodeBlock
+                                    language="json"
+                                    code={`{
+  "full_name": "Ramesh Kumar",
+  "age": 45,
+  "gender": "Male",
+  "village": "Rampur",
+  "phone": "+919876543210"
+}`}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                {/* Screening & AI */}
+                <section id="screening" className="scroll-mt-24 space-y-8">
+                    <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                        <Activity className="h-6 w-6 text-purple-400" />
+                        <h2 className="text-2xl font-bold text-white">Screening & AI Analysis</h2>
+                    </div>
+
+                    <p className="text-slate-400">
+                        When you submit a screening, the system automatically triggers the <span className="text-purple-400 font-medium">Gemini AI Engine</span> to analyze the vitals and generate a risk assessment.
+                    </p>
+
+                    <Endpoint
+                        method="POST"
+                        path="/screening/screenings"
+                        title="Submit Screening"
+                        description="Records patient vitals and returns immediate AI analysis."
+                    />
+
+                    <div className="grid lg:grid-cols-2 gap-6">
+                        <CodeBlock
+                            language="json"
+                            title="Request Body"
+                            code={`{
+  "patient_id": 123,
+  "systolic_bp": 145,
+  "diastolic_bp": 95,
+  "heart_rate": 88,
+  "glucose_level": 160,
+  "smoking_status": "Current",
+  "physical_activity": "Low"
+}`}
+                        />
+                        <CodeBlock
+                            language="json"
+                            title="AI Response"
+                            code={`{
+  "id": 456,
+  "risk_level": "High",
+  "risk_score": 85,
+  "risk_notes": "Hypertensive crisis risk combined with elevated glucose.",
+  "ai_analysis": {
+    "summary": "Patient exhibits signs of Stage 2 Hypertension...",
+    "recommendations": [
+      "Immediate medical consultation required",
+      "Reduce sodium intake to <2g/day"
+    ]
+  }
+}`}
+                        />
+                    </div>
+                </section>
+
+                {/* Errors */}
+                <section id="errors" className="scroll-mt-24 space-y-8 pb-32">
+                    <div className="flex items-center gap-3 pb-4 border-b border-white/5">
+                        <Zap className="h-6 w-6 text-amber-400" />
+                        <h2 className="text-2xl font-bold text-white">Errors & Rate Limits</h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {[
+                            { code: 400, text: "Bad Request - Invalid inputs" },
+                            { code: 401, text: "Unauthorized - Invalid token" },
+                            { code: 403, text: "Forbidden - Insufficient permissions" },
+                            { code: 429, text: "Too Many Requests - Rate limit exceeded" },
+                        ].map((err) => (
+                            <div key={err.code} className="p-4 rounded-lg bg-slate-900/50 border border-white/5 flex justify-between items-center">
+                                <span className="text-slate-400">{err.text}</span>
+                                <span className={cn(
+                                    "font-mono font-bold px-2 py-0.5 rounded text-sm",
+                                    err.code === 429 ? "text-amber-400 bg-amber-950/30" : "text-red-400 bg-red-950/30"
+                                )}>{err.code}</span>
+                            </div>
+                        ))}
+                    </div>
+                </section>
+
+            </main>
         </div>
     );
 }
+
+// Helper Components
+function Endpoint({ method, path, title, description }: { method: string, path: string, title: string, description: string }) {
+    const color = method === "GET" ? "text-blue-400 bg-blue-500/10 border-blue-500/20" :
+        method === "POST" ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20" :
+            "text-amber-400 bg-amber-500/10 border-amber-500/20";
+
+    return (
+        <div className="space-y-2">
+            <h3 className="text-lg font-semibold text-white">{title}</h3>
+            <div className="flex items-center gap-3 font-mono text-sm">
+                <span className={cn("px-2.5 py-0.5 rounded border font-bold", color)}>{method}</span>
+                <span className="text-slate-300">{path}</span>
+            </div>
+            <p className="text-slate-400 text-sm leading-relaxed">{description}</p>
+        </div>
+    )
+}
+
+function CodeBlock({ language, code, title }: { language: string, code: string, title?: string }) {
+    return (
+        <div className="rounded-xl overflow-hidden border border-white/10 bg-[#0d1117]">
+            {title && <div className="px-4 py-2 border-b border-white/5 text-xs text-slate-500 font-medium uppercase tracking-wider bg-white/5">{title}</div>}
+            <pre className="p-4 overflow-x-auto text-sm text-slate-300 font-mono leading-relaxed">
+                <code className={`language-${language}`}>{code}</code>
+            </pre>
+        </div>
+    )
+}
+
+function Param({ name, type, required, children }: { name: string, type: string, required?: boolean, children: React.ReactNode }) {
+    return (
+        <li className="flex gap-2 text-sm">
+            <code className="text-teal-400 font-mono">{name}</code>
+            <span className="text-slate-600 font-mono text-xs mt-0.5">({type})</span>
+            {required && <span className="text-amber-500 text-xs mt-0.5 font-medium">required</span>}
+            <span className="text-slate-400">- {children}</span>
+        </li>
+    )
+}
+

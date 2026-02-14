@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { HeartPulse, Loader2 } from "lucide-react";
+import { HeartPulse, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
@@ -16,6 +16,7 @@ export function RegisterPage() {
         full_name: "",
         role: "health_worker"
     });
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
@@ -109,14 +110,23 @@ export function RegisterPage() {
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="password" className="text-slate-300">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={handleChange}
-                                required
-                                className="bg-slate-900/50 border-white/10 text-white focus:border-teal-500/50 focus:ring-teal-500/20"
-                            />
+                            <div className="relative">
+                                <Input
+                                    id="password"
+                                    type={showPassword ? "text" : "password"}
+                                    value={formData.password}
+                                    onChange={handleChange}
+                                    required
+                                    className="bg-slate-900/50 border-white/10 text-white focus:border-teal-500/50 focus:ring-teal-500/20 pr-10"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
+                                >
+                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                </button>
+                            </div>
                         </div>
                         <div className="space-y-2">
                             <Label htmlFor="role" className="text-slate-300">Select Role</Label>
