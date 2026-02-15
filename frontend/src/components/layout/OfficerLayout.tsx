@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Activity, LayoutDashboard, Users, BarChart3, LogOut, Settings, X, Mail, Shield } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../ui/button";
+import { ConfirmationModal } from "../ui/confirmation-modal";
 import { Footer } from "../Footer";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -19,9 +20,15 @@ export function OfficerLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogoutClick = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const handleConfirmLogout = async () => {
+        await logout();
+        setIsLogoutModalOpen(false);
         navigate("/login");
     };
 
@@ -219,7 +226,7 @@ export function OfficerLayout() {
                                     </p>
                                     <Button
                                         variant="ghost"
-                                        onClick={handleLogout}
+                                        onClick={handleLogoutClick}
                                         className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                     >
                                         <LogOut className="mr-3 h-4 w-4" />
@@ -231,6 +238,16 @@ export function OfficerLayout() {
                     </>
                 )}
             </AnimatePresence>
+
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+                title="Confirm Logout"
+                message="Are you sure you want to log out of your account?"
+                confirmText="Logout"
+                variant="danger"
+            />
         </div>
     );
 }

@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Search, Filter, Activity, Edit, X } from "lucide-react";
+import { Search, Filter, Activity, Edit, X, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 // import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-
+import { useToast } from "../context/ToastContext";
+import { ConfirmationModal } from "../components/ui/confirmation-modal";
 import { firestoreService } from "../services/firestoreService";
 
 export function AllPatientsPage() {
@@ -20,6 +21,9 @@ export function AllPatientsPage() {
     const [total, setTotal] = useState(0);
     const [editingPatient, setEditingPatient] = useState<any>(null);
     const [showEditModal, setShowEditModal] = useState(false);
+    const [patientToDelete, setPatientToDelete] = useState<any>(null);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const { showToast } = useToast();
 
     useEffect(() => {
         fetchPatients();
@@ -86,6 +90,23 @@ export function AllPatientsPage() {
             fetchPatients();
         } catch (error) {
             console.error('Failed to update patient:', error);
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (!patientToDelete) return;
+        setLoading(true);
+        try {
+            await firestoreService.deletePatient(patientToDelete.id);
+            showToast("Patient deleted successfully", "success");
+            setIsDeleteModalOpen(false);
+            setPatientToDelete(null);
+            fetchPatients();
+        } catch (error: any) {
+            console.error("Failed to delete patient:", error);
+            showToast(error.message || "Failed to delete patient", "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -241,6 +262,17 @@ export function AllPatientsPage() {
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="sm"
+                                                    onClick={() => {
+                                                        setPatientToDelete(patient);
+                                                        setIsDeleteModalOpen(true);
+                                                    }}
+                                                    className="text-red-400 hover:text-white hover:bg-red-500/10"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
                                             </div>
                                         </td>
                                     </tr>
@@ -343,6 +375,17 @@ export function AllPatientsPage() {
                     </motion.div>
                 </div>
             )}
+
+            <ConfirmationModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleConfirmDelete}
+                title="Delete Patient"
+                message={`Are you sure you want to delete ${patientToDelete?.full_name}? This action cannot be undone and will remove all their health history.`}
+                confirmText="Delete"
+                variant="danger"
+                isLoading={loading}
+            />
         </div>
     );
 }

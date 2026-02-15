@@ -27,37 +27,7 @@ export function SystemAnalyticsPage() {
         try {
             const stats = await firestoreService.getDashboardStats();
 
-            // Mocking detailed distributions as they require complex aggregation not available in simple client-side stats yet
-            const mockData = {
-                age_distribution: { "18-30": 15, "31-50": 45, "51-70": 30, "70+": 10 },
-                gender_distribution: [
-                    { gender: "Male", count: 45 },
-                    { gender: "Female", count: 55 },
-                    { gender: "Other", count: 2 }
-                ],
-                risk_factor_prevalence: {
-                    "Hypertension": 35,
-                    "Diabetes": 28,
-                    "Smoking": 22,
-                    "Obesity": 40,
-                    "Alcohol": 15
-                },
-                worker_performance: [
-                    { worker_name: "John Doe", patients: 120, screenings: 350, completion_rate: 95 },
-                    { worker_name: "Jane Smith", patients: 98, screenings: 280, completion_rate: 88 },
-                    { worker_name: "Bob Wilson", patients: 150, screenings: 410, completion_rate: 92 }
-                ],
-                geographic_distribution: [
-                    { village: "North Village", total: 150, high_risk: 45 },
-                    { village: "South Hamlet", total: 80, high_risk: 12 },
-                    { village: "East District", total: 200, high_risk: 60 },
-                    { village: "West Coast", total: 120, high_risk: 30 }
-                ],
-                // Merge real stats where possible
-                real_stats: stats
-            };
-
-            setAnalytics(mockData);
+            setAnalytics(stats);
         } catch (error) {
             console.error('Failed to fetch analytics:', error);
         } finally {

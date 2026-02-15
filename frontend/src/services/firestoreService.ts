@@ -303,8 +303,70 @@ export const firestoreService = {
             }
         });
 
-        // Weekly Activity (Mock or Calculate)
-        // Calculating properly would require bucketing dates
+        // Age Distribution
+        const ageDist: Record<string, number> = { "0-18": 0, "19-30": 0, "31-45": 0, "46-60": 0, "61-75": 0, "75+": 0 };
+        patients.forEach(p => {
+            if (p.age <= 18) ageDist["0-18"]++;
+            else if (p.age <= 30) ageDist["19-30"]++;
+            else if (p.age <= 45) ageDist["31-45"]++;
+            else if (p.age <= 60) ageDist["46-60"]++;
+            else if (p.age <= 75) ageDist["61-75"]++;
+            else ageDist["75+"]++;
+        });
+
+        // Gender Distribution
+        const genderCounts: Record<string, number> = {};
+        patients.forEach(p => {
+            const g = p.gender || 'Unknown';
+            genderCounts[g] = (genderCounts[g] || 0) + 1;
+        });
+        const genderDist = Object.entries(genderCounts).map(([gender, count]) => ({ gender, count }));
+
+        // Geographic Distribution
+        const villageStats: Record<string, { total: number, high_risk: number }> = {};
+        patients.forEach(p => {
+            const v = p.village || 'Unknown';
+            if (!villageStats[v]) villageStats[v] = { total: 0, high_risk: 0 };
+            villageStats[v].total++;
+        });
+        relevantScreenings.forEach(s => {
+            const patient = patients.find(p => p.id === s.patient_id);
+            const v = patient?.village || 'Unknown';
+            if (villageStats[v] && s.risk_level === 'High') {
+                villageStats[v].high_risk++;
+            }
+        });
+        const geographicDist = Object.entries(villageStats).map(([village, stats]) => ({ village, ...stats }));
+
+        // Risk Factor Prevalence (%)
+        const riskFactors = {
+            "Hypertension": relevantScreenings.filter(s => (s.systolic_bp || 0) >= 140 || (s.diastolic_bp || 0) >= 90).length,
+            "Diabetes": relevantScreenings.filter(s => (s.glucose_level || 0) >= 200).length,
+            "Smoking": relevantScreenings.filter(s => s.smoking_status === 'Current').length,
+            "Obesity": relevantScreenings.filter(s => (s.weight_kg || 0) / (Math.pow((s.height_cm || 0) / 100, 2) || 1) >= 30).length,
+            "Alcohol": relevantScreenings.filter(s => s.alcohol_usage === 'Frequent').length
+        };
+        const riskFactorPrevalence = Object.fromEntries(
+            Object.entries(riskFactors).map(([key, count]) => [key, relevantScreenings.length > 0 ? Math.round((count / relevantScreenings.length) * 100) : 0])
+        );
+
+        // Worker Performance
+        const workers = await this.getHealthWorkers();
+        const workerPerformance = workers.map(worker => {
+            const workerPatients = patients.filter(p => p.health_worker_id === worker.uid);
+            // This is a simplification; in a real app, screenings would have worker_id
+            // For now, assume screenings are linked to patients who are linked to workers
+            const workerScreenings = relevantScreenings.filter(s => {
+                const p = patients.find(pat => pat.id === s.patient_id);
+                return p?.health_worker_id === worker.uid;
+            });
+            return {
+                worker_name: worker.full_name,
+                patients: workerPatients.length,
+                screenings: workerScreenings.length,
+                completion_rate: workerPatients.length > 0 ? Math.round((workerScreenings.length / workerPatients.length) * 100) : 0
+            };
+        });
 
         return {
             total_patients: patients.length,
@@ -312,8 +374,13 @@ export const firestoreService = {
             high_risk_count: highRisk,
             pending_appointments: pendingAppointments,
             risk_distribution: riskDist,
+            age_distribution: ageDist,
+            gender_distribution: genderDist,
+            geographic_distribution: geographicDist,
+            risk_factor_prevalence: riskFactorPrevalence,
+            worker_performance: workerPerformance,
             recent_screenings: relevantScreenings.slice(0, 5),
-            weekly_screenings: [] // Todo: implement date bucketing if needed
+            weekly_screenings: []
         };
     }
 };

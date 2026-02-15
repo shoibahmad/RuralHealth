@@ -3,6 +3,7 @@ import { HeartPulse, Menu, X } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Footer } from "../Footer";
+import { motion, AnimatePresence } from "framer-motion";
 
 
 export function PublicLayout() {
@@ -63,7 +64,7 @@ export function PublicLayout() {
                             </Link>
                         )}
                         {location.pathname !== "/register" && (
-                            <Link to="/register">
+                            <Link to="/register" className="hidden md:block">
                                 <Button className="bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-full shadow-lg shadow-teal-500/20 border-0 h-10 px-6 font-medium">
                                     Get Started
                                 </Button>
@@ -71,43 +72,97 @@ export function PublicLayout() {
                         )}
                     </div>
                 </div>
-
-                {/* Mobile Navigation Menu */}
-                {mobileMenuOpen && !isAuthPage && (
-                    <div className="md:hidden glass border-t border-white/5 absolute top-20 left-0 w-full animate-in slide-in-from-top-4 fade-in duration-200">
-                        <nav className="flex flex-col p-4 gap-2">
-                            {[
-                                { name: "How it Works", href: "/how-it-works" },
-                                { name: "Features", href: "/features" },
-                                { name: "About", href: "/about" },
-                                { name: "API Docs", href: "/api-docs" }
-                            ].map((item) => (
-                                <Link
-                                    key={item.name}
-                                    to={item.href}
-                                    onClick={() => setMobileMenuOpen(false)}
-                                    className="px-4 py-3 text-slate-300 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                                >
-                                    {item.name}
-                                </Link>
-                            ))}
-                            <div className="h-px bg-white/5 my-2" />
-                            <Link to="/login" onClick={() => setMobileMenuOpen(false)} className="sm:hidden">
-                                <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-white/5">
-                                    Sign In
-                                </Button>
-                            </Link>
-                        </nav>
-                    </div>
-                )}
             </header>
+
+            {/* Mobile Navigation Drawer */}
+            <AnimatePresence>
+                {mobileMenuOpen && !isAuthPage && (
+                    <>
+                        {/* Backdrop */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] md:hidden"
+                        />
+
+                        {/* Drawer */}
+                        <motion.div
+                            initial={{ x: "100%" }}
+                            animate={{ x: 0 }}
+                            exit={{ x: "100%" }}
+                            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+                            className="fixed top-0 right-0 h-full w-[300px] bg-[#020617] border-l border-white/10 z-[61] md:hidden shadow-2xl p-8 flex flex-col"
+                        >
+                            <div className="flex items-center justify-between mb-10">
+                                <span className="font-bold text-xl text-white">Menu Navigation</span>
+                                <button
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="p-2 text-slate-400 hover:text-white transition-colors"
+                                >
+                                    <X className="h-6 w-6" />
+                                </button>
+                            </div>
+
+                            <nav className="flex flex-col gap-4">
+                                {[
+                                    { name: "How it Works", href: "/how-it-works" },
+                                    { name: "Features", href: "/features" },
+                                    { name: "About", href: "/about" },
+                                    { name: "API Docs", href: "/api-docs" }
+                                ].map((item) => (
+                                    <Link
+                                        key={item.name}
+                                        to={item.href}
+                                        onClick={() => setMobileMenuOpen(false)}
+                                        className="px-4 py-4 text-xl font-medium text-slate-300 hover:text-teal-400 hover:bg-white/5 rounded-2xl transition-all border border-transparent hover:border-white/5 active:scale-95"
+                                    >
+                                        {item.name}
+                                    </Link>
+                                ))}
+
+                                <div className="h-px bg-white/10 my-6" />
+
+                                <div className="flex flex-col gap-4">
+                                    {location.pathname !== "/login" && (
+                                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                                            <Button variant="ghost" className="w-full justify-start text-lg h-14 text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl">
+                                                Sign In
+                                            </Button>
+                                        </Link>
+                                    )}
+                                    {location.pathname !== "/register" && (
+                                        <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                                            <Button className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold">
+                                                Get Started
+                                            </Button>
+                                        </Link>
+                                    )}
+                                </div>
+                            </nav>
+
+                            <div className="mt-auto">
+                                <div className="bg-white/5 p-4 rounded-2xl border border-white/5 flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-xl bg-teal-500/20 flex items-center justify-center">
+                                        <HeartPulse className="h-5 w-5 text-teal-400" />
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-semibold text-white">RuralHealthAI</p>
+                                        <p className="text-xs text-slate-500 leading-tight">Empowering Rural Care</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
 
             {/* Main Content */}
             <main className="flex-1 pt-20">
                 <Outlet />
             </main>
 
-            {/* Footer */}
             {/* Footer */}
             <Footer />
         </div>

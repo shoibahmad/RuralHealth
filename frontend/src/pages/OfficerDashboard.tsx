@@ -271,6 +271,9 @@ export function OfficerDashboard() {
                                 </Pie>
                                 <Tooltip
                                     contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    itemStyle={{ color: '#fff' }}
+                                    labelStyle={{ color: '#fff' }}
+                                    cursor={{ fill: 'transparent' }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>

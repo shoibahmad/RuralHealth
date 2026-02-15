@@ -3,6 +3,7 @@ import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Heart, LayoutDashboard, History, Settings, LogOut, X, Mail, Shield } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { Button } from "../ui/button";
+import { ConfirmationModal } from "../ui/confirmation-modal";
 import { Footer } from "../Footer";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -11,9 +12,15 @@ export function PatientLayout() {
     const navigate = useNavigate();
     const location = useLocation();
     const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-    const handleLogout = () => {
-        logout();
+    const handleLogoutClick = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const handleConfirmLogout = async () => {
+        await logout();
+        setIsLogoutModalOpen(false);
         navigate("/login");
     };
 
@@ -46,8 +53,8 @@ export function PatientLayout() {
                                             key={item.path}
                                             to={item.path}
                                             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${isActive
-                                                    ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
-                                                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                                                ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
+                                                : "text-slate-400 hover:text-white hover:bg-white/5"
                                                 }`}
                                         >
                                             <Icon className="h-4 w-4" />
@@ -186,8 +193,8 @@ export function PatientLayout() {
                                                 <Button
                                                     variant="ghost"
                                                     className={`w-full justify-start ${isActive
-                                                            ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
-                                                            : "text-slate-300 hover:text-white hover:bg-white/5"
+                                                        ? "bg-pink-500/10 text-pink-400 border border-pink-500/20"
+                                                        : "text-slate-300 hover:text-white hover:bg-white/5"
                                                         }`}
                                                 >
                                                     <Icon className="mr-3 h-4 w-4" />
@@ -205,7 +212,7 @@ export function PatientLayout() {
                                     </p>
                                     <Button
                                         variant="ghost"
-                                        onClick={handleLogout}
+                                        onClick={handleLogoutClick}
                                         className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
                                     >
                                         <LogOut className="mr-3 h-4 w-4" />
@@ -217,6 +224,16 @@ export function PatientLayout() {
                     </>
                 )}
             </AnimatePresence>
+
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+                title="Confirm Logout"
+                message="Are you sure you want to log out? Any unsaved changes may be lost."
+                confirmText="Logout"
+                variant="danger"
+            />
         </div>
     );
 }

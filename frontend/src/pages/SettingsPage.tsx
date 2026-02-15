@@ -5,6 +5,7 @@ import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { useAuth } from "../context/AuthContext";
+import { useToast } from "../context/ToastContext";
 
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
@@ -13,6 +14,7 @@ import { firestoreService } from "../services/firestoreService";
 
 export function SettingsPage() {
     const { user } = useAuth(); // User from context
+    const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -94,9 +96,11 @@ export function SettingsPage() {
                 // created_at will be handled by setPatient if new
             });
 
+            showToast("Profile updated successfully!", "success");
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
         } catch (error: any) {
             console.error(error);
+            showToast(error.message || 'Failed to update profile', "error");
             setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
         } finally {
             setLoading(false);
@@ -130,6 +134,7 @@ export function SettingsPage() {
             // Update Password
             await updatePassword(auth.currentUser, passwordData.new_password);
 
+            showToast("Password changed successfully!", "success");
             setMessage({ type: 'success', text: 'Password changed successfully!' });
             setPasswordData({
                 current_password: "",
@@ -138,6 +143,7 @@ export function SettingsPage() {
             });
         } catch (error: any) {
             console.error(error);
+            showToast(error.message || 'Failed to change password', "error");
             setMessage({ type: 'error', text: error.message || 'Failed to change password. Check current password.' });
         } finally {
             setLoading(false);
@@ -377,7 +383,7 @@ export function SettingsPage() {
                     </div>
                 </div>
 
-                <div className="space-y-4">
+                <form onSubmit={handleProfileUpdate} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label htmlFor="age" className="text-slate-300">Age</Label>
@@ -425,7 +431,26 @@ export function SettingsPage() {
                             />
                         </div>
                     </div>
-                </div>
+                    <div className="flex items-center gap-3 pt-2">
+                        <Button
+                            type="submit"
+                            disabled={loading}
+                            className="bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500"
+                        >
+                            {loading ? (
+                                <>
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    Saving...
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="mr-2 h-4 w-4" />
+                                    Save Profile
+                                </>
+                            )}
+                        </Button>
+                    </div>
+                </form>
             </motion.div>
 
             {/* Account Information */}

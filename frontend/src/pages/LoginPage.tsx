@@ -58,6 +58,7 @@ export function LoginPage() {
 
         try {
             await signInWithEmailAndPassword(auth, email, password);
+            showToast("Successfully logged in!", "success");
             // Navigation handled by AuthContext or the redirect check above/useEffect
             navigate("/dashboard");
         } catch (err: any) {

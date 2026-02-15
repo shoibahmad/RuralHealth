@@ -13,6 +13,7 @@ import {
     Shield
 } from "lucide-react";
 import { Button } from "../ui/button";
+import { ConfirmationModal } from "../ui/confirmation-modal";
 import { useAuth } from "../../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "../Footer";
@@ -27,12 +28,18 @@ const NAV_ITEMS = [
 
 export function DashboardLayout() {
     const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
+    const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const location = useLocation();
     const navigate = useNavigate();
     const { user, logout } = useAuth();
 
-    const handleLogout = () => {
-        logout();
+    const handleLogoutClick = () => {
+        setIsLogoutModalOpen(true);
+    };
+
+    const handleConfirmLogout = async () => {
+        await logout();
+        setIsLogoutModalOpen(false);
         navigate("/login");
     };
 
@@ -203,7 +210,7 @@ export function DashboardLayout() {
                                             Settings
                                         </Button>
                                     </Link>
-                                    <Button variant="ghost" onClick={handleLogout} className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                    <Button variant="ghost" onClick={handleLogoutClick} className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10">
                                         <LogOut className="mr-3 h-4 w-4" />
                                         Logout
                                     </Button>
@@ -213,6 +220,16 @@ export function DashboardLayout() {
                     </>
                 )}
             </AnimatePresence>
+
+            <ConfirmationModal
+                isOpen={isLogoutModalOpen}
+                onClose={() => setIsLogoutModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+                title="Confirm Logout"
+                message="Are you sure you want to log out of your account?"
+                confirmText="Logout"
+                variant="danger"
+            />
         </div>
     );
 }
