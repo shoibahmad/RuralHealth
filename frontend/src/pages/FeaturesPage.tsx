@@ -69,21 +69,21 @@ export function FeaturesPage() {
                     <motion.h1
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="text-4xl md:text-5xl font-bold text-white mb-6"
+                        className="text-4xl md:text-6xl font-bold text-white mb-6"
                     >
-                        Detailed <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Features</span>
+                        Pioneering <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">Rural Healthcare</span> AI
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="text-slate-400 text-lg max-w-2xl mx-auto"
+                        className="text-slate-400 text-xl max-w-2xl mx-auto font-light"
                     >
-                        Built with cutting-edge technology to solve real-world healthcare challenges in rural India.
+                        Our platform combines offline reliability with state-of-the-art AI to transform how healthcare is delivered in remote regions.
                     </motion.p>
                 </div>
 
-                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
                     {FEATURES.map((feature, i) => (
                         <motion.div
                             key={i}

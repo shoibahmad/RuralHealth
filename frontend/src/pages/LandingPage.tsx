@@ -105,13 +105,13 @@ export function LandingPage() {
                     >
                         <Link to="/register">
                             <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-lg shadow-teal-500/25 rounded-full transition-all hover:scale-105">
-                                Get Started
+                                Start Your Survey
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Button>
                         </Link>
-                        <Link to="/login">
+                        <Link to="/about">
                             <Button variant="ghost" size="lg" className="h-14 px-8 text-base text-slate-300 hover:text-white hover:bg-white/5 rounded-full border border-white/10 hover:border-white/20">
-                                Log In
+                                Explore Modules
                             </Button>
                         </Link>
                     </motion.div>
