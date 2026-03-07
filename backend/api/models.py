@@ -111,6 +111,26 @@ class Screening(models.Model):
     glucose_level = models.FloatField(blank=True, null=True)
     cholesterol_level = models.FloatField(blank=True, null=True)
     
+    # Hematology Panel
+    hemoglobin = models.FloatField(blank=True, null=True)
+    rbc_count = models.FloatField(blank=True, null=True)
+    wbc_count = models.FloatField(blank=True, null=True)
+    platelet_count = models.FloatField(blank=True, null=True)
+    
+    # Basic Metabolic Panel
+    blood_urea_nitrogen = models.FloatField(blank=True, null=True)
+    creatinine = models.FloatField(blank=True, null=True)
+    sodium = models.FloatField(blank=True, null=True)
+    potassium = models.FloatField(blank=True, null=True)
+    chloride = models.FloatField(blank=True, null=True)
+    calcium = models.FloatField(blank=True, null=True)
+    
+    # Liver Function Tests
+    alt_sgpt = models.FloatField(blank=True, null=True)
+    ast_sgot = models.FloatField(blank=True, null=True)
+    albumin = models.FloatField(blank=True, null=True)
+    total_bilirubin = models.FloatField(blank=True, null=True)
+    
     # Result
     risk_score = models.FloatField(blank=True, null=True)
     risk_level = models.CharField(

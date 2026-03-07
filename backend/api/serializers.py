@@ -123,6 +123,10 @@ class ScreeningSerializer(serializers.ModelSerializer):
             'systolic_bp', 'diastolic_bp', 'heart_rate',
             'smoking_status', 'alcohol_usage', 'physical_activity',
             'glucose_level', 'cholesterol_level',
+            'hemoglobin', 'rbc_count', 'wbc_count', 'platelet_count',
+            'blood_urea_nitrogen', 'creatinine', 'sodium', 'potassium',
+            'chloride', 'calcium', 'alt_sgpt', 'ast_sgot',
+            'albumin', 'total_bilirubin',
             'risk_score', 'risk_level', 'risk_notes', 'created_at'
         ]
         read_only_fields = ['id', 'risk_score', 'risk_level', 'risk_notes', 'created_at']
@@ -139,7 +143,11 @@ class ScreeningCreateSerializer(serializers.ModelSerializer):
             'patient_id', 'height_cm', 'weight_kg', 
             'systolic_bp', 'diastolic_bp', 'heart_rate',
             'smoking_status', 'alcohol_usage', 'physical_activity',
-            'glucose_level', 'cholesterol_level'
+            'glucose_level', 'cholesterol_level',
+            'hemoglobin', 'rbc_count', 'wbc_count', 'platelet_count',
+            'blood_urea_nitrogen', 'creatinine', 'sodium', 'potassium',
+            'chloride', 'calcium', 'alt_sgpt', 'ast_sgot',
+            'albumin', 'total_bilirubin'
         ]
     
     def validate_patient_id(self, value):

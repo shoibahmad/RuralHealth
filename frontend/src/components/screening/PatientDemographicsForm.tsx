@@ -2,6 +2,7 @@
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { VoiceEntryBanner } from "./VoiceEntryBanner";
 
 interface PatientDemographicsFormProps {
     data: any;
@@ -11,6 +12,12 @@ interface PatientDemographicsFormProps {
 export function PatientDemographicsForm({ data, updateData }: PatientDemographicsFormProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
+            <VoiceEntryBanner
+                data={data}
+                updateData={updateData}
+                title="Voice Identity Check"
+                description="Speak patient name, age, and village to auto-fill."
+            />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                     <Label htmlFor="full_name" className="text-slate-300">Full Name</Label>

@@ -14,6 +14,8 @@ from .views import (
     AnalyticsView,
     AIAnalysisView,
     AIVoiceVitalsView,
+    AILabExtractionView,
+    AITextVitalsView,
     # Health Officer views
     HealthWorkerListView,
     HealthWorkerDetailView,
@@ -64,6 +66,8 @@ urlpatterns = [
     # AI endpoints
     path('ai/analyze', AIAnalysisView.as_view(), name='ai_analyze'),
     path('ai/voice-vitals', AIVoiceVitalsView.as_view(), name='voice_vitals'),
+    path('ai/lab-extract', AILabExtractionView.as_view(), name='lab_extract'),
+    path('ai/text-vitals', AITextVitalsView.as_view(), name='text_vitals'),
     
     # Health Officer endpoints
     path('officer/workers', HealthWorkerListView.as_view(), name='health_workers'),

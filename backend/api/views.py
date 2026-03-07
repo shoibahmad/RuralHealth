@@ -757,6 +757,98 @@ class AIVoiceVitalsView(APIView):
             )
 
 
+class AILabExtractionView(APIView):
+    """Process lab report images to extract values using AI."""
+    
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    from rest_framework.parsers import MultiPartParser, FormParser
+    parser_classes = [MultiPartParser, FormParser]
+    
+    def post(self, request):
+        """Upload lab report image and extract results."""
+        if 'image' not in request.FILES:
+            return Response(
+                {'detail': 'No image file provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        image_file = request.FILES['image']
+        
+        # Save to temp file
+        import tempfile
+        import os
+        
+        suffix = os.path.splitext(image_file.name)[1] or '.jpg'
+        
+        temp_file_path = None
+        try:
+            with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
+                for chunk in image_file.chunks():
+                    temp_file.write(chunk)
+                temp_file_path = temp_file.name
+                
+            from .ai_service import extract_lab_from_image
+            result = extract_lab_from_image(temp_file_path)
+            
+            # Clean up temp file
+            try:
+                if temp_file_path:
+                    os.unlink(temp_file_path)
+            except:
+                pass
+                
+            if result.get('success'):
+                return Response(result.get('data', {}))
+            else:
+                return Response(
+                    {'detail': result.get('error', 'AI processing failed')},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            if temp_file_path and os.path.exists(temp_file_path):
+                try: os.unlink(temp_file_path)
+                except: pass
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class AITextVitalsView(APIView):
+    """Process transcribed text to extract vitals using AI."""
+    
+    permission_classes = [AllowAny]
+    authentication_classes = []
+    
+    def post(self, request):
+        """Extract vitals from text."""
+        text = request.data.get('text')
+        
+        if not text:
+            return Response(
+                {'detail': 'No transcription text provided'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        try:
+            from .ai_service import extract_vitals_from_text
+            result = extract_vitals_from_text(text)
+            
+            if result.get('success'):
+                return Response(result.get('data', {}))
+            else:
+                return Response(
+                    {'detail': result.get('error', 'AI processing failed')},
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
+        except Exception as e:
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 # ============= HEALTH OFFICER SPECIFIC VIEWS =============
 
 class HealthWorkerListView(APIView):

@@ -13,25 +13,19 @@ if not GEMINI_API_KEY:
 genai.configure(api_key=GEMINI_API_KEY)
 
 
-def try_generate_content(prompt, models=['gemini-3-flash-preview', 'gemini-2.0-flash-exp', 'gemini-1.5-flash']):
+def try_generate_content(prompt):
     """
-    Attempt to generate content using a list of models in priority order.
-    Returns the first successful response object.
-    Raises Exception if all models fail.
+    Generate content using gemini-2.5-flash.
     """
-    last_error = None
-    for model_name in models:
-        try:
-            print(f"Attempting AI generation with model: {model_name}")
-            model = genai.GenerativeModel(model_name)
-            response = model.generate_content(prompt)
-            return response
-        except Exception as e:
-            print(f"Model {model_name} failed: {e}")
-            last_error = e
-            continue
-    
-    raise last_error or Exception("All AI models failed")
+    model_name = 'gemini-2.5-flash'
+    try:
+        print(f"Attempting AI generation with model: {model_name}")
+        model = genai.GenerativeModel(model_name)
+        response = model.generate_content(prompt)
+        return response
+    except Exception as e:
+        print(f"Model {model_name} failed: {e}")
+        raise e
 
 
 
@@ -57,16 +51,19 @@ def analyze_health_data(screening_data: dict) -> dict:
         - Age: {screening_data.get('age')} | Gender: {screening_data.get('gender')}
         - Vitals: BP {screening_data.get('systolic_bp')}/{screening_data.get('diastolic_bp')}, HR {screening_data.get('heart_rate')}
         - BMI Data: Height {screening_data.get('height_cm')}cm, Weight {screening_data.get('weight_kg')}kg
-        - Lab: Glucose {screening_data.get('glucose_level')} mg/dL
+        - Lab: Glucose {screening_data.get('glucose_level')} mg/dL, Chol {screening_data.get('cholesterol_level')} mg/dL
+        - Hematology: Hb {screening_data.get('hemoglobin')}, WBC {screening_data.get('wbc_count')}, Plt {screening_data.get('platelet_count')}
+        - Metabolic: BUN {screening_data.get('blood_urea_nitrogen')}, Cr {screening_data.get('creatinine')}, Na {screening_data.get('sodium')}, K {screening_data.get('potassium')}
+        - Liver: ALT {screening_data.get('alt_sgpt')}, AST {screening_data.get('ast_sgot')}, Alb {screening_data.get('albumin')}, Bilirubin {screening_data.get('total_bilirubin')}
         - Lifestyle: Smoking: {screening_data.get('smoking_status')}, Activity: {screening_data.get('physical_activity')}
         - Computed Risk: {screening_data.get('risk_level')} (Score: {screening_data.get('risk_score')})
         
         Output valid JSON with these fields:
-        1. "summary": A professional clinical summary (2-3 sentences).
+        1. "summary": A professional clinical summary focusing on any abnormalities in the lab panels.
         2. "concerns": List of strings for key health risks.
-        3. "recommendations": List of strings for actionable advice.
+        3. "recommendations": List of strings for actionable advice including specialized consults if lab values are critical.
         4. "formatted_insights": A markdown string exactly matching this structure:
-           "**AI Health Assessment**\\n\\nBased on the screening data, the patient is categorized as **[Risk Level] Risk**.\\n\\n**Key Observations:**\\n- [Observation 1]\\n- [Observation 2]\\n\\n**Recommendations:**\\n1. [Action 1]\\n2. [Action 2]"
+           "**Medical Diagnostic Overview**\\n\\nThe screening reveals a **[Risk Level]** clinical status. Significant findings include [Findings].\\n\\n**Diagnostic Details:**\\n- [Detail 1]\\n- [Detail 2]\\n\\n**Clinical Guidance:**\\n1. [Guidance 1]\\n2. [Guidance 2]"
         """
         
         # Use fallback mechanism
@@ -177,6 +174,76 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         print(f"AI recommendation error: {e}")
         return []
 
+def extract_lab_from_image(image_path: str) -> dict:
+    """
+    Extract lab results from an image using Gemini 2.5 Flash (multimodal).
+    
+    Args:
+        image_path: Path to the laboratory report image
+        
+    Returns:
+        Dictionary containing extracted lab values
+    """
+    try:
+        # Check if file exists
+        if not os.path.exists(image_path):
+            return {'success': False, 'error': f"File not found: {image_path}"}
+            
+        # Upload the file to Gemini
+        img_file = genai.upload_file(path=image_path)
+        
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        prompt = """
+        Analyze this laboratory report image and extract all medical values.
+        Return a JSON object with the following fields (use null if not found):
+        
+        - Hematology: hemoglobin, rbc_count, wbc_count, platelet_count
+        - Metabolic: glucose_level, blood_urea_nitrogen, creatinine, sodium, potassium, chloride, calcium
+        - Liver: alt_sgpt, ast_sgot, albumin, total_bilirubin, cholesterol_level
+        
+        Ensure values are numeric. If a range is given, use the specific result value.
+        
+        Example: 
+        {
+            "hemoglobin": 14.8,
+            "glucose_level": 94,
+            "creatinine": 1.02
+        }
+        """
+        
+        response = model.generate_content([prompt, img_file])
+        response_text = response.text
+        
+        import json
+        import re
+        
+        # Find JSON in the response
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            try:
+                data = json.loads(json_match.group())
+                return {
+                    'success': True,
+                    'data': data
+                }
+            except json.JSONDecodeError:
+                pass
+                
+        return {
+            'success': False,
+            'error': 'Failed to parse AI response',
+            'raw_response': response_text
+        }
+        
+    except Exception as e:
+        print(f"Image extraction error: {e}")
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+
 def extract_vitals_from_audio(audio_file_path: str) -> dict:
     """
     Extract vitals from an audio file using Gemini 1.5 Flash.
@@ -194,7 +261,7 @@ def extract_vitals_from_audio(audio_file_path: str) -> dict:
         # For 1.5 Flash, File API is standard for multimodal.
         audio_file = genai.upload_file(path=audio_file_path)
         
-        model = genai.GenerativeModel('gemini-3-flash-preview')
+        model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = """
         Listen to this audio recording of a health worker dictating patient vitals.
@@ -249,6 +316,118 @@ def extract_vitals_from_audio(audio_file_path: str) -> dict:
         
     except Exception as e:
         print(f"Voice extraction error: {e}")
+        return {
+            'success': False,
+            'error': str(e)
+        }
+
+def extract_vitals_from_text(text: str) -> dict:
+    """
+    Extract vitals from transcribed text using Gemini.
+    
+    Args:
+        text: Transcribed text from voice input
+        
+    Returns:
+        Dictionary containing extracted vitals
+    """
+    try:
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        
+        prompt = f"""
+        Extract patient health data from the following transcribed speech:
+        "{text}"
+
+        Return a JSON object with these fields (use null if not found):
+        - full_name (string)
+        - age (number)
+        - gender (string: "Male", "Female", or "Other")
+        - village (string)
+        - phone (string)
+        - height_cm (number)
+        - weight_kg (number)
+        - systolic_bp (number)
+        - diastolic_bp (number)
+        - heart_rate (number)
+        - smoking_status (string: "Never", "Former", or "Current")
+        - alcohol_usage (string: "None", "Moderate", or "Heavy")
+        - physical_activity (string: "Low", "Moderate", or "High")
+        - glucose_level (number)
+        - cholesterol_level (number)
+        - hemoglobin (number)
+        - rbc_count (number)
+        - wbc_count (number)
+        - platelet_count (number)
+        - blood_urea_nitrogen (number)
+        - creatinine (number)
+        - sodium (number)
+        - potassium (number)
+        - chloride (number)
+        - calcium (number)
+        - alt_sgpt (number)
+        - ast_sgot (number)
+        - albumin (number)
+        - total_bilirubin (number)
+
+        If the text is just a number without context, try to infer which field it belongs to based on common ranges for vitals.
+        - BP is usually two numbers (e.g., 120 over 80).
+        - Heart rate is usually 60-100.
+        - Height is usually 140-200 cm.
+        - Weight is usually 40-120 kg.
+
+        Example:
+        {{
+            "full_name": "John Doe",
+            "age": 45,
+            "gender": "Male",
+            "height_cm": 175,
+            "weight_kg": 70,
+            "systolic_bp": 120,
+            "diastolic_bp": 80,
+            "heart_rate": 72,
+            "smoking_status": "Current",
+            "physical_activity": "Moderate"
+        }}
+        """
+        
+        response = model.generate_content(prompt)
+        response_text = response.text
+        
+        import json
+        import re
+        
+        # Robust JSON extraction
+        json_match = re.search(r'\{[\s\S]*\}', response_text)
+        if json_match:
+            try:
+                extracted_json = json_match.group()
+                # Clean potential markdown or extra text
+                data = json.loads(extracted_json)
+                return {
+                    'success': True,
+                    'data': data
+                }
+            except json.JSONDecodeError:
+                # Try to clean common issues like leading/trailing text
+                try:
+                    # Strip any potential markdown wrappers
+                    clean_text = extracted_json.strip('`').replace('json\n', '', 1)
+                    data = json.loads(clean_text)
+                    return {
+                        'success': True,
+                        'data': data
+                    }
+                except:
+                    pass
+                
+        return {
+            'success': False,
+            'error': 'Failed to parse AI response',
+            'raw_response': response_text
+        }
+        
+    except Exception as e:
+        print(f"Text extraction error: {e}")
         return {
             'success': False,
             'error': str(e)

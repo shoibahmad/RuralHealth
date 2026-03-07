@@ -1,6 +1,7 @@
 import { Activity, Wine, Cigarette } from "lucide-react";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { VoiceEntryBanner } from "./VoiceEntryBanner";
 
 interface LifestyleSurveyFormProps {
     data: any;
@@ -10,6 +11,12 @@ interface LifestyleSurveyFormProps {
 export function LifestyleSurveyForm({ data, updateData }: LifestyleSurveyFormProps) {
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+            <VoiceEntryBanner
+                data={data}
+                updateData={updateData}
+                title="Lifestyle AI Assistant"
+                description="Speak habits (e.g., 'I am a smoker, I exercise regularly')."
+            />
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Smoking */}
                 <div className="space-y-4 p-4 border border-white/5 rounded-xl glass-card">

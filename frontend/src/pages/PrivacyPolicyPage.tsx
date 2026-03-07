@@ -137,10 +137,26 @@ export function PrivacyPolicyPage() {
                             <p>
                                 If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:
                             </p>
-                            <div className="bg-slate-800/50 p-4 rounded-lg mt-3">
-                                <p className="mb-1"><strong>Email:</strong> privacy@ruralhealthai.org</p>
-                                <p className="mb-1"><strong>Phone:</strong> +1 (555) 123-4567</p>
-                                <p><strong>Address:</strong> Rural Health Initiative, New Delhi, India</p>
+                            <div className="bg-slate-800/50 p-6 rounded-2xl mt-4 border border-white/5 space-y-3">
+                                <div className="flex items-start gap-4">
+                                    <div className="text-teal-400 font-bold w-20">Team:</div>
+                                    <div className="text-white">Alisha Shad and Atifa Kausar</div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="text-teal-400 font-bold w-20">Email:</div>
+                                    <div className="text-white">privacy@ruralhealthai.org</div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="text-teal-400 font-bold w-20">Phone:</div>
+                                    <div className="text-white">+91 91404 00000</div>
+                                </div>
+                                <div className="flex items-start gap-4">
+                                    <div className="text-teal-400 font-bold w-20">Address:</div>
+                                    <div className="text-white leading-relaxed">
+                                        Integral University, Lucknow,<br />
+                                        Uttar Pradesh, India
+                                    </div>
+                                </div>
                             </div>
                         </section>
                     </div>

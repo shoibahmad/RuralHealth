@@ -55,6 +55,23 @@ export function ScreeningWizard() {
         // Lab
         glucose_level: "",
         cholesterol_level: "",
+        // Hematology
+        hemoglobin: "",
+        rbc_count: "",
+        wbc_count: "",
+        platelet_count: "",
+        // Metabolic
+        blood_urea_nitrogen: "",
+        creatinine: "",
+        sodium: "",
+        potassium: "",
+        chloride: "",
+        calcium: "",
+        // Liver
+        alt_sgpt: "",
+        ast_sgot: "",
+        albumin: "",
+        total_bilirubin: "",
     });
     const navigate = useNavigate();
     const { user } = useAuth();
@@ -113,10 +130,30 @@ export function ScreeningWizard() {
                 physical_activity: formData.physical_activity || undefined,
                 glucose_level: parseFloat(formData.glucose_level) || undefined,
                 cholesterol_level: parseFloat(formData.cholesterol_level) || undefined,
+
+                // Hematology
+                hemoglobin: parseFloat(formData.hemoglobin) || undefined,
+                rbc_count: parseFloat(formData.rbc_count) || undefined,
+                wbc_count: parseFloat(formData.wbc_count) || undefined,
+                platelet_count: parseFloat(formData.platelet_count) || undefined,
+
+                // Metabolic
+                blood_urea_nitrogen: parseFloat(formData.blood_urea_nitrogen) || undefined,
+                creatinine: parseFloat(formData.creatinine) || undefined,
+                sodium: parseFloat(formData.sodium) || undefined,
+                potassium: parseFloat(formData.potassium) || undefined,
+                chloride: parseFloat(formData.chloride) || undefined,
+                calcium: parseFloat(formData.calcium) || undefined,
+
+                // Liver
+                alt_sgpt: parseFloat(formData.alt_sgpt) || undefined,
+                ast_sgot: parseFloat(formData.ast_sgot) || undefined,
+                albumin: parseFloat(formData.albumin) || undefined,
+                total_bilirubin: parseFloat(formData.total_bilirubin) || undefined,
+
                 risk_score: riskResult.score,
                 risk_level: riskResult.level,
                 risk_notes: riskResult.notes,
-                // ai_insights: insights // Will be updated via backend API
             };
 
             const screening = await firestoreService.addScreening(screeningData);
@@ -138,10 +175,9 @@ export function ScreeningWizard() {
                 console.error("Failed to update patient stats:", updateErr);
             }
 
-            // 2. Trigger Real Gemini AI Analysis via Backend
-            let finalInsights = "Analysis queued...";
+            // --- Trigger Real Gemini AI Analysis ---
+            let aiSuccess = false;
             try {
-                // Prepare data for backend analysis
                 const analysisPayload = {
                     ...screeningData,
                     age: parseInt(formData.age) || 0,
@@ -150,33 +186,24 @@ export function ScreeningWizard() {
 
                 const aiResponse = await fetch('/api/ai/analyze', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(analysisPayload)
                 });
 
                 if (aiResponse.ok) {
                     const aiResult = await aiResponse.json();
                     if (aiResult.success && aiResult.analysis) {
-                        const analysis = aiResult.analysis;
-                        finalInsights = analysis.formatted_insights || analysis.summary;
-
                         setAiAnalysis({
-                            ...analysis,
-                            risk_level: riskResult.level // Ensure client side risk is preserved or use AI's
+                            ...aiResult.analysis,
+                            risk_level: riskResult.level // Preserve local gravity
                         });
                         setIsAiModalOpen(true);
+                        aiSuccess = true;
 
-                        // Update the screening in Firestore with real insights
                         if (screening.id) {
-                            try {
-                                await firestoreService.updateScreening(screening.id, {
-                                    ai_insights: analysis
-                                });
-                            } catch (err) {
-                                console.error("Failed to save AI insights to Firestore:", err);
-                            }
+                            await firestoreService.updateScreening(screening.id, {
+                                ai_insights: aiResult.analysis
+                            });
                         }
                     }
                 }
@@ -184,17 +211,10 @@ export function ScreeningWizard() {
                 console.error("AI Analysis failed:", aiErr);
             }
 
-            // Update UI with real analysis
-            if (finalInsights !== "Analysis queued...") {
-                // If we got real structured data back (depends on how we updated backend)
-                // Ideally backend returns full object. For now we might just have formatted text.
-                // NOTE: We should check if we can parse it or if backend returns it structurally.
-            }
-
             // Allow time for async updates (a bit hacky but ensures firestore syncs before redirect)
             await new Promise(r => setTimeout(r, 500));
 
-            return true;
+            return aiSuccess;
         } catch (err: any) {
             throw err;
         }
@@ -205,15 +225,12 @@ export function ScreeningWizard() {
         setError(null);
 
         try {
-            await handleSubmitOnline();
-
+            const hasAi = await handleSubmitOnline();
             setIsSuccess(true);
             showToast("Screening submitted successfully", "success");
 
-            // Redirect after showing success
-            // Only redirect if modal is NOT open (i.e. if AI failed or user closed it)
-            // But we want them to see the modal. So we won't auto-redirect immediately if AI success.
-            if (!isAiModalOpen) {
+            // If AI failed or didn't trigger, navigate away after delay
+            if (!hasAi) {
                 setTimeout(() => {
                     navigate("/dashboard");
                 }, 3000);

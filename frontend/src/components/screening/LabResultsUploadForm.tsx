@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, Loader2, CheckCircle2 } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, FlaskConical, Beaker, Activity } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -14,108 +14,159 @@ export function LabResultsUploadForm({ data, updateData }: LabResultsUploadFormP
     const [isScanning, setIsScanning] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
 
-    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         const objectUrl = URL.createObjectURL(file);
         setPreview(objectUrl);
 
-        // Simulate OCR Scanning
         setIsScanning(true);
-        setTimeout(() => {
-            setIsScanning(false);
-            // Mock extracted values
-            updateData({
-                ...data,
-                glucose_level: 110,
-                cholesterol_level: 190
+        try {
+            const uploadFormData = new FormData();
+            uploadFormData.append('image', file);
+
+            const response = await fetch('/api/ai/lab-extract', {
+                method: 'POST',
+                body: uploadFormData
             });
-        }, 2500);
+
+            if (response.ok) {
+                const extractedData = await response.json();
+                updateData({
+                    ...data,
+                    ...extractedData
+                });
+            }
+        } catch (err) {
+            console.error("Lab extraction failed:", err);
+        } finally {
+            setIsScanning(false);
+        }
     };
 
-    return (
-        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+    const renderField = (id: string, label: string, unit: string, placeholder = "---") => (
+        <div className="space-y-1.5">
+            <Label htmlFor={id} className="text-[11px] uppercase tracking-wider font-bold text-slate-500">{label} ({unit})</Label>
+            <div className="relative group">
+                <Input
+                    id={id}
+                    type="number"
+                    step="0.01"
+                    placeholder={placeholder}
+                    value={data[id] || ""}
+                    onChange={(e) => updateData({ ...data, [id]: e.target.value })}
+                    className={cn(
+                        data[id] ? "border-teal-500/50 bg-teal-500/5 text-teal-100" : "border-white/10 bg-slate-900/50 text-slate-300",
+                        "h-9 text-sm focus:border-purple-500/50 focus:ring-purple-500/10 transition-all"
+                    )}
+                />
+                {data[id] && (
+                    <CheckCircle2 className="absolute right-2.5 top-2.5 h-4 w-4 text-teal-400 opacity-60" />
+                )}
+            </div>
+        </div>
+    );
 
-            <div className="glass-card border-dashed border border-white/20 rounded-xl p-8 text-center transition-all hover:bg-white/5 group relative overflow-hidden">
+    return (
+        <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-10">
+
+            <div className="glass-card border-dashed border border-white/10 rounded-2xl p-6 text-center transition-all hover:bg-white/[0.02] group relative overflow-hidden bg-slate-900/20">
                 {!preview ? (
-                    <div className="flex flex-col items-center relative z-10">
-                        <div className="h-16 w-16 bg-blue-500/20 text-blue-400 rounded-full flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                    <div className="flex flex-col items-center relative z-10 py-4">
+                        <div className="h-16 w-16 bg-gradient-to-br from-blue-500/20 to-purple-500/20 text-blue-400 rounded-2xl flex items-center justify-center mb-4 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 border border-white/5">
                             <Upload className="h-8 w-8" />
                         </div>
-                        <h3 className="text-lg font-semibold text-white">Upload Lab Report</h3>
-                        <p className="text-slate-400 mb-6 max-w-sm mx-auto">
-                            Take a photo of the blood test report. Our <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-semibold">Gemini AI</span> will automatically extract Glucose and Cholesterol values.
+                        <h3 className="text-xl font-bold text-white mb-2 tracking-tight">Upload Health Report</h3>
+                        <p className="text-slate-400 mb-6 max-w-sm mx-auto text-sm leading-relaxed">
+                            Upload or take a photo of the lab report. <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400 font-bold">Gemini 2.5 Flash</span> will identify and extract over 15+ diagnostic values.
                         </p>
-                        <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 border-0 text-white shadow-lg shadow-blue-500/25">
+                        <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 border-0 text-white shadow-xl shadow-blue-500/20 px-8 py-6 rounded-xl font-bold">
                             <label className="cursor-pointer">
-                                Select Image
+                                <Upload className="h-4 w-4 mr-2" />
+                                Select Report Image
                                 <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} />
                             </label>
                         </Button>
-                        <div className="mt-4 inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-slate-900/50 border border-white/10">
-                            <span className="relative flex h-2 w-2">
-                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-purple-400 opacity-75"></span>
-                                <span className="relative inline-flex rounded-full h-2 w-2 bg-purple-500"></span>
-                            </span>
-                            <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Powered by Gemini 2.5 Flash</span>
-                        </div>
                     </div>
                 ) : (
                     <div className="flex flex-col items-center relative z-10">
-                        <div className="relative w-full max-w-sm aspect-video mb-6 rounded-lg overflow-hidden border border-white/10 shadow-lg">
-                            <img src={preview} alt="Lab Report" className="object-cover w-full h-full opacity-80" />
+                        <div className="relative w-full max-w-md aspect-[16/10] mb-4 rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-black/40">
+                            <img src={preview} alt="Lab Report" className="object-contain w-full h-full opacity-60" />
                             {isScanning && (
-                                <div className="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white backdrop-blur-sm">
-                                    <Loader2 className="h-10 w-10 animate-spin mb-2 text-purple-400" />
-                                    <span className="font-medium bg-clip-text text-transparent bg-gradient-to-r from-blue-200 to-purple-200">Analyzing with Gemini AI...</span>
+                                <div className="absolute inset-0 bg-slate-950/80 flex flex-col items-center justify-center text-white backdrop-blur-md">
+                                    <div className="relative">
+                                        <Loader2 className="h-12 w-12 animate-spin text-purple-400" />
+                                        <div className="absolute inset-0 animate-ping opacity-20 bg-purple-500 rounded-full scale-150"></div>
+                                    </div>
+                                    <span className="mt-4 font-bold tracking-widest uppercase text-xs text-purple-300 animate-pulse">Analyzing with Gemini AI</span>
+                                    <div className="mt-2 w-32 h-1 bg-slate-800 rounded-full overflow-hidden">
+                                        <div className="h-full bg-purple-500 animate-progress-indeterminate"></div>
+                                    </div>
                                 </div>
                             )}
                         </div>
-                        <Button variant="ghost" onClick={() => { setPreview(null); updateData({ ...data, glucose_level: "", cholesterol_level: "" }) }} className="text-slate-400 hover:text-white hover:bg-white/10">
+                        <Button variant="ghost" onClick={() => { setPreview(null); }} className="text-slate-500 hover:text-white hover:bg-white/5 transition-colors text-xs font-bold uppercase tracking-widest">
                             Remove & Retake
                         </Button>
                     </div>
                 )}
             </div>
 
-            {/* Extracted Data Fields */}
-            <div className="grid md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                    <Label htmlFor="glucose" className="text-slate-300">Fasting Glucose (mg/dL)</Label>
-                    <div className="relative">
-                        <Input
-                            id="glucose"
-                            type="number"
-                            value={data.glucose_level || ""}
-                            onChange={(e) => updateData({ ...data, glucose_level: e.target.value })}
-                            className={cn(data.glucose_level && "border-green-500/50 ring-green-500/20 bg-green-500/10", "bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-purple-500/50 focus:ring-purple-500/20")}
-                        />
-                        {data.glucose_level && (
-                            <CheckCircle2 className="absolute right-3 top-2.5 h-5 w-5 text-green-400" />
-                        )}
+            <div className="space-y-6">
+                {/* Hematology Panel */}
+                <div className="glass-card rounded-2xl border border-white/5 bg-slate-900/40 p-6">
+                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                        <div className="h-8 w-8 rounded-lg bg-red-500/10 text-red-400 flex items-center justify-center">
+                            <Beaker className="h-4 w-4" />
+                        </div>
+                        <h4 className="font-bold text-white tracking-tight">Hematology Panel</h4>
                     </div>
-                    <p className="text-xs text-slate-500">Normal range: 70-99 mg/dL</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+                        {renderField("hemoglobin", "Hemoglobin", "g/dL")}
+                        {renderField("rbc_count", "RBC Count", "10^6/uL")}
+                        {renderField("wbc_count", "WBC Count", "10^3/uL")}
+                        {renderField("platelet_count", "Platelets", "10^3/uL")}
+                    </div>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="cholesterol" className="text-slate-300">Total Cholesterol (mg/dL)</Label>
-                    <div className="relative">
-                        <Input
-                            id="cholesterol"
-                            type="number"
-                            value={data.cholesterol_level || ""}
-                            onChange={(e) => updateData({ ...data, cholesterol_level: e.target.value })}
-                            className={cn(data.cholesterol_level && "border-green-500/50 ring-green-500/20 bg-green-500/10", "bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-purple-500/50 focus:ring-purple-500/20")}
-                        />
-                        {data.cholesterol_level && (
-                            <CheckCircle2 className="absolute right-3 top-2.5 h-5 w-5 text-green-400" />
-                        )}
+                {/* Metabolic Panel */}
+                <div className="glass-card rounded-2xl border border-white/5 bg-slate-900/40 p-6">
+                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                        <div className="h-8 w-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                            <FlaskConical className="h-4 w-4" />
+                        </div>
+                        <h4 className="font-bold text-white tracking-tight">Basic Metabolic Panel</h4>
                     </div>
-                    <p className="text-xs text-slate-500">Normal: &lt; 200 mg/dL</p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+                        {renderField("glucose_level", "Glucose", "mg/dL")}
+                        {renderField("cholesterol_level", "Cholesterol", "mg/dL")}
+                        {renderField("blood_urea_nitrogen", "BUN", "mg/dL")}
+                        {renderField("creatinine", "Creatinine", "mg/dL")}
+                        {renderField("sodium", "Sodium", "mmol/L")}
+                        {renderField("potassium", "Potassium", "mmol/L")}
+                        {renderField("chloride", "Chloride", "mmol/L")}
+                        {renderField("calcium", "Calcium", "mg/dL")}
+                    </div>
+                </div>
+
+                {/* Liver Function */}
+                <div className="glass-card rounded-2xl border border-white/5 bg-slate-900/40 p-6">
+                    <div className="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
+                        <div className="h-8 w-8 rounded-lg bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <Activity className="h-4 w-4" />
+                        </div>
+                        <h4 className="font-bold text-white tracking-tight">Liver Function Tests</h4>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-4">
+                        {renderField("alt_sgpt", "ALT (SGPT)", "U/L")}
+                        {renderField("ast_sgot", "AST (SGOT)", "U/L")}
+                        {renderField("albumin", "Albumin", "g/dL")}
+                        {renderField("total_bilirubin", "Total Bilirubin", "mg/dL")}
+                    </div>
                 </div>
             </div>
-
         </div>
-    )
+    );
 }
+

@@ -1,8 +1,4 @@
-/**
- * Offline Indicator Component
- * Shows connection status and sync progress
- */
-
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Wifi, RefreshCw, Check, AlertCircle, Cloud, CloudOff } from 'lucide-react';
 import { useOffline } from '../context/OfflineContext';
@@ -10,22 +6,50 @@ import { Button } from './ui/button';
 
 export function OfflineIndicator() {
     const { isOnline, pendingSyncCount, syncStatus, syncNow } = useOffline();
+    const [showOnlineBanner, setShowOnlineBanner] = useState(false);
+    const prevOnlineRef = useRef(isOnline);
+
+    useEffect(() => {
+        // Only show "Back Online" if we were previously offline
+        if (isOnline && !prevOnlineRef.current) {
+            setShowOnlineBanner(true);
+            const timer = setTimeout(() => {
+                setShowOnlineBanner(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        }
+        prevOnlineRef.current = isOnline;
+    }, [isOnline]);
 
     return (
         <>
-            {/* Offline Banner */}
-            <AnimatePresence>
-                {!isOnline && (
+            {/* Connection Status Banner */}
+            <AnimatePresence mode="wait">
+                {!isOnline ? (
                     <motion.div
-                        initial={{ y: -50, opacity: 0 }}
+                        key="offline"
+                        initial={{ y: 50, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: -50, opacity: 0 }}
-                        className="fixed top-0 left-0 right-0 z-50 bg-amber-500/90 backdrop-blur-sm text-white py-2 px-4 flex items-center justify-center gap-2 text-sm font-medium"
+                        exit={{ y: 50, opacity: 0 }}
+                        className="fixed bottom-0 left-0 right-0 z-[100] bg-amber-500/95 backdrop-blur-md text-white py-3 px-6 flex items-center justify-center gap-3 text-sm font-bold shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
                     >
+                        <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
                         <WifiOff className="h-4 w-4" />
-                        <span>You're offline. Data will be saved locally and synced when connected.</span>
+                        <span>Offline Mode: Data will be synced automatically when connection returns.</span>
                     </motion.div>
-                )}
+                ) : showOnlineBanner ? (
+                    <motion.div
+                        key="online"
+                        initial={{ y: 50, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        exit={{ y: 50, opacity: 0 }}
+                        className="fixed bottom-0 left-0 right-0 z-[100] bg-teal-500/95 backdrop-blur-md text-white py-3 px-6 flex items-center justify-center gap-3 text-sm font-bold shadow-[0_-4px_20px_rgba(0,0,0,0.3)]"
+                    >
+                        <Wifi className="h-4 w-4" />
+                        <span>Internet Restored: Connection is back online.</span>
+                        <div className="h-1.5 w-1.5 rounded-full bg-white animate-ping" />
+                    </motion.div>
+                ) : null}
             </AnimatePresence>
 
             {/* Sync Status Badge - Show when there's pending data or syncing */}
