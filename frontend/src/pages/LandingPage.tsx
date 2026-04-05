@@ -1,13 +1,22 @@
-import { ArrowRight, Activity, ShieldCheck, Stethoscope } from "lucide-react";
+import { ArrowRight, Activity, ShieldCheck, Stethoscope, LayoutDashboard } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export function LandingPage() {
+    const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient } = useAuth();
     const [isLoading, setIsLoading] = useState(true);
+
+    const getDashboardPath = () => {
+        if (isHealthWorker) return "/dashboard";
+        if (isHealthOfficer) return "/officer/dashboard";
+        if (isPatient) return "/patient/dashboard";
+        return "/dashboard";
+    };
 
     useEffect(() => {
         const timer = setTimeout(() => {
@@ -103,17 +112,29 @@ export function LandingPage() {
                         transition={{ duration: 0.8, delay: 0.6 }}
                         className="flex flex-col sm:flex-row gap-4"
                     >
-                        <Link to="/register">
-                            <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-lg shadow-teal-500/25 rounded-full transition-all hover:scale-105">
-                                Start Your Survey
-                                <ArrowRight className="ml-2 h-4 w-4" />
-                            </Button>
-                        </Link>
-                        <Link to="/about">
-                            <Button variant="ghost" size="lg" className="h-14 px-8 text-base text-slate-300 hover:text-white hover:bg-white/5 rounded-full border border-white/10 hover:border-white/20">
-                                Explore Modules
-                            </Button>
-                        </Link>
+                        {isAuthenticated ? (
+                            <Link to={getDashboardPath()}>
+                                <Button size="lg" className="h-14 px-10 text-lg bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-xl shadow-teal-500/30 rounded-full transition-all hover:scale-105 flex items-center gap-3">
+                                    <LayoutDashboard className="h-5 w-5" />
+                                    Go to Dashboard
+                                    <ArrowRight className="h-5 w-5" />
+                                </Button>
+                            </Link>
+                        ) : (
+                            <>
+                                <Link to="/register">
+                                    <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-lg shadow-teal-500/25 rounded-full transition-all hover:scale-105">
+                                        Start Your Survey
+                                        <ArrowRight className="ml-2 h-4 w-4" />
+                                    </Button>
+                                </Link>
+                                <Link to="/about">
+                                    <Button variant="ghost" size="lg" className="h-14 px-8 text-base text-slate-300 hover:text-white hover:bg-white/5 rounded-full border border-white/10 hover:border-white/20">
+                                        Explore Modules
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                     </motion.div>
                 </div>
             </section>

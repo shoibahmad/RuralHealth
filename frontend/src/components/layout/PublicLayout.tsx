@@ -1,15 +1,24 @@
 import { Outlet, Link, useLocation } from "react-router-dom";
-import { HeartPulse, Menu, X } from "lucide-react";
+import { HeartPulse, Menu, X, LayoutDashboard } from "lucide-react";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import { Footer } from "../Footer";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../../context/AuthContext";
 
 
 export function PublicLayout() {
     const location = useLocation();
+    const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient } = useAuth();
     const isAuthPage = location.pathname === "/login" || location.pathname === "/register";
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+    const getDashboardPath = () => {
+        if (isHealthWorker) return "/dashboard";
+        if (isHealthOfficer) return "/officer/dashboard";
+        if (isPatient) return "/patient/dashboard";
+        return "/dashboard";
+    };
 
     return (
         <div className="min-h-screen flex flex-col bg-slate-950 text-slate-100 font-sans selection:bg-teal-500/30">
@@ -56,19 +65,30 @@ export function PublicLayout() {
                             </button>
                         )}
 
-                        {location.pathname !== "/login" && (
-                            <Link to="/login" className="hidden sm:block">
-                                <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
-                                    Sign In
+                        {isAuthenticated ? (
+                            <Link to={getDashboardPath()} className="hidden sm:block">
+                                <Button className="bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 border border-teal-500/20 rounded-full h-10 px-6 font-medium flex items-center gap-2">
+                                    <LayoutDashboard className="h-4 w-4" />
+                                    Dashboard
                                 </Button>
                             </Link>
-                        )}
-                        {location.pathname !== "/register" && (
-                            <Link to="/register" className="hidden md:block">
-                                <Button className="bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-full shadow-lg shadow-teal-500/20 border-0 h-10 px-6 font-medium">
-                                    Get Started
-                                </Button>
-                            </Link>
+                        ) : (
+                            <>
+                                {location.pathname !== "/login" && (
+                                    <Link to="/login" className="hidden sm:block">
+                                        <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
+                                            Sign In
+                                        </Button>
+                                    </Link>
+                                )}
+                                {location.pathname !== "/register" && (
+                                    <Link to="/register" className="hidden md:block">
+                                        <Button className="bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-full shadow-lg shadow-teal-500/20 border-0 h-10 px-6 font-medium">
+                                            Get Started
+                                        </Button>
+                                    </Link>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -125,19 +145,30 @@ export function PublicLayout() {
                                 <div className="h-px bg-white/10 my-6" />
 
                                 <div className="flex flex-col gap-4">
-                                    {location.pathname !== "/login" && (
-                                        <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                                            <Button variant="ghost" className="w-full justify-start text-lg h-14 text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl">
-                                                Sign In
+                                    {isAuthenticated ? (
+                                        <Link to={getDashboardPath()} onClick={() => setMobileMenuOpen(false)}>
+                                            <Button className="w-full bg-teal-500 hover:bg-teal-400 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold flex items-center justify-center gap-2">
+                                                <LayoutDashboard className="h-5 w-5" />
+                                                Go to Dashboard
                                             </Button>
                                         </Link>
-                                    )}
-                                    {location.pathname !== "/register" && (
-                                        <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
-                                            <Button className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold">
-                                                Get Started
-                                            </Button>
-                                        </Link>
+                                    ) : (
+                                        <>
+                                            {location.pathname !== "/login" && (
+                                                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
+                                                    <Button variant="ghost" className="w-full justify-start text-lg h-14 text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl">
+                                                        Sign In
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                            {location.pathname !== "/register" && (
+                                                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                                                    <Button className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold">
+                                                        Get Started
+                                                    </Button>
+                                                </Link>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </nav>

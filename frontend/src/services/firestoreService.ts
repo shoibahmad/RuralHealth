@@ -83,12 +83,88 @@ export interface Appointment {
 export const firestoreService = {
     // --- Users (Health Workers) ---
     async getHealthWorkers() {
-        const q = query(
-            collection(db, "users"),
-            where("role", "==", "health_worker")
-        );
-        const snapshot = await getDocs(q);
-        return snapshot.docs.map((doc: any) => ({ uid: doc.id, ...doc.data() } as User));
+        try {
+            // 1. Fetch Workers
+            const q = query(
+                collection(db, "users"),
+                where("role", "==", "health_worker")
+            );
+            const snapshot = await getDocs(q);
+            const workers = snapshot.docs.map((doc: any) => {
+                const data = doc.data();
+                return { 
+                    id: doc.id, 
+                    uid: doc.id, 
+                    ...data 
+                } as any;
+            });
+
+            // 2. Concurrently fetch Patients and Screenings with error fallback
+            let allPatients: any[] = [];
+            let allScreenings: any[] = [];
+
+            try {
+                const [patientsSnap, screeningsSnap] = await Promise.all([
+                    getDocs(collection(db, "patients")),
+                    getDocs(collection(db, "screenings"))
+                ]);
+                allPatients = patientsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allScreenings = screeningsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+            } catch (err) {
+                console.warn("Permission denied for stats aggregation. Showing workers without full metrics.", err);
+                // Continue with 0 stats if we can't read those specific collections (permission error)
+            }
+
+            // 3. Build lookup maps for O(N) performance
+            // patientId -> workerId
+            const patientToWorkerId = new Map<string, string>();
+            allPatients.forEach(p => {
+                if (p.health_worker_id) {
+                    patientToWorkerId.set(p.id, p.health_worker_id);
+                }
+            });
+
+            // workerId -> count
+            const workerPatientCounts = new Map<string, number>();
+            const workerScreeningCounts = new Map<string, number>();
+            const workerHighRiskCounts = new Map<string, number>();
+
+            // Calculate patients per worker
+            allPatients.forEach(p => {
+                if (p.health_worker_id) {
+                    const current = workerPatientCounts.get(p.health_worker_id) || 0;
+                    workerPatientCounts.set(p.health_worker_id, current + 1);
+                }
+            });
+
+            // Calculate screenings per worker via patient map
+            allScreenings.forEach(s => {
+                const workerId = patientToWorkerId.get(s.patient_id);
+                if (workerId) {
+                    const sCount = workerScreeningCounts.get(workerId) || 0;
+                    workerScreeningCounts.set(workerId, sCount + 1);
+
+                    if (s.risk_level === 'High') {
+                        const hCount = workerHighRiskCounts.get(workerId) || 0;
+                        workerHighRiskCounts.set(workerId, hCount + 1);
+                    }
+                }
+            });
+
+            // 4. Final enrichment
+            return workers.map((worker: any) => ({
+                ...worker,
+                stats: {
+                    total_patients: workerPatientCounts.get(worker.uid) || 0,
+                    total_screenings: workerScreeningCounts.get(worker.uid) || 0,
+                    high_risk_patients: workerHighRiskCounts.get(worker.uid) || 0
+                }
+            }));
+
+        } catch (error) {
+            console.error('Failed to fetch health workers with stats:', error);
+            throw error;
+        }
     },
 
     async createHealthWorker(data: any) {

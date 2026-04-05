@@ -188,7 +188,7 @@ export function TermsConditionsPage() {
                             <div className="bg-slate-800/50 p-6 rounded-2xl mt-4 border border-white/5 space-y-3">
                                 <div className="flex items-start gap-4">
                                     <div className="text-teal-400 font-bold w-20">Team:</div>
-                                    <div className="text-white">Alisha Shad and Atifa Kausar</div>
+                                    <div className="text-white">Alisha Shad and Atifa Kaisar</div>
                                 </div>
                                 <div className="flex items-start gap-4">
                                     <div className="text-teal-400 font-bold w-20">Email:</div>

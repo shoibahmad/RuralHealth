@@ -40,7 +40,7 @@ import { SettingsPage } from "./pages/SettingsPage";
 
 // Protected Route Wrapper for Health Workers
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isHealthWorker, loading } = useAuth();
+  const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
 
   if (loading) {
     return (
@@ -52,7 +52,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isHealthWorker) {
-    const { isHealthOfficer, isPatient } = useAuth();
     if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
     if (isPatient) return <Navigate to="/patient/dashboard" replace />;
   }
@@ -61,7 +60,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Protected Route Wrapper for Health Officers
 const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isHealthOfficer, loading } = useAuth();
+  const { isAuthenticated, isHealthOfficer, isHealthWorker, isPatient, loading } = useAuth();
 
   if (loading) {
     return (
@@ -73,7 +72,6 @@ const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isHealthOfficer) {
-    const { isHealthWorker, isPatient } = useAuth();
     if (isHealthWorker) return <Navigate to="/dashboard" replace />;
     if (isPatient) return <Navigate to="/patient/dashboard" replace />;
   }
@@ -82,7 +80,7 @@ const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
 
 // Protected Route Wrapper for Patients
 const PatientRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isPatient, loading } = useAuth();
+  const { isAuthenticated, isPatient, isHealthWorker, isHealthOfficer, loading } = useAuth();
 
   if (loading) {
     return (
@@ -94,10 +92,31 @@ const PatientRoute = ({ children }: { children: React.ReactNode }) => {
 
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (!isPatient) {
-    const { isHealthWorker, isHealthOfficer } = useAuth();
     if (isHealthWorker) return <Navigate to="/dashboard" replace />;
     if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
   }
+  return <>{children}</>;
+};
+
+// Public Route Wrapper to redirect authenticated users
+const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+  const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+        <div className="h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    if (isHealthWorker) return <Navigate to="/dashboard" replace />;
+    if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
+    if (isPatient) return <Navigate to="/patient/dashboard" replace />;
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return <>{children}</>;
 };
 
@@ -121,8 +140,16 @@ function App() {
                   <Route path="/api-docs" element={<APIDocsPage />} />
                   <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                   <Route path="/terms-conditions" element={<TermsConditionsPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/login" element={
+                    <PublicRoute>
+                      <LoginPage />
+                    </PublicRoute>
+                  } />
+                  <Route path="/register" element={
+                    <PublicRoute>
+                      <RegisterPage />
+                    </PublicRoute>
+                  } />
                   <Route path="/data-security" element={<DataSecurityPage />} />
                 </Route>
 

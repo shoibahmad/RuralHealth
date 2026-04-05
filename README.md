@@ -1,232 +1,150 @@
-# RuralHealthAI: AI-Powered Digital Health Screening
+# RuralHealthAI: Empowering Rural Healthcare with AI & Offline Connectivity
 
-<div align="center">
-  <img src="frontend/public/logo.svg" alt="RuralHealthAI Logo" width="120" height="120" />
-  <br />
-  <p>
-    <b>Democratizing access to preventative healthcare with intelligent, offline-capable digital tools.</b>
-  </p>
-  <br />
-
-  ![React](https://img.shields.io/badge/React-18-blue?logo=react)
-  ![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript)
-  ![Django](https://img.shields.io/badge/Django-5.x-green?logo=django)
-  ![Firebase](https://img.shields.io/badge/Firebase-Auth%20%7C%20Firestore-orange?logo=firebase)
-  ![Gemini AI](https://img.shields.io/badge/AI-Gemini%20Pro-purple?logo=google)
-
-</div>
+**RuralHealthAI** is a mission-critical digital health platform designed to bring advanced diagnostic capabilities to frontline health workers in underserved rural areas. By transitioning from manual paper-based logs to a smart, AI-driven, and offline-capable system, the platform enables early identification of Non-Communicable Diseases (NCDs) like Hypertension, Diabetes, and cardiovascular risks.
 
 ---
 
-## 📋 Table of Contents
+## 🌟 Key Features
 
--   [Overview](#-overview)
--   [Key Features](#-key-features)
--   [System Architecture](#-system-architecture)
--   [Tech Stack](#-tech-stack)
--   [Getting Started](#-getting-started)
-    -   [Prerequisites](#prerequisites)
-    -   [Backend Setup](#backend-setup)
-    -   [Frontend Setup](#frontend-setup)
--   [Configuration](#-configuration)
--   [API Documentation](#-api-documentation)
--   [Roadmap](#-roadmap)
--   [License](#-license)
--   [Contact](#-contact)
+### 👩‍⚕️ For Health Workers (Frontline Screening)
+- **Smart Screening Wizard**: A multi-step guided workflow for capturing:
+  - **Patient Identity**: Demographics and location tracking.
+  - **Vitals Check**: Blood Pressure, BMI, Heart Rate, and Oxygen levels.
+  - **Lifestyle Survey**: Capturing habits like smoking, alcohol usage, and physical activity.
+  - **Lab Report OCR**: Uploading lab reports for automatic blood profile extraction.
+- **AI-Powered Risk Assessment**: Localized risk calculation combined with **Google Gemini Pro** analysis for instant medical insights.
+- **Patient History**: Complete digital timeline of a patient's screening history and risk trends.
 
----
+### 👮‍♂️ For Health Officers (Regional Monitoring)
+- **Centralized Dashboard**: Real-time view of regional health metrics, total screenings, and worker performance.
+- **High-Risk Surveillance**: Targeted tracking of patients flagged as "High Risk" to ensure timely secondary intervention.
+- **Worker Management**: Monitoring active health workers and their regional coverage.
+- **System Analytics**: In-depth visualization of disease prevalence and demographic trends across villages.
 
-## 🏥 Overview
-
-**RuralHealthAI** is a comprehensive digital health screening platform designed to empower frontline health workers (ASHAs) in rural areas. By conducting simple screenings for Non-Communicable Diseases (NCDs) like Diabetes and Hypertension, health workers can identify risks early and connect patients to care.
-
-Key challenges addressed:
--   **Lack of Specialists:** Bridging the gap where doctors are scarce.
--   **Late Diagnosis:** Identifying "silent killers" before they become critical.
--   **Manual Records:** Digitizing health data for better tracking and analysis.
+### 👤 For Patients
+- **Self-Screening Portal**: Secure access for patients to perform basic self-assessments.
+- **Personal Health Records**: Instant access to previous screening results and AI-generated wellness recommendations.
 
 ---
 
-## ✨ Key Features
+## 🛡️ Technological Foundation
 
--   **🤖 AI-Powered Analysis:** Integration with **Google Gemini AI** to analyze vitals and provide instant risk assessments and lifestyle recommendations.
--   **📱 Role-Based Access:** tailored interfaces for **Health Workers** (screening), **Health Officers** (monitoring), and **Admins**.
--   **🔒 Secure & Private:** Robust authentication via **Firebase Auth** and secure data storage in **Firestore**.
--   **📊 Interactive Dashboard:** Visual analytics for screening trends and high-risk case tracking.
--   **⚡ Modern UI:** Fast, responsive interface built with React, Tailwind CSS, and Framer Motion.
--   **📝 Digital Health Records:** Comprehensive patient history tracking.
+### Frontend: Modern & Resilient
+- **Framework**: React 18 with Vite for lightning-fast development and optimized bundles.
+- **State Management**: React Context API for Global Auth and Offline state.
+- **Offline Core**: Specialized `DatabaseService` using **IndexedDB** for local storage and a robust **SyncQueue** for background data reconciliation.
+- **Styling**: Tailwind CSS for a premium "Glassmorphism" aesthetic, Lucide React for iconography, and Framer Motion for smooth micro-animations.
 
----
+### Backend: Scalable & Intelligent
+- **Framework**: Django 5.x with Django REST Framework (DRF) for structured API endpoints.
+- **AI Engine**: Deep integration with **Google Gemini Pro** for analyzing structured screening data and generating personalized health insights.
+- **Security**: CORS headers, secret-key protection, and environment-based configuration for production readiness.
 
-## 🏗 System Architecture
-
-The project follows a modern Client-Server architecture:
-
-```mermaid
-graph TD
-    Client[React Frontend] -->|REST API| Server[Django Backend]
-    Server -->|Auth & Data| Firebase[Firebase Auth & Firestore]
-    Server -->|Analysis| AI[Google Gemini API]
-    
-    subgraph "Frontend Layer"
-        Client
-    end
-    
-    subgraph "Backend Layer"
-        Server
-        Firebase
-        AI
-    end
-```
+### Cloud & Database
+- **Primary Data**: **Firebase Firestore** for real-time document-based clinical data.
+- **Identity Provider**: **Firebase Authentication** for secure, role-based login (Health Worker vs. Officer vs. Patient).
+- **Secondary Data**: **PostgreSQL/SQLite** for backend-specific logging and audit trails.
 
 ---
 
-## 💻 Tech Stack
+## 📡 Advanced Capabilities: Offline Connectivity
 
-### Frontend
--   **Framework:** React 18 (Vite)
--   **Language:** TypeScript
--   **Styling:** Tailwind CSS, ShadCN UI
--   **State:** React Context API, React Query
--   **Icons:** Lucide React
-
-### Backend
--   **Framework:** Django + Django REST Framework (DRF)
--   **Language:** Python 3.10+
--   **Request Handling:** `requests` (for external APIs), `django-cors-headers`
-
-### Database & Cloud
--   **Database:** Google Firebase Firestore (NoSQL)
--   **Authentication:** Firebase Authentication
--   **AI Model:** Google Gemini Pro
+RuralHealthAI is built with a "Local-First" philosophy to handle the intermittent connectivity of remote villages:
+1. **Background Sync**: Screenings are saved locally in IndexedDB when the network is unavailable.
+2. **Persistence**: A specialized `SyncQueue` manages retry attempts and data conflict resolution.
+3. **Auto-Reconciliation**: The system automatically detects when the device returns online and pushes pending data to the cloud without user intervention.
+4. **Visual Indicators**: Real-time "Offline" vs "Online" status badges keep health workers informed.
 
 ---
 
-## 🚀 Getting Started
-
-Follow these steps to set up the project locally.
+## 🚀 Installation & Setup
 
 ### Prerequisites
--   **Node.js** (v18+)
--   **Python** (v3.10+)
--   **Firebase Account** (for API keys)
+- **Node.js** (v18.0 or higher)
+- **Python** (v3.10 or higher)
+- **Firebase Account** with a Firestore database and Auth enabled.
+- **Google AI Studio API Key** (for Gemini Pro).
 
-### Backend Setup
+### Step 1: Backend Setup
+1. Clone the repository and navigate to the backend:
+   ```bash
+   cd backend
+   ```
+2. Set up a virtual environment:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows: venv\Scripts\activate
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r requirements.txt
+   ```
+4. Configure environment variables in a `.env` file (see [Configuration](#-configuration)).
+5. Run migrations and start the server:
+   ```bash
+   python manage.py migrate
+   python manage.py runserver 0.0.0.0:8000
+   ```
 
-1.  **Clone the repository:**
-    ```bash
-    git clone https://github.com/yourusername/RuralHealthAI.git
-    cd RuralHealthAI/backend
-    ```
-
-2.  **Create a virtual environment:**
-    ```bash
-    python -m venv venv
-    
-    # Windows
-    venv\Scripts\activate
-    
-    # Mac/Linux
-    source venv/bin/activate
-    ```
-
-3.  **Install dependencies:**
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-4.  **Configure Environment Variables:**
-    Create a `.env` file in the `backend/` directory (see [Configuration](#-configuration)).
-
-5.  **Run Migrations:**
-    ```bash
-    python manage.py migrate
-    ```
-
-6.  **Start the Server:**
-    ```bash
-    python manage.py runserver
-    ```
-
-### Frontend Setup
-
-1.  **Navigate to frontend directory:**
-    ```bash
-    cd ../frontend
-    ```
-
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-
-3.  **Configure Environment Variables:**
-    Copy `.env.example` to `.env` and fill in your Firebase credentials.
-
-4.  **Start the Development Server:**
-    ```bash
-    npm run dev
-    ```
+### Step 2: Frontend Setup
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install packages:
+   ```bash
+   npm install
+   ```
+3. Configure environment variables in a `.env` file (see [Configuration](#-configuration)).
+4. Launch the development server:
+   ```bash
+   npm run dev
+   ```
 
 ---
 
-## ⚙ Configuration
+## ⚙️ Configuration Reference
 
-### Backend (`backend/.env`)
-```env
-SECRET_KEY=your_django_secret_key
-DEBUG=True
-ALLOWED_HOSTS=localhost,127.0.0.1
-GEMINI_API_KEY=your_google_gemini_api_key
-```
+### Backend `.env`
+| Variable | Description |
+| :--- | :--- |
+| `SECRET_KEY` | Django standard security key. |
+| `DEBUG` | Set to `True` for development, `False` for production. |
+| `GEMINI_API_KEY` | API Key from Google AI Studio. |
+| `ALLOWED_HOSTS` | Comma-separated list of domains. |
 
-### Frontend (`frontend/.env`)
-```env
-VITE_FIREBASE_API_KEY=your_api_key
-VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
-VITE_FIREBASE_PROJECT_ID=your_project_id
-VITE_FIREBASE_STORAGE_BUCKET=your_bucket
-VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-VITE_FIREBASE_APP_ID=your_app_id
-```
+### Frontend `.env`
+| Variable | Description |
+| :--- | :--- |
+| `VITE_FIREBASE_API_KEY` | Firebase Web API Key. |
+| `VITE_FIREBASE_AUTH_DOMAIN` | Firebase Project Auth Domain. |
+| `VITE_FIREBASE_PROJECT_ID` | Firebase Project ID. |
+| `VITE_FIREBASE_APP_ID` | Firebase Web App ID. |
 
 ---
 
 ## 📖 API Documentation
 
-The backend exposes a RESTful API. Key endpoints include:
+The backend exposes several key endpoints for core functionality:
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| **POST** | `/api/auth/register` | Register a new user |
-| **POST** | `/api/auth/login` | Authenticate user |
-| **GET** | `/api/patients` | List all patients |
-| **POST** | `/api/patients` | Add a new patient |
-| **POST** | `/api/screenings` | Submit screening data for AI analysis |
+- **Auth**: `POST /api/auth/register`, `POST /api/auth/login`
+- **Dashboards**: `GET /api/officer/dashboard`, `GET /api/patient/dashboard`
+- **AI Analytics**: `POST /api/ai/analyze` (Sends screening data to Gemini)
+- **Data Management**: `GET /api/screening/patients`, `POST /api/screening/screenings`
 
-For detailed documentation, visit the `/api-docs` route on the frontend.
+For interactive documentation, use the built-in **API Docs** page within the application (accessible via the footer).
 
 ---
 
-## 🗺 Roadmap
-
-- [x] MVP Development (Screening & AI Analysis)
-- [x] **New:** Forgot Password & Visibility Toggle
-- [ ] Offline Mode (PWA)
-- [ ] Voice-Based Vitals Screening
-- [ ] Multi-language Support (Hindi/Vernacular)
-- [ ] SMS/WhatsApp Report Integration
+## 🗺️ Future Roadmap
+- [ ] **Multi-lingual Support**: Localization into Hindi and regional vernaculars.
+- [ ] **Voice-Based Vitals**: AI-powered voice capture for elderly patients.
+- [ ] **WhatsApp/SMS Integration**: Automatic PDF health reports sent to patient mobiles.
+- [ ] **Predictive Modeling**: Long-term risk prediction based on historical screening trends.
 
 ---
 
-## 📄 License
+## 📄 License & Ownership
+Distributed under the **MIT License**. Created and maintained by **Alisha Shad**.
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-## 📞 Contact
-
-**Alisha Shad** - [LinkedIn](https://www.linkedin.com/in/alisha-shad-983456380/) - [GitHub](https://github.com/alishashad) - [Email](mailto:alishasshad@gmail.com)
-
-Project Link: [https://github.com/alishashad/RuralHealthAI](https://github.com/alishashad/RuralHealthAI)
+For inquiries or contributions, contact: **[alishasshad@gmail.com](mailto:alishasshad@gmail.com)**
