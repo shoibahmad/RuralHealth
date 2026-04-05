@@ -24,22 +24,22 @@ export function LifestyleSurveyForm({ data, updateData }: LifestyleSurveyFormPro
                         <div className="h-10 w-10 text-orange-400 bg-orange-500/20 rounded-full flex items-center justify-center">
                             <Cigarette className="h-5 w-5" />
                         </div>
-                        <h3 className="font-semibold text-white">Tobacco Use</h3>
+                        <h3 className="font-semibold text-white">Tobacco Use / तंबाकू का उपयोग</h3>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Do you currently smoke tobacco?</Label>
+                        <Label className="text-slate-300">Do you currently smoke tobacco? / क्या आप वर्तमान में तंबाकू का सेवन करते हैं?</Label>
                         <Select
                             value={data.smoking_status || ""}
                             onValueChange={(val) => updateData({ ...data, smoking_status: val })}
                         >
                             <SelectTrigger className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20">
-                                <SelectValue placeholder="Select status" />
+                                <SelectValue placeholder="Select status / स्थिति चुनें" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="Never" className="focus:bg-teal-500/20 focus:text-white">Never</SelectItem>
-                                <SelectItem value="Former" className="focus:bg-teal-500/20 focus:text-white">Former Smoker</SelectItem>
-                                <SelectItem value="Current" className="focus:bg-teal-500/20 focus:text-white">Current Smoker</SelectItem>
+                                <SelectItem value="Never" className="focus:bg-teal-500/20 focus:text-white">Never / कभी नहीं</SelectItem>
+                                <SelectItem value="Former" className="focus:bg-teal-500/20 focus:text-white">Former Smoker / पूर्व धूम्रपान करने वाला</SelectItem>
+                                <SelectItem value="Current" className="focus:bg-teal-500/20 focus:text-white">Current Smoker / वर्तमान धूम्रपान करने वाला</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -51,22 +51,22 @@ export function LifestyleSurveyForm({ data, updateData }: LifestyleSurveyFormPro
                         <div className="h-10 w-10 text-purple-400 bg-purple-500/20 rounded-full flex items-center justify-center">
                             <Wine className="h-5 w-5" />
                         </div>
-                        <h3 className="font-semibold text-white">Alcohol Consumption</h3>
+                        <h3 className="font-semibold text-white">Alcohol Consumption / शराब का सेवन</h3>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Alcohol intake frequency?</Label>
+                        <Label className="text-slate-300">Alcohol intake frequency? / शराब के सेवन की आवृत्ति?</Label>
                         <Select
                             value={data.alcohol_usage || ""}
                             onValueChange={(val) => updateData({ ...data, alcohol_usage: val })}
                         >
                             <SelectTrigger className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20">
-                                <SelectValue placeholder="Select frequency" />
+                                <SelectValue placeholder="Select frequency / आवृत्ति चुनें" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="None" className="focus:bg-teal-500/20 focus:text-white">None / Rare</SelectItem>
-                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">Moderate (1-2 drinks/day)</SelectItem>
-                                <SelectItem value="Heavy" className="focus:bg-teal-500/20 focus:text-white">Heavy ({'>'}2 drinks/day)</SelectItem>
+                                <SelectItem value="None" className="focus:bg-teal-500/20 focus:text-white">None / Rare / कोई नहीं / दुर्लभ</SelectItem>
+                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">Moderate (1-2 drinks/day) / मध्यम (1-2 पेय/दिन)</SelectItem>
+                                <SelectItem value="Heavy" className="focus:bg-teal-500/20 focus:text-white">Heavy ({'>'}2 drinks/day) / भारी ({'>'}2 पेय/दिन)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -78,22 +78,22 @@ export function LifestyleSurveyForm({ data, updateData }: LifestyleSurveyFormPro
                         <div className="h-10 w-10 text-green-400 bg-green-500/20 rounded-full flex items-center justify-center">
                             <Activity className="h-5 w-5" />
                         </div>
-                        <h3 className="font-semibold text-white">Physical Activity</h3>
+                        <h3 className="font-semibold text-white">Physical Activity / शारीरिक गतिविधि</h3>
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-slate-300">Weekly physical activity level (WHO Guidelines)</Label>
+                        <Label className="text-slate-300">Weekly physical activity level / साप्ताहिक शारीरिक गतिविधि स्तर</Label>
                         <Select
                             value={data.physical_activity || ""}
                             onValueChange={(val) => updateData({ ...data, physical_activity: val })}
                         >
                             <SelectTrigger className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20">
-                                <SelectValue placeholder="Select activity level" />
+                                <SelectValue placeholder="Select activity level / गतिविधि स्तर चुनें" />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="Low" className="focus:bg-teal-500/20 focus:text-white">Low (Sedentary lifestyle)</SelectItem>
-                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">Moderate (150 mins/week)</SelectItem>
-                                <SelectItem value="High" className="focus:bg-teal-500/20 focus:text-white">High (Active job/exercise)</SelectItem>
+                                <SelectItem value="Low" className="focus:bg-teal-500/20 focus:text-white">Low (Sedentary lifestyle) / कम (गतिहीन जीवन शैली)</SelectItem>
+                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">Moderate (150 mins/week) / मध्यम (150 मिनट/सप्ताह)</SelectItem>
+                                <SelectItem value="High" className="focus:bg-teal-500/20 focus:text-white">High (Active job/exercise) / उच्च (सक्रिय कार्य/व्यायाम)</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

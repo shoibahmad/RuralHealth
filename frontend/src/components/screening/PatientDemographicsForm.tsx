@@ -20,54 +20,54 @@ export function PatientDemographicsForm({ data, updateData }: PatientDemographic
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="full_name" className="text-slate-300">Full Name</Label>
+                    <Label htmlFor="full_name" className="text-slate-300">Full Name / पूरा नाम</Label>
                     <Input
                         id="full_name"
                         value={data.full_name || ""}
                         onChange={(e) => updateData({ ...data, full_name: e.target.value })}
-                        placeholder="e.g. Ram Singh"
+                        placeholder="e.g. Ram Singh / जैसे राम सिंह"
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="age" className="text-slate-300">Age</Label>
+                    <Label htmlFor="age" className="text-slate-300">Age / आयु</Label>
                     <Input
                         id="age"
                         type="number"
                         value={data.age || ""}
                         onChange={(e) => updateData({ ...data, age: parseInt(e.target.value) || "" })}
-                        placeholder="Years"
+                        placeholder="Years / वर्ष"
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="gender" className="text-slate-300">Gender</Label>
+                    <Label htmlFor="gender" className="text-slate-300">Gender / लिंग</Label>
                     <Select
                         value={data.gender || ""}
                         onValueChange={(val) => updateData({ ...data, gender: val })}
                     >
                         <SelectTrigger className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20">
-                            <SelectValue placeholder="Select gender" />
+                            <SelectValue placeholder="Select gender / लिंग चुनें" />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-900 border-white/10 text-white">
-                            <SelectItem value="Male" className="focus:bg-teal-500/20 focus:text-white">Male</SelectItem>
-                            <SelectItem value="Female" className="focus:bg-teal-500/20 focus:text-white">Female</SelectItem>
-                            <SelectItem value="Other" className="focus:bg-teal-500/20 focus:text-white">Other</SelectItem>
+                            <SelectItem value="Male" className="focus:bg-teal-500/20 focus:text-white">Male / पुरुष</SelectItem>
+                            <SelectItem value="Female" className="focus:bg-teal-500/20 focus:text-white">Female / महिला</SelectItem>
+                            <SelectItem value="Other" className="focus:bg-teal-500/20 focus:text-white">Other / अन्य</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="village" className="text-slate-300">Village / Community</Label>
+                    <Label htmlFor="village" className="text-slate-300">Village / Community / गाँव / समुदाय</Label>
                     <Input
                         id="village"
                         value={data.village || ""}
                         onChange={(e) => updateData({ ...data, village: e.target.value })}
-                        placeholder="Village Name"
+                        placeholder="Village Name / गाँव का नाम"
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-300">Phone Number (Optional)</Label>
+                    <Label htmlFor="phone" className="text-slate-300">Phone Number / फ़ोन नंबर (Optional / वैकल्पिक)</Label>
                     <Input
                         id="phone"
                         value={data.phone || ""}

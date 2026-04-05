@@ -59,11 +59,15 @@ def analyze_health_data(screening_data: dict) -> dict:
         - Computed Risk: {screening_data.get('risk_level')} (Score: {screening_data.get('risk_score')})
         
         Output valid JSON with these fields:
-        1. "summary": A professional clinical summary focusing on any abnormalities in the lab panels.
-        2. "concerns": List of strings for key health risks.
-        3. "recommendations": List of strings for actionable advice including specialized consults if lab values are critical.
-        4. "formatted_insights": A markdown string exactly matching this structure:
+        1. "summary": A professional clinical summary focusing on any abnormalities.
+        2. "summary_hi": Same as summary but in Hindi.
+        3. "concerns": List of strings for key health risks.
+        4. "concerns_hi": Same as concerns but in Hindi.
+        5. "recommendations": List of strings for actionable advice.
+        6. "recommendations_hi": Same as recommendations but in Hindi.
+        7. "formatted_insights": A markdown string exactly matching this structure:
            "**Medical Diagnostic Overview**\\n\\nThe screening reveals a **[Risk Level]** clinical status. Significant findings include [Findings].\\n\\n**Diagnostic Details:**\\n- [Detail 1]\\n- [Detail 2]\\n\\n**Clinical Guidance:**\\n1. [Guidance 1]\\n2. [Guidance 2]"
+        8. "formatted_insights_hi": Same formatted insights but in Hindi.
         """
         
         # Use fallback mechanism

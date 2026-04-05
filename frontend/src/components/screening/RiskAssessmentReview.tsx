@@ -9,8 +9,8 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-white mb-2">Review & Submit</h3>
-                <p className="text-slate-400">Please verify the collected information before finalizing the risk assessment.</p>
+                <h3 className="text-xl font-bold text-white mb-2">Review & Submit / समीक्षा और सबमिट करें</h3>
+                <p className="text-slate-400">Please verify the collected information before finalizing the risk assessment. / जोखिम मूल्यांकन को अंतिम रूप देने से पहले एकत्रित जानकारी को सत्यापित करें।</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -18,21 +18,21 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <User className="h-5 w-5 text-teal-400" /> Patient Profile
+                            <User className="h-5 w-5 text-teal-400" /> Patient Profile / रोगी प्रोफ़ाइल
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">FullName</span>
-                            <span className="text-white font-medium">{data.full_name || "N/A"}</span>
+                            <span className="text-slate-400 text-xs">Full Name / पूरा नाम</span>
+                            <span className="text-white font-medium text-xs">{data.full_name || "N/A"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Age / Gender</span>
-                            <span className="text-white font-medium">{data.age} / {data.gender}</span>
+                            <span className="text-slate-400 text-xs text-left">Age / Gender / आयु / लिंग</span>
+                            <span className="text-white font-medium text-xs">{data.age} / {data.gender}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Location</span>
-                            <span className="text-white font-medium">{data.village || "N/A"}</span>
+                            <span className="text-slate-400 text-xs">Location / स्थान</span>
+                            <span className="text-white font-medium text-xs">{data.village || "N/A"}</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -41,13 +41,13 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <Activity className="h-5 w-5 text-blue-400" /> Clinical Vitals
+                            <Activity className="h-5 w-5 text-blue-400" /> Clinical Vitals / नैदानिक महत्वपूर्ण संकेत
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Blood Pressure</span>
-                            <span className="text-white font-medium">{data.systolic_bp}/{data.diastolic_bp} mmHg</span>
+                            <span className="text-slate-400 text-xs">Blood Pressure / रक्तचाप</span>
+                            <span className="text-white font-medium text-xs">{data.systolic_bp}/{data.diastolic_bp} mmHg</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">BMI (Calc)</span>
@@ -58,8 +58,8 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Pulse/HR</span>
-                            <span className="text-white font-medium">{data.heart_rate || "N/A"} bpm</span>
+                            <span className="text-slate-400 text-xs">Pulse/HR / नब्ज़</span>
+                            <span className="text-white font-medium text-xs">{data.heart_rate || "N/A"} bpm</span>
                         </div>
                     </CardContent>
                 </Card>
@@ -68,7 +68,7 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5 md:col-span-2">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <Thermometer className="h-5 w-5 text-purple-400" /> Lab & Lifestyle Factors
+                            <Thermometer className="h-5 w-5 text-purple-400" /> Lab & Lifestyle / लैब और जीवनशैली
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="grid sm:grid-cols-2 gap-x-8 gap-y-3">

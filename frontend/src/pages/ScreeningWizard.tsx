@@ -18,11 +18,11 @@ import { motion } from "framer-motion";
 
 
 const STEPS = [
-    { label: "Patient Identity", description: "Demographics & Location" },
-    { label: "Vitals Check", description: "BP, BMI, Heart Rate" },
-    { label: "Lifestyle Survey", description: "Habits & History" },
-    { label: "Lab Reports", description: "OCR Upload" },
-    { label: "Risk Assessment", description: "Final Analysis" }
+    { label: "Identity / पहचान", description: "Demographics / जनसांख्यिकी" },
+    { label: "Vitals / महत्वपूर्ण संकेत", description: "BP, BMI, Heart Rate / बीपी, बीएमआई" },
+    { label: "Lifestyle / जीवनशैली", description: "Habits & History / आदतें और इतिहास" },
+    { label: "Lab Reports / लैब रिपोर्ट", description: "OCR Upload / ओसीआर अपलोड" },
+    { label: "Risk / जोखिम", description: "Final Analysis / अंतिम विश्लेषण" }
 ];
 
 import { useToast } from "../context/ToastContext";
@@ -35,6 +35,7 @@ export function ScreeningWizard() {
     const [error, setError] = useState<string | null>(null);
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
+    const [language, setLanguage] = useState<'en' | 'hi'>('hi'); // Default to Hindi as per request hint
     const [formData, setFormData] = useState<any>({
         // Patient
         full_name: "",
@@ -362,8 +363,26 @@ export function ScreeningWizard() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
-                    <h1 className="text-xl md:text-2xl font-bold text-white">New Screening</h1>
-                    <p className="text-sm md:text-base text-slate-400">Complete the workflow to assess health risk.</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-white">New Screening / नई स्क्रीनिंग</h1>
+                    <p className="text-sm md:text-base text-slate-400">Complete the workflow to assess health risk. / स्वास्थ्य जोखिम का आकलन करने के लिए कार्यप्रवाह पूरा करें।</p>
+                </div>
+                <div className="flex items-center bg-slate-800/50 rounded-xl p-1 border border-white/5">
+                    <Button
+                        variant={language === 'en' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setLanguage('en')}
+                        className={`text-xs h-8 px-3 rounded-lg transition-all ${language === 'en' ? 'bg-teal-500 text-white shadow-lg' : 'text-slate-400'}`}
+                    >
+                        EN
+                    </Button>
+                    <Button
+                        variant={language === 'hi' ? 'secondary' : 'ghost'}
+                        size="sm"
+                        onClick={() => setLanguage('hi')}
+                        className={`text-xs h-8 px-3 rounded-lg transition-all ${language === 'hi' ? 'bg-teal-500 text-white shadow-lg' : 'text-slate-400'}`}
+                    >
+                        हिन्दी
+                    </Button>
                 </div>
                 {/* Offline indicator */}
                 {/* Offline indicator */}
@@ -416,6 +435,7 @@ export function ScreeningWizard() {
                 }}
                 analysis={aiAnalysis}
                 patientName={formData.full_name}
+                language={language}
             />
         </motion.div >
     )
