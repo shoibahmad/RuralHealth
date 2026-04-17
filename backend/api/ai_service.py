@@ -178,45 +178,51 @@ def generate_health_recommendations(patient_data: dict, screening_results: dict)
         print(f"AI recommendation error: {e}")
         return []
 
-def extract_lab_from_image(image_path: str) -> dict:
+def extract_screening_data_from_file(file_path: str) -> dict:
     """
-    Extract lab results from an image using Gemini 2.5 Flash (multimodal).
+    Extract all screening results (Patient Info, Vitals, Lab) from an image or PDF using Gemini.
     
     Args:
-        image_path: Path to the laboratory report image
+        file_path: Path to the laboratory report or health document
         
     Returns:
-        Dictionary containing extracted lab values
+        Dictionary containing extracted values (demographics, vitals, labs)
     """
     try:
         # Check if file exists
-        if not os.path.exists(image_path):
-            return {'success': False, 'error': f"File not found: {image_path}"}
+        if not os.path.exists(file_path):
+            return {'success': False, 'error': f"File not found: {file_path}"}
             
-        # Upload the file to Gemini
-        img_file = genai.upload_file(path=image_path)
+        # Upload the file to Gemini (supports images and PDF)
+        uploaded_file = genai.upload_file(path=file_path)
         
         model = genai.GenerativeModel('gemini-2.5-flash')
         
         prompt = """
-        Analyze this laboratory report image and extract all medical values.
+        Analyze this health document (image or PDF) and extract all relevant patient, vitals, and medical data.
         Return a JSON object with the following fields (use null if not found):
         
+        - Demographics: full_name, age (number), gender ("Male", "Female"), village, phone
+        - Vitals: height_cm, weight_kg, systolic_bp, diastolic_bp, heart_rate
         - Hematology: hemoglobin, rbc_count, wbc_count, platelet_count
         - Metabolic: glucose_level, blood_urea_nitrogen, creatinine, sodium, potassium, chloride, calcium
         - Liver: alt_sgpt, ast_sgot, albumin, total_bilirubin, cholesterol_level
+        - Lifestyle: smoking_status ("Never", "Former", "Current"), alcohol_usage ("None", "Moderate", "Heavy"), physical_activity ("Low", "Moderate", "High")
         
-        Ensure values are numeric. If a range is given, use the specific result value.
+        Ensure all laboratory and vital values are numeric. If a range is given, use the specific result value.
+        For demographics, try to find patient identification if available.
         
         Example: 
         {
-            "hemoglobin": 14.8,
-            "glucose_level": 94,
-            "creatinine": 1.02
+            "full_name": "Ramesh Kumar",
+            "age": 42,
+            "systolic_bp": 130,
+            "glucose_level": 110,
+            "hemoglobin": 14.2
         }
         """
         
-        response = model.generate_content([prompt, img_file])
+        response = model.generate_content([prompt, uploaded_file])
         response_text = response.text
         
         import json
@@ -241,7 +247,7 @@ def extract_lab_from_image(image_path: str) -> dict:
         }
         
     except Exception as e:
-        print(f"Image extraction error: {e}")
+        print(f"File extraction error: {e}")
         return {
             'success': False,
             'error': str(e)

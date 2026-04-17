@@ -4,19 +4,26 @@ import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 
+import { translations } from "../../lib/translations";
+
 interface VoiceEntryBannerProps {
     data: any;
     updateData: (data: any) => void;
     title?: string;
     description?: string;
+    language: "en" | "hi";
 }
 
 export function VoiceEntryBanner({
     data,
     updateData,
-    title = "Real-time Voice Entry",
-    description = "Tap microphone to auto-fill fields in real-time."
+    title,
+    description,
+    language
 }: VoiceEntryBannerProps) {
+    const t = translations[language];
+    const defaultTitle = language === 'en' ? "Real-time Voice Entry" : "रीयल-टाइम वॉयस एंट्री";
+    const defaultDesc = language === 'en' ? "Tap microphone to auto-fill fields in real-time." : "रीयल-टाइम में फ़ील्ड भरने के लिए माइक्रोफ़ोन टैप करें।";
     const [isProcessing, setIsProcessing] = useState(false);
 
     const handleSpeechResult = useCallback(async (text: string, isFinal: boolean) => {
@@ -58,7 +65,6 @@ export function VoiceEntryBanner({
             });
 
             const result = await response.json();
-            console.log("AI Extraction Result:", result);
 
             // Merge all potential fields
             const newData = { ...data };
@@ -114,14 +120,14 @@ export function VoiceEntryBanner({
                     </div>
                     <div>
                         <h3 className="font-semibold text-white">
-                            {isListening ? "Listening..." : isProcessing ? "Processing..." : title}
+                            {isListening ? (language === 'en' ? "Listening..." : "सुन रहा हूँ...") : isProcessing ? (language === 'en' ? "Processing..." : "प्रोसेसिंग...") : (title || defaultTitle)}
                         </h3>
                         <p className="text-sm text-slate-400">
                             {isListening
-                                ? "Speak clearly (e.g., 'Weight 70, BP 120 over 80')"
+                                ? (language === 'en' ? "Speak clearly (e.g., 'Weight 70, BP 120 over 80')" : "साफ बोलें (जैसे, 'वजन 70, बीपी 120 ओवर 80')")
                                 : isProcessing
-                                    ? "Gemini is extracting data..."
-                                    : description}
+                                    ? (language === 'en' ? "Gemini is extracting data..." : "Gemini डेटा निकाल रहा है...")
+                                    : (description || defaultDesc)}
                         </p>
                     </div>
                 </div>
@@ -131,7 +137,7 @@ export function VoiceEntryBanner({
                     disabled={isProcessing}
                     className={cn(isListening ? "shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-teal-500/20 text-teal-300 hover:bg-teal-500/30 border-0")}
                 >
-                    {isListening ? "Stop" : "Start"}
+                    {isListening ? (language === 'en' ? "Stop" : "रोकें") : (language === 'en' ? "Start" : "शुरू करें")}
                 </Button>
             </div>
 
@@ -142,7 +148,7 @@ export function VoiceEntryBanner({
                         "text-sm italic",
                         isListening ? "text-white" : "text-slate-400"
                     )}>
-                        {transcript || "Waiting for speech..."}
+                        {transcript || (language === 'en' ? "Waiting for speech..." : "आवाज की प्रतीक्षा...")}
                         {isListening && <span className="inline-block w-1 h-4 ml-1 bg-teal-400 animate-pulse" />}
                     </p>
                 </div>

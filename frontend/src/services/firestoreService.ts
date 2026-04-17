@@ -400,19 +400,28 @@ export const firestoreService = {
 
         // Geographic Distribution
         const villageStats: Record<string, { total: number, high_risk: number }> = {};
+        
+        // 1. Initialize villages from patients
         patients.forEach(p => {
-            const v = p.village || 'Unknown';
+            const v = (p.village || 'Unknown').trim();
             if (!villageStats[v]) villageStats[v] = { total: 0, high_risk: 0 };
             villageStats[v].total++;
         });
+
+        // 2. Map screenings to villages via case-insensitive ID lookup
         relevantScreenings.forEach(s => {
             const patient = patients.find(p => p.id === s.patient_id);
-            const v = patient?.village || 'Unknown';
+            const v = (patient?.village || 'Unknown').trim();
+            
             if (villageStats[v] && s.risk_level === 'High') {
                 villageStats[v].high_risk++;
             }
         });
-        const geographicDist = Object.entries(villageStats).map(([village, stats]) => ({ village, ...stats }));
+
+        // 3. Convert to array and sort by total patients descending
+        const geographicDist = Object.entries(villageStats)
+            .map(([village, stats]) => ({ village, ...stats }))
+            .sort((a, b) => b.total - a.total);
 
         // Risk Factor Prevalence (%)
         const riskFactors = {

@@ -1,16 +1,20 @@
+import { translations } from "../../lib/translations";
 import { AlertTriangle, Activity, Thermometer, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface RiskAssessmentReviewProps {
     data: any;
+    language: "en" | "hi";
 }
 
-export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
+export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewProps) {
+    const t = translations[language];
+    
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center mb-8">
-                <h3 className="text-xl font-bold text-white mb-2">Review & Submit / समीक्षा और सबमिट करें</h3>
-                <p className="text-slate-400">Please verify the collected information before finalizing the risk assessment. / जोखिम मूल्यांकन को अंतिम रूप देने से पहले एकत्रित जानकारी को सत्यापित करें।</p>
+                <h3 className="text-xl font-bold text-white mb-2">{t.review_submit}</h3>
+                <p className="text-slate-400">{t.verify_info}</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
@@ -18,20 +22,20 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <User className="h-5 w-5 text-teal-400" /> Patient Profile / रोगी प्रोफ़ाइल
+                            <User className="h-5 w-5 text-teal-400" /> {t.patient_profile}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs">Full Name / पूरा नाम</span>
+                            <span className="text-slate-400 text-xs">{t.full_name}</span>
                             <span className="text-white font-medium text-xs">{data.full_name || "N/A"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs text-left">Age / Gender / आयु / लिंग</span>
+                            <span className="text-slate-400 text-xs text-left">{t.age} / {t.gender}</span>
                             <span className="text-white font-medium text-xs">{data.age} / {data.gender}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs">Location / स्थान</span>
+                            <span className="text-slate-400 text-xs">{t.location}</span>
                             <span className="text-white font-medium text-xs">{data.village || "N/A"}</span>
                         </div>
                     </CardContent>
@@ -41,16 +45,16 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <Activity className="h-5 w-5 text-blue-400" /> Clinical Vitals / नैदानिक महत्वपूर्ण संकेत
+                            <Activity className="h-5 w-5 text-blue-400" /> {t.clinical_vitals}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs">Blood Pressure / रक्तचाप</span>
+                            <span className="text-slate-400 text-xs">{t.blood_pressure}</span>
                             <span className="text-white font-medium text-xs">{data.systolic_bp}/{data.diastolic_bp} mmHg</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">BMI (Calc)</span>
+                            <span className="text-slate-400">BMI</span>
                             <span className="text-white font-medium">
                                 {data.weight_kg && data.height_cm
                                     ? (data.weight_kg / ((data.height_cm / 100) ** 2)).toFixed(1)
@@ -58,7 +62,7 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs">Pulse/HR / नब्ज़</span>
+                            <span className="text-slate-400 text-xs">{t.pulse_hr}</span>
                             <span className="text-white font-medium text-xs">{data.heart_rate || "N/A"} bpm</span>
                         </div>
                     </CardContent>
@@ -68,26 +72,26 @@ export function RiskAssessmentReview({ data }: RiskAssessmentReviewProps) {
                 <Card className="glass-card border-none bg-white/5 md:col-span-2">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-white flex items-center gap-2">
-                            <Thermometer className="h-5 w-5 text-purple-400" /> Lab & Lifestyle / लैब और जीवनशैली
+                            <Thermometer className="h-5 w-5 text-purple-400" /> {t.lab_lifestyle}
                         </CardTitle>
                     </CardHeader>
                     <CardContent className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Glucose (Fasting)</span>
+                            <span className="text-slate-400">{t.glucose}</span>
                             <span className="text-white font-medium">{data.glucose_level ? `${data.glucose_level} mg/dL` : "Not Provided"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Cholesterol</span>
+                            <span className="text-slate-400">{t.cholesterol}</span>
                             <span className="text-white font-medium">{data.cholesterol_level ? `${data.cholesterol_level} mg/dL` : "Not Provided"}</span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Tobacco Status</span>
+                            <span className="text-slate-400">{t.tobacco_status}</span>
                             <span className={`font-medium ${data.smoking_status === 'Current' ? 'text-red-400' : 'text-slate-200'}`}>
                                 {data.smoking_status || "N/A"}
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400">Physical Activity</span>
+                            <span className="text-slate-400">{t.physical_activity}</span>
                             <span className={`font-medium ${data.physical_activity === 'Low' ? 'text-amber-400' : 'text-slate-200'}`}>
                                 {data.physical_activity || "N/A"}
                             </span>

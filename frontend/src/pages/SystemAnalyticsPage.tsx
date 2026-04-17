@@ -261,31 +261,36 @@ export function SystemAnalyticsPage() {
                             </tr>
                         </thead>
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                            {(analytics.geographic_distribution || []).map((village: any, index: number) => {
-                                const riskPercentage = village.total > 0 ? ((village.high_risk / village.total) * 100).toFixed(1) : 0;
-                                return (
-                                    <tr key={index} className="hover:bg-white/5 transition-colors">
-                                        <td className="p-4 font-medium text-white">{village.village}</td>
-                                        <td className="p-4">{village.total}</td>
-                                        <td className="p-4">
-                                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
-                                                {village.high_risk}
-                                            </span>
-                                        </td>
-                                        <td className="p-4">{riskPercentage}%</td>
-                                        <td className="p-4">
-                                            <div className="flex items-center gap-3">
-                                                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[200px]">
-                                                    <div
-                                                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
-                                                        style={{ width: `${Math.min((village.total / (analytics.geographic_distribution[0]?.total || 1)) * 100, 100)}%` }}
-                                                    />
+                            {(() => {
+                                const geoData = analytics.geographic_distribution || [];
+                                const maxPatients = Math.max(...geoData.map((v: any) => v.total), 1);
+                                
+                                return geoData.map((village: any, index: number) => {
+                                    const riskPercentage = village.total > 0 ? ((village.high_risk / village.total) * 100).toFixed(1) : 0;
+                                    return (
+                                        <tr key={index} className="hover:bg-white/5 transition-colors">
+                                            <td className="p-4 font-medium text-white">{village.village}</td>
+                                            <td className="p-4">{village.total}</td>
+                                            <td className="p-4">
+                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                                                    {village.high_risk}
+                                                </span>
+                                            </td>
+                                            <td className="p-4">{riskPercentage}%</td>
+                                            <td className="p-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[200px]">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
+                                                            style={{ width: `${Math.min((village.total / maxPatients) * 100, 100)}%` }}
+                                                        />
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
+                                            </td>
+                                        </tr>
+                                    );
+                                });
+                            })()}
                         </tbody>
                     </table>
                 </div>

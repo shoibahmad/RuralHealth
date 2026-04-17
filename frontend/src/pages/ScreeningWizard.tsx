@@ -1,12 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle, Sparkles, FastForward } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { useAuth } from "../context/AuthContext";
 import { firestoreService } from "../services/firestoreService";
 import { riskUtils } from "../lib/riskUtils";
 
 import { WizardSteppers } from "../components/ui/wizard-steppers";
+import { InitialScanStep } from "../components/screening/InitialScanStep";
 import { PatientDemographicsForm } from "../components/screening/PatientDemographicsForm";
 import { VitalsEntryForm } from "../components/screening/VitalsEntryForm";
 import { LifestyleSurveyForm } from "../components/screening/LifestyleSurveyForm";
@@ -15,17 +16,8 @@ import { RiskAssessmentReview } from "../components/screening/RiskAssessmentRevi
 import { AIAnalysisModal } from "../components/screening/AIAnalysisModal";
 import { motion } from "framer-motion";
 
-
-
-const STEPS = [
-    { label: "Identity / पहचान", description: "Demographics / जनसांख्यिकी" },
-    { label: "Vitals / महत्वपूर्ण संकेत", description: "BP, BMI, Heart Rate / बीपी, बीएमआई" },
-    { label: "Lifestyle / जीवनशैली", description: "Habits & History / आदतें और इतिहास" },
-    { label: "Lab Reports / लैब रिपोर्ट", description: "OCR Upload / ओसीआर अपलोड" },
-    { label: "Risk / जोखिम", description: "Final Analysis / अंतिम विश्लेषण" }
-];
-
 import { useToast } from "../context/ToastContext";
+import { translations } from "../lib/translations";
 
 export function ScreeningWizard() {
     const { showToast } = useToast();
@@ -36,6 +28,18 @@ export function ScreeningWizard() {
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const [language, setLanguage] = useState<'en' | 'hi'>('hi'); // Default to Hindi as per request hint
+    
+    const t = translations[language];
+
+    const wizardSteps = [
+        { label: t.step_ai_scan, description: t.desc_ai_scan },
+        { label: t.step_identity, description: t.desc_identity },
+        { label: t.step_vitals, description: t.desc_vitals },
+        { label: t.step_lifestyle, description: t.desc_lifestyle },
+        { label: t.step_lab, description: t.desc_lab },
+        { label: t.step_risk, description: t.desc_risk }
+    ];
+
     const [formData, setFormData] = useState<any>({
         // Patient
         full_name: "",
@@ -80,6 +84,111 @@ export function ScreeningWizard() {
 
     const updateFormData = (newData: any) => {
         setFormData(newData);
+    };
+
+    // Diagnostics: Log form data changes
+    useEffect(() => {
+        console.log("Form Data Updated:", formData);
+    }, [formData]);
+
+    const handleOcrData = (extractedData: any) => {
+        // Robust check: Support both {'success': true, 'data': {...}} and flat {...} responses
+        let incoming = extractedData.data || extractedData;
+        
+        // If the backend sent an explicit success: false, handle it
+        if (extractedData.success === false) {
+            console.error("AI Extraction Error:", extractedData.error || "Unknown error");
+            const errorMsg = language === 'en' 
+                ? `Extraction failed: ${extractedData.error || "Please try again"}` 
+                : `निकााल विफल: ${extractedData.error || "कृपया पुनः प्रयास करें"}`;
+            showToast(errorMsg, "error");
+            return;
+        }
+
+        console.log("Tesseract Raw Incoming:", incoming);
+
+        // Utility to flatten nested objects (so "Demographics.age" becomes just "age")
+        const flattenObject = (obj: any, parentKey = ''): any => {
+            let flattened: any = {};
+            for (let key in obj) {
+                if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                    // If the value is an object and not null, recurse
+                    if (typeof obj[key] === 'object' && obj[key] !== null && !Array.isArray(obj[key])) {
+                        const deeplyFlattened = flattenObject(obj[key], '');
+                        flattened = { ...flattened, ...deeplyFlattened };
+                    } else {
+                        flattened[key] = obj[key];
+                    }
+                }
+            }
+            return flattened;
+        };
+
+        const flatData = flattenObject(incoming);
+        console.log("Tesseract Flattened Data:", flatData);
+        
+        setFormData((prev: any) => {
+            const updated = { ...prev };
+            let hasAppliedData = false;
+            
+            // Use flatData for all mapping logic
+            Object.keys(flatData).forEach(key => {
+                const val = flatData[key];
+                if (val !== null && val !== undefined && val !== "" && val !== "null") {
+                    if (Object.prototype.hasOwnProperty.call(updated, key)) {
+                        updated[key] = String(val);
+                        hasAppliedData = true;
+                    }
+                }
+            });
+
+            // 2. Alias & Transformation Mapping
+            const aliases: Record<string, string> = {
+                "patient_name": "full_name",
+                "fullname": "full_name",
+                "patient": "full_name",
+                "height": "height_cm",
+                "weight": "weight_kg",
+                "pulse": "heart_rate",
+                "heartrate": "heart_rate",
+                "cholesterol": "cholesterol_level",
+                "glucose": "glucose_level"
+            };
+
+            Object.keys(aliases).forEach(aliasKey => {
+                const targetKey = aliases[aliasKey];
+                const val = flatData[aliasKey];
+                if (val && val !== "null" && !updated[targetKey]) {
+                    updated[targetKey] = String(val);
+                    hasAppliedData = true;
+                }
+            });
+
+            // 3. Special handling for Blood Pressure 
+            const bp = flatData.blood_pressure || flatData.bp || flatData.systolic_over_diastolic;
+            if (bp && typeof bp === 'string' && bp !== "null") {
+                const parts = bp.split(/[\/\s]+/).filter(p => !isNaN(parseInt(p)));
+                if (parts.length >= 2) {
+                    updated.systolic_bp = parts[0];
+                    updated.diastolic_bp = parts[1];
+                    hasAppliedData = true;
+                }
+            }
+            
+            if (!hasAppliedData) {
+                console.warn("OCR succeeded but no matching fields were found even after flattening.");
+            }
+
+            return updated;
+        });
+
+        const successMsg = language === 'en' 
+            ? "Data extracted successfully! Please verify details." 
+            : "डेटा सफलतापूर्वक निकाला गया! कृपया विवरण सत्यापित करें।";
+            
+        showToast(successMsg, "success");
+        // Move to Identity step for verification
+        setCurrentStep(1);
     };
 
     const handleSubmitOnline = async () => {
@@ -247,7 +356,7 @@ export function ScreeningWizard() {
     };
 
     const nextStep = () => {
-        if (currentStep < STEPS.length - 1) {
+        if (currentStep < wizardSteps.length - 1) {
             setCurrentStep(c => c + 1);
         } else {
             handleSubmit();
@@ -338,15 +447,23 @@ export function ScreeningWizard() {
 
         switch (currentStep) {
             case 0:
-                return <PatientDemographicsForm data={formData} updateData={updateFormData} />;
+                return (
+                    <InitialScanStep 
+                        onDataExtracted={handleOcrData} 
+                        onSkip={() => setCurrentStep(1)} 
+                        language={language}
+                    />
+                );
             case 1:
-                return <VitalsEntryForm data={formData} updateData={updateFormData} />;
+                return <PatientDemographicsForm data={formData} updateData={updateFormData} language={language} />;
             case 2:
-                return <LifestyleSurveyForm data={formData} updateData={updateFormData} />;
+                return <VitalsEntryForm data={formData} updateData={updateFormData} language={language} />;
             case 3:
-                return <LabResultsUploadForm data={formData} updateData={updateFormData} />;
+                return <LifestyleSurveyForm data={formData} updateData={updateFormData} language={language} />;
             case 4:
-                return <RiskAssessmentReview data={formData} />;
+                return <LabResultsUploadForm data={formData} updateData={updateFormData} language={language} />;
+            case 5:
+                return <RiskAssessmentReview data={formData} language={language} />;
             default:
                 return <div className="p-8 text-center text-slate-500">Coming Soon... Step {currentStep + 1}</div>;
         }
@@ -363,8 +480,8 @@ export function ScreeningWizard() {
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div className="flex-1">
-                    <h1 className="text-xl md:text-2xl font-bold text-white">New Screening / नई स्क्रीनिंग</h1>
-                    <p className="text-sm md:text-base text-slate-400">Complete the workflow to assess health risk. / स्वास्थ्य जोखिम का आकलन करने के लिए कार्यप्रवाह पूरा करें।</p>
+                    <h1 className="text-xl md:text-2xl font-bold text-white">{t.wizard_title}</h1>
+                    <p className="text-sm md:text-base text-slate-400">{t.wizard_subtitle}</p>
                 </div>
                 <div className="flex items-center bg-slate-800/50 rounded-xl p-1 border border-white/5">
                     <Button
@@ -384,13 +501,11 @@ export function ScreeningWizard() {
                         हिन्दी
                     </Button>
                 </div>
-                {/* Offline indicator */}
-                {/* Offline indicator */}
             </div>
 
             <div className="glass-card rounded-2xl shadow-xl overflow-hidden border border-white/5">
                 <div className="p-6">
-                    <WizardSteppers steps={STEPS} currentStep={currentStep} />
+                    <WizardSteppers steps={wizardSteps} currentStep={currentStep} />
                 </div>
                 <div className="p-6 min-h-[400px]">
                     {renderStep()}
@@ -406,18 +521,19 @@ export function ScreeningWizard() {
                             >
                                 Back
                             </Button>
+                            {/* Only show Next if not on Scan Step (which has its own flow) */}
                             <Button
                                 onClick={nextStep}
                                 className="min-w-[120px] bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white border-0 shadow-lg shadow-teal-500/25 transition-all duration-300"
                             >
-                                {currentStep === STEPS.length - 1 ? (
+                                {currentStep === wizardSteps.length - 1 ? (
                                     <>
                                         <Save className="mr-2 h-4 w-4" />
-                                        {isOnline ? 'Finish' : 'Save Offline'}
+                                        {isOnline ? t.finish : t.save_offline}
                                     </>
                                 ) : (
                                     <>
-                                        Next <ArrowRight className="ml-2 h-4 w-4" />
+                                        {t.next} <ArrowRight className="ml-2 h-4 w-4" />
                                     </>
                                 )}
                             </Button>

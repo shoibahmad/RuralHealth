@@ -758,7 +758,7 @@ class AIVoiceVitalsView(APIView):
 
 
 class AILabExtractionView(APIView):
-    """Process lab report images to extract values using AI."""
+    """Process lab report images or PDFs to extract values using AI."""
     
     permission_classes = [AllowAny]
     authentication_classes = []
@@ -766,30 +766,31 @@ class AILabExtractionView(APIView):
     parser_classes = [MultiPartParser, FormParser]
     
     def post(self, request):
-        """Upload lab report image and extract results."""
-        if 'image' not in request.FILES:
+        """Upload lab report image/PDF and extract results."""
+        # Frontend might send under 'image' or 'file' key
+        file_obj = request.FILES.get('image') or request.FILES.get('file')
+        
+        if not file_obj:
             return Response(
-                {'detail': 'No image file provided'},
+                {'detail': 'No file provided'},
                 status=status.HTTP_400_BAD_REQUEST
             )
             
-        image_file = request.FILES['image']
-        
         # Save to temp file
         import tempfile
         import os
         
-        suffix = os.path.splitext(image_file.name)[1] or '.jpg'
+        suffix = os.path.splitext(file_obj.name)[1] or '.jpg'
         
         temp_file_path = None
         try:
             with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as temp_file:
-                for chunk in image_file.chunks():
+                for chunk in file_obj.chunks():
                     temp_file.write(chunk)
                 temp_file_path = temp_file.name
                 
-            from .ai_service import extract_lab_from_image
-            result = extract_lab_from_image(temp_file_path)
+            from .ai_service import extract_screening_data_from_file
+            result = extract_screening_data_from_file(temp_file_path)
             
             # Clean up temp file
             try:
@@ -805,6 +806,14 @@ class AILabExtractionView(APIView):
                     {'detail': result.get('error', 'AI processing failed')},
                     status=status.HTTP_500_INTERNAL_SERVER_ERROR
                 )
+        except Exception as e:
+            if temp_file_path and os.path.exists(temp_file_path):
+                try: os.unlink(temp_file_path)
+                except: pass
+            return Response(
+                {'detail': str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
         except Exception as e:
             if temp_file_path and os.path.exists(temp_file_path):
                 try: os.unlink(temp_file_path)

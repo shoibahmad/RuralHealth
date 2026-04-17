@@ -3,71 +3,76 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { VoiceEntryBanner } from "./VoiceEntryBanner";
+import { translations } from "../../lib/translations";
 
 interface PatientDemographicsFormProps {
     data: any;
     updateData: (data: any) => void;
+    language: "en" | "hi";
 }
 
-export function PatientDemographicsForm({ data, updateData }: PatientDemographicsFormProps) {
+export function PatientDemographicsForm({ data, updateData, language }: PatientDemographicsFormProps) {
+    const t = translations[language];
+    
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <VoiceEntryBanner
                 data={data}
                 updateData={updateData}
-                title="Voice Identity Check"
-                description="Speak patient name, age, and village to auto-fill."
+                language={language}
+                title={language === 'en' ? "Voice Identity Check" : "आवाज पहचान जांच"}
+                description={language === 'en' ? "Speak patient name, age, and village to auto-fill." : "ऑटो-फिल करने के लिए रोगी का नाम, आयु और गांव बोलें।"}
             />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="full_name" className="text-slate-300">Full Name / पूरा नाम</Label>
+                    <Label htmlFor="full_name" className="text-slate-300">{t.full_name}</Label>
                     <Input
                         id="full_name"
                         value={data.full_name || ""}
                         onChange={(e) => updateData({ ...data, full_name: e.target.value })}
-                        placeholder="e.g. Ram Singh / जैसे राम सिंह"
+                        placeholder={language === 'en' ? "e.g. Ram Singh" : "जैसे: राम सिंह"}
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="age" className="text-slate-300">Age / आयु</Label>
+                    <Label htmlFor="age" className="text-slate-300">{t.age}</Label>
                     <Input
                         id="age"
                         type="number"
                         value={data.age || ""}
-                        onChange={(e) => updateData({ ...data, age: parseInt(e.target.value) || "" })}
-                        placeholder="Years / वर्ष"
+                        onChange={(e) => updateData({ ...data, age: e.target.value })}
+                        placeholder={t.years}
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="gender" className="text-slate-300">Gender / लिंग</Label>
+                    <Label htmlFor="gender" className="text-slate-300">{t.gender}</Label>
                     <Select
                         value={data.gender || ""}
                         onValueChange={(val) => updateData({ ...data, gender: val })}
                     >
                         <SelectTrigger className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20">
-                            <SelectValue placeholder="Select gender / लिंग चुनें" />
+                            <SelectValue placeholder={t.select_gender} />
                         </SelectTrigger>
                         <SelectContent className="bg-slate-900 border-white/10 text-white">
-                            <SelectItem value="Male" className="focus:bg-teal-500/20 focus:text-white">Male / पुरुष</SelectItem>
-                            <SelectItem value="Female" className="focus:bg-teal-500/20 focus:text-white">Female / महिला</SelectItem>
-                            <SelectItem value="Other" className="focus:bg-teal-500/20 focus:text-white">Other / अन्य</SelectItem>
+                            <SelectItem value="Male" className="focus:bg-teal-500/20 focus:text-white">{t.male}</SelectItem>
+                            <SelectItem value="Female" className="focus:bg-teal-500/20 focus:text-white">{t.female}</SelectItem>
+                            <SelectItem value="Other" className="focus:bg-teal-500/20 focus:text-white">{t.other}</SelectItem>
                         </SelectContent>
                     </Select>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="village" className="text-slate-300">Village / Community / गाँव / समुदाय</Label>
+                    <Label htmlFor="village" className="text-slate-300">{t.village}</Label>
                     <Input
                         id="village"
                         value={data.village || ""}
                         onChange={(e) => updateData({ ...data, village: e.target.value })}
-                        placeholder="Village Name / गाँव का नाम"
+                        placeholder={t.village_placeholder}
                         className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50 focus:ring-teal-500/20"
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="phone" className="text-slate-300">Phone Number / फ़ोन नंबर (Optional / वैकल्पिक)</Label>
+                    <Label htmlFor="phone" className="text-slate-300">{t.phone}</Label>
                     <Input
                         id="phone"
                         value={data.phone || ""}
