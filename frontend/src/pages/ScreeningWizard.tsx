@@ -262,7 +262,16 @@ export function ScreeningWizard() {
                 console.log("New patient created:", newPatient);
             } else {
                 console.log("Self-screening for patient:", patientId);
-                // Optionally update patient profile in 'users' or 'patients' here if needed
+                // Create or update the patient profile in the 'patients' collection
+                // so they exist in both 'users' and 'patients'
+                const patientData = {
+                    full_name: formData.full_name,
+                    age: parseInt(formData.age) || 0,
+                    gender: formData.gender,
+                    village: formData.village,
+                    phone: formData.phone || undefined,
+                };
+                await firestoreService.setPatient(patientId!, patientData);
             }
 
             // Step 2: Calculate Risk (Client-side)

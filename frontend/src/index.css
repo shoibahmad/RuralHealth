@@ -95,3 +95,13 @@
 .animate-progress-indeterminate {
   animation: progress-indeterminate 1.8s infinite linear;
 }
+
+/* Style standard HTML select option elements to match the dark theme */
+select option {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+select option:disabled {
+  color: #64748b;
+}

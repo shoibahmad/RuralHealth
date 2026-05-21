@@ -201,6 +201,44 @@ export const firestoreService = {
         const snapshot = await getDocs(q);
         const patients = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Patient));
 
+        // If getting all patients, also include self-registered patient users from users collection
+        if (!healthWorkerId) {
+            try {
+                const usersQ = query(
+                    collection(db, "users"),
+                    where("role", "==", "patient")
+                );
+                const usersSnapshot = await getDocs(usersQ);
+                
+                const patientsMap = new Map<string, Patient>();
+                patients.forEach(p => {
+                    if (p.id) patientsMap.set(p.id, p);
+                });
+
+                usersSnapshot.docs.forEach((doc: any) => {
+                    if (!patientsMap.has(doc.id)) {
+                        const uData = doc.data();
+                        patientsMap.set(doc.id, {
+                            id: doc.id,
+                            full_name: uData.full_name || 'Patient',
+                            age: uData.age || 0,
+                            gender: uData.gender || 'Not Set',
+                            village: uData.village || 'Not Set',
+                            phone: uData.phone || '',
+                            health_worker_id: uData.health_worker_id || undefined,
+                            created_at: uData.created_at || new Date().toISOString()
+                        } as Patient);
+                    }
+                });
+
+                const merged = Array.from(patientsMap.values());
+                merged.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
+                return merged;
+            } catch (err) {
+                console.error("Error fetching self-registered patient users:", err);
+            }
+        }
+
         // Client-side sort if healthWorkerId was used (to avoid composite index)
         if (healthWorkerId) {
             patients.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
