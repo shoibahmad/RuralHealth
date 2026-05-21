@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Upload, Loader2, CheckCircle2, FlaskConical, Beaker, Activity } from "lucide-react";
+import { Upload, Loader2, CheckCircle2, FlaskConical, Beaker, Activity, AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -11,12 +11,15 @@ interface LabResultsUploadFormProps {
     data: any;
     updateData: (data: any) => void;
     language: "en" | "hi";
+    patientName?: string;
+    onNameMismatch?: (extractedName: string) => void;
 }
 
-export function LabResultsUploadForm({ data, updateData, language }: LabResultsUploadFormProps) {
+export function LabResultsUploadForm({ data, updateData, language, patientName, onNameMismatch }: LabResultsUploadFormProps) {
     const t = translations[language];
     const [isScanning, setIsScanning] = useState(false);
     const [preview, setPreview] = useState<string | null>(null);
+    const [labMismatch, setLabMismatch] = useState<{ extracted: string; expected: string } | null>(null);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -38,6 +41,22 @@ export function LabResultsUploadForm({ data, updateData, language }: LabResultsU
             if (response.ok) {
                 const result = await response.json();
                 const extractedData = result.data || result;
+
+                // ODR Name Mismatch Check — applies to all roles
+                if (patientName) {
+                    const extractedName: string = (
+                        extractedData.full_name || extractedData.patient_name || extractedData.fullname || ""
+                    ).trim();
+                    if (extractedName) {
+                        const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+                        if (normalize(extractedName) !== normalize(patientName.trim())) {
+                            setLabMismatch({ extracted: extractedName, expected: patientName.trim() });
+                            onNameMismatch?.(extractedName);
+                        } else {
+                            setLabMismatch(null);
+                        }
+                    }
+                }
                 
                 const newData = { ...data };
                 Object.keys(extractedData).forEach(key => {
@@ -81,6 +100,39 @@ export function LabResultsUploadForm({ data, updateData, language }: LabResultsU
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500 pb-10">
+
+            {labMismatch && (
+                <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm">
+                    <div className="flex items-start gap-3">
+                        <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                        <div className="flex-1">
+                            <p className="font-semibold text-amber-300">
+                                {language === 'en' ? 'Report Mismatch Detected' : 'रिपोर्ट मेल नहीं खाती'}
+                            </p>
+                            <p className="text-amber-400/80 mt-1">
+                                {language === 'en'
+                                    ? `This lab report appears to belong to "${labMismatch.extracted}", but the patient is "${labMismatch.expected}". You may still proceed if this is intentional.`
+                                    : `यह लैब रिपोर्ट "${labMismatch.extracted}" की लगती है, लेकिन मरीज़ "${labMismatch.expected}" हैं। यदि यह जानबूझकर है तो आप आगे बढ़ सकते हैं।`}
+                            </p>
+                        </div>
+                        <button
+                            onClick={() => setLabMismatch(null)}
+                            className="text-amber-500 hover:text-amber-300 transition-colors text-lg leading-none shrink-0"
+                            aria-label="Dismiss"
+                        >
+                            ×
+                        </button>
+                    </div>
+                    <div className="flex gap-2 mt-3 ml-8">
+                        <button
+                            onClick={() => setLabMismatch(null)}
+                            className="text-xs text-amber-400 border border-amber-500/40 rounded-md px-3 py-1 hover:bg-amber-500/10 hover:text-amber-300 transition-colors"
+                        >
+                            {language === 'en' ? 'Proceed Anyway' : 'फिर भी आगे बढ़ें'}
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="glass-card border-dashed border border-white/10 rounded-2xl p-6 text-center transition-all hover:bg-white/[0.02] group relative overflow-hidden bg-slate-900/20">
                 {!preview ? (

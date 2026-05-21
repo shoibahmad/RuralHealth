@@ -65,10 +65,7 @@ export function AppointmentsPage() {
 
     const fetchPatients = async () => {
         try {
-            // If HW, get only their patients
-            const data = await firestoreService.getPatients(
-                user?.role === 'health_worker' ? user.uid : undefined
-            );
+            const data = await firestoreService.getPatients();
             setPatients(data);
         } catch (error) {
             console.error("Error fetching patients:", error);

@@ -28,6 +28,8 @@ export function ScreeningWizard() {
     const [aiAnalysis, setAiAnalysis] = useState<any>(null);
     const [isAiModalOpen, setIsAiModalOpen] = useState(false);
     const [language, setLanguage] = useState<'en' | 'hi'>('hi'); // Default to Hindi as per request hint
+    const [nameMismatch, setNameMismatch] = useState<{ extracted: string; expected: string } | null>(null);
+    const [ocrExtractedName, setOcrExtractedName] = useState<string>("");
     
     const t = translations[language];
 
@@ -84,6 +86,22 @@ export function ScreeningWizard() {
 
     const updateFormData = (newData: any) => {
         setFormData(newData);
+
+        // ODR Name Mismatch Check for health worker/officer:
+        // When patient name is typed/changed in demographics, compare against OCR-extracted name
+        if ((user?.role === 'health_worker' || user?.role === 'health_officer') && newData._ocr_extracted_name) {
+            const extractedName: string = newData._ocr_extracted_name.trim();
+            const typedName: string = (newData.full_name || "").trim();
+            const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+            if (extractedName && typedName) {
+                if (normalize(extractedName) !== normalize(typedName)) {
+                    setNameMismatch({ extracted: extractedName, expected: typedName });
+                } else {
+                    // Names match — clear mismatch but keep the verify notice (expected: "")
+                    setNameMismatch({ extracted: extractedName, expected: "" });
+                }
+            }
+        }
     };
 
     // Diagnostics: Log form data changes
@@ -187,6 +205,37 @@ export function ScreeningWizard() {
             : "डेटा सफलतापूर्वक निकाला गया! कृपया विवरण सत्यापित करें।";
             
         showToast(successMsg, "success");
+
+        // ODR Name Mismatch Check (all roles)
+        const extractedName: string = (flatData.full_name || flatData.patient_name || flatData.fullname || "").trim();
+        const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+
+        if (extractedName) {
+            setOcrExtractedName(extractedName);
+            setFormData((prev: any) => ({ ...prev, _ocr_extracted_name: extractedName }));
+
+            if (user?.role === 'patient') {
+                // Patient: compare against logged-in user's own name
+                const loggedInName = (user.full_name || user.displayName || "").trim();
+                if (loggedInName && normalize(extractedName) !== normalize(loggedInName)) {
+                    setNameMismatch({ extracted: extractedName, expected: loggedInName });
+                    showToast(
+                        language === 'en'
+                            ? `Report mismatch! Report is for "${extractedName}" but you are logged in as "${loggedInName}".`
+                            : `रिपोर्ट मेल नहीं खाती! रिपोर्ट "${extractedName}" के लिए है, लेकिन आप "${loggedInName}" के रूप में लॉग इन हैं।`,
+                        "error"
+                    );
+                } else {
+                    setNameMismatch(null);
+                }
+            } else {
+                // Health worker / officer: always show a verification banner with the OCR name.
+                // Mismatch fires when they type a different name at step 1.
+                // Set nameMismatch with extracted as both fields so the banner shows as a "verify" notice.
+                setNameMismatch({ extracted: extractedName, expected: "" });
+            }
+        }
+
         // Move to Identity step for verification
         setCurrentStep(1);
     };
@@ -450,7 +499,7 @@ export function ScreeningWizard() {
                 return (
                     <InitialScanStep 
                         onDataExtracted={handleOcrData} 
-                        onSkip={() => setCurrentStep(1)} 
+                        onSkip={() => { setNameMismatch(null); setOcrExtractedName(""); setCurrentStep(1); }} 
                         language={language}
                     />
                 );
@@ -461,7 +510,29 @@ export function ScreeningWizard() {
             case 3:
                 return <LifestyleSurveyForm data={formData} updateData={updateFormData} language={language} />;
             case 4:
-                return <LabResultsUploadForm data={formData} updateData={updateFormData} language={language} />;
+                return <LabResultsUploadForm 
+                    data={formData} 
+                    updateData={updateFormData} 
+                    language={language}
+                    patientName={formData.full_name}
+                    onNameMismatch={(extracted: string) => {
+                        const patientName = (formData.full_name || "").trim();
+                        if (extracted && patientName) {
+                            const normalize = (s: string) => s.toLowerCase().replace(/\s+/g, " ").trim();
+                            if (normalize(extracted) !== normalize(patientName)) {
+                                setNameMismatch({ extracted, expected: patientName });
+                                showToast(
+                                    language === 'en'
+                                        ? `Report mismatch! Report is for "${extracted}" but patient is "${patientName}".`
+                                        : `रिपोर्ट मेल नहीं खाती! रिपोर्ट "${extracted}" के लिए है, लेकिन मरीज़ "${patientName}" हैं।`,
+                                    "error"
+                                );
+                            } else {
+                                setNameMismatch(null);
+                            }
+                        }
+                    }}
+                />;
             case 5:
                 return <RiskAssessmentReview data={formData} language={language} />;
             default:
@@ -508,6 +579,62 @@ export function ScreeningWizard() {
                     <WizardSteppers steps={wizardSteps} currentStep={currentStep} />
                 </div>
                 <div className="p-6 min-h-[400px]">
+                    {nameMismatch && nameMismatch.expected === "" && (
+                        // Verify notice for health worker/officer — OCR detected a name, ask them to confirm
+                        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/30 rounded-xl text-sm">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="h-5 w-5 text-red-400 shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <p className="font-semibold text-red-300">
+                                        {language === 'en' ? 'Verify Patient Name' : 'मरीज़ का नाम सत्यापित करें'}
+                                    </p>
+                                    <p className="text-red-400/80 mt-1">
+                                        {language === 'en'
+                                            ? `Report detected patient name: "${nameMismatch.extracted}". Please confirm this matches the intended patient.`
+                                            : `रिपोर्ट में मरीज़ का नाम मिला: "${nameMismatch.extracted}"। कृपया पुष्टि करें कि यह सही मरीज़ है।`}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setNameMismatch(null)}
+                                    className="text-red-500 hover:text-red-300 transition-colors text-lg leading-none shrink-0"
+                                    aria-label="Dismiss"
+                                >×</button>
+                            </div>
+                        </div>
+                    )}
+                    {nameMismatch && nameMismatch.expected !== "" && (
+                        // Mismatch warning — extracted name differs from patient/logged-in name
+                        <div className="mb-4 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl text-sm">
+                            <div className="flex items-start gap-3">
+                                <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
+                                <div className="flex-1">
+                                    <p className="font-semibold text-amber-300">
+                                        {language === 'en' ? 'Report Mismatch Detected' : 'रिपोर्ट मेल नहीं खाती'}
+                                    </p>
+                                    <p className="text-amber-400/80 mt-1">
+                                        {language === 'en'
+                                            ? `Report is for "${nameMismatch.extracted}" but patient is "${nameMismatch.expected}". You may still proceed if this is intentional.`
+                                            : `रिपोर्ट "${nameMismatch.extracted}" के लिए है, लेकिन मरीज़ "${nameMismatch.expected}" हैं। यदि यह जानबूझकर है तो आप आगे बढ़ सकते हैं।`}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setNameMismatch(null)}
+                                    className="text-amber-500 hover:text-amber-300 transition-colors text-lg leading-none shrink-0"
+                                    aria-label="Dismiss"
+                                >×</button>
+                            </div>
+                            <div className="flex gap-2 mt-3 ml-8">
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => setNameMismatch(null)}
+                                    className="border-amber-500/40 text-amber-400 hover:bg-amber-500/10 hover:text-amber-300 text-xs h-7"
+                                >
+                                    {language === 'en' ? 'Proceed Anyway' : 'फिर भी आगे बढ़ें'}
+                                </Button>
+                            </div>
+                        </div>
+                    )}
                     {renderStep()}
                 </div>
                 <div className="p-6 border-t border-white/5 flex justify-between bg-black/20">
