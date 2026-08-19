@@ -21,6 +21,14 @@ export default defineConfig({
         'src/main.tsx',
         'src/vite-env.d.ts',
       ],
+      // Floors enforced by `npm run test:coverage`, which CI runs. Raise them
+      // as coverage improves; never lower them to make a build pass.
+      thresholds: {
+        lines: 55,
+        functions: 55,
+        branches: 70,
+        statements: 55,
+      },
     },
   },
 })

@@ -3,15 +3,53 @@
  */
 
 import { db } from './db';
-import type { LocalPatient, LocalScreening, SyncQueueItem } from './db';
+import type {
+    LocalPatient,
+    LocalScreening,
+    QueuedScreeningData,
+    SyncQueueItem,
+} from './db';
 
-type SyncStatus = 'idle' | 'syncing' | 'error' | 'success';
+export type SyncStatus = 'idle' | 'syncing' | 'error' | 'success';
 
-interface SyncResult {
+export interface SyncResult {
     success: boolean;
     synced: number;
     failed: number;
     errors: string[];
+}
+
+/**
+ * Raw form input awaiting sync.
+ *
+ * Values arrive as strings from the wizard inputs but may already be numbers
+ * when they come from an OCR extraction, so both are accepted and coerced.
+ */
+export type OfflineFormInput = Record<string, string | number | undefined | null>;
+
+/** Extract the message from an unknown thrown value. */
+function errorMessage(error: unknown): string {
+    return error instanceof Error ? error.message : String(error);
+}
+
+/**
+ * Coerce a form value to a number, treating blank and unparseable input as
+ * "not recorded" rather than zero.
+ */
+function toFloat(value: string | number | undefined | null): number | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    return Number.isNaN(parsed) ? undefined : parsed;
+}
+
+function toInt(value: string | number | undefined | null): number | undefined {
+    const parsed = toFloat(value);
+    return parsed === undefined ? undefined : Math.trunc(parsed);
+}
+
+function toText(value: string | number | undefined | null): string | undefined {
+    if (value === undefined || value === null || value === '') return undefined;
+    return String(value);
 }
 
 class SyncService {
@@ -38,17 +76,17 @@ class SyncService {
     }
 
     // Save patient locally (for offline use)
-    async savePatientLocally(patientData: any): Promise<string> {
+    async savePatientLocally(patientData: OfflineFormInput): Promise<string> {
         const localId = db.generateId();
         const localPatient: LocalPatient = {
             localId,
             synced: false,
             data: {
-                full_name: patientData.full_name,
-                age: parseInt(patientData.age) || 0,
-                gender: patientData.gender,
-                village: patientData.village,
-                phone: patientData.phone || undefined,
+                full_name: String(patientData.full_name ?? ''),
+                age: toInt(patientData.age) ?? 0,
+                gender: String(patientData.gender ?? ''),
+                village: String(patientData.village ?? ''),
+                phone: patientData.phone ? String(patientData.phone) : undefined,
             },
             createdAt: new Date(),
         };
@@ -66,23 +104,26 @@ class SyncService {
     }
 
     // Save screening locally (for offline use)
-    async saveScreeningLocally(screeningData: any, patientLocalId: string): Promise<string> {
+    async saveScreeningLocally(
+        screeningData: OfflineFormInput,
+        patientLocalId: string,
+    ): Promise<string> {
         const localId = db.generateId();
         const localScreening: LocalScreening = {
             localId,
             patientLocalId,
             synced: false,
             data: {
-                height_cm: parseFloat(screeningData.height_cm) || undefined,
-                weight_kg: parseFloat(screeningData.weight_kg) || undefined,
-                systolic_bp: parseInt(screeningData.systolic_bp) || undefined,
-                diastolic_bp: parseInt(screeningData.diastolic_bp) || undefined,
-                heart_rate: parseInt(screeningData.heart_rate) || undefined,
-                smoking_status: screeningData.smoking_status || undefined,
-                alcohol_usage: screeningData.alcohol_usage || undefined,
-                physical_activity: screeningData.physical_activity || undefined,
-                glucose_level: parseFloat(screeningData.glucose_level) || undefined,
-                cholesterol_level: parseFloat(screeningData.cholesterol_level) || undefined,
+                height_cm: toFloat(screeningData.height_cm),
+                weight_kg: toFloat(screeningData.weight_kg),
+                systolic_bp: toInt(screeningData.systolic_bp),
+                diastolic_bp: toInt(screeningData.diastolic_bp),
+                heart_rate: toInt(screeningData.heart_rate),
+                smoking_status: toText(screeningData.smoking_status),
+                alcohol_usage: toText(screeningData.alcohol_usage),
+                physical_activity: toText(screeningData.physical_activity),
+                glucose_level: toFloat(screeningData.glucose_level),
+                cholesterol_level: toFloat(screeningData.cholesterol_level),
             },
             createdAt: new Date(),
         };
@@ -153,7 +194,7 @@ class SyncService {
                         }
                     } else if (item.type === 'screening') {
                         // Get patient server ID
-                        const patientLocalId = item.data.patientLocalId;
+                        const { patientLocalId } = item.data as QueuedScreeningData;
                         let patientServerId = patientIdMap.get(patientLocalId);
 
                         // If patient not yet synced, try to find it
@@ -175,23 +216,24 @@ class SyncService {
                             result.synced++;
                         }
                     }
-                } catch (error: any) {
+                } catch (error: unknown) {
+                    const message = errorMessage(error);
                     console.error(`Failed to sync item ${item.id}:`, error);
                     item.attempts++;
                     item.lastAttempt = new Date();
-                    item.error = error.message;
+                    item.error = message;
                     await db.updateSyncQueueItem(item);
                     result.failed++;
-                    result.errors.push(`${item.type}: ${error.message}`);
+                    result.errors.push(`${item.type}: ${message}`);
                 }
             }
 
             result.success = result.failed === 0;
             this.notifyListeners(result.success ? 'success' : 'error');
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Sync failed:', error);
             result.success = false;
-            result.errors.push(error.message);
+            result.errors.push(errorMessage(error));
             this.notifyListeners('error');
         } finally {
             this.isSyncing = false;
@@ -223,7 +265,8 @@ class SyncService {
 
     private async syncScreening(item: SyncQueueItem, patientServerId: number): Promise<number | null> {
         // patientLocalId is an offline-only key and must not reach the server.
-        const { patientLocalId: _localId, ...screeningData } = item.data;
+        const { patientLocalId: _localId, ...screeningData } =
+            item.data as QueuedScreeningData;
 
         const response = await fetch('/api/screening/screenings', {
             method: 'POST',

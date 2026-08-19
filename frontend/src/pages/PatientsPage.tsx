@@ -14,16 +14,18 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-// import { useAuth } from "../context/AuthContext";
-import { firestoreService, type Patient } from "../services/firestoreService";
+import {
+    firestoreService,
+    type Patient,
+    type PatientDetail,
+} from "../services/firestoreService";
 import { useToast } from "../context/ToastContext";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
+import { createLogger } from "../lib/logger";
+import { errorMessage } from "../lib/errors";
+import { formatDate, formatDateTime } from "../lib/dates";
 
-interface PatientDetail extends Patient {
-    screenings: unknown[];
-    appointments: unknown[];
-    recommendations: unknown[];
-}
+const log = createLogger("PatientsPage");
 
 export function PatientsPage() {
     const { showToast } = useToast();
@@ -57,12 +59,12 @@ export function PatientsPage() {
             }
 
             if (riskFilter) {
-                filtered = filtered.filter((p: any) => p.latest_risk_level === riskFilter);
+                filtered = filtered.filter((p) => p.latest_risk_level === riskFilter);
             }
 
             setPatients(filtered);
         } catch (error) {
-            console.error("Error fetching patients:", error);
+            log.error("Failed to fetch patients", error);
         } finally {
             setLoading(false);
         }
@@ -80,13 +82,13 @@ export function PatientsPage() {
                     screenings,
                     appointments,
                     recommendations: [],
-                    latest_risk_level: (patient as any).latest_risk_level,
-                    screening_count: (patient as any).screening_count
+                    latest_risk_level: patient.latest_risk_level,
+                    screening_count: patient.screening_count
                 });
                 setShowDetailModal(true);
             }
         } catch (error) {
-            console.error("Error fetching patient detail:", error);
+            log.error("Failed to fetch patient detail", error);
         }
     };
 
@@ -102,15 +104,15 @@ export function PatientsPage() {
             showToast("Patient deleted successfully", "success");
             fetchPatients();
         } catch (error) {
-            console.error("Error deleting patient:", error);
-            showToast("Failed to delete patient", "error");
+            log.error("Failed to delete patient", error);
+            showToast(errorMessage(error, "Failed to delete patient"), "error");
         } finally {
             setIsDeleting(false);
             setDeleteId(null);
         }
     };
 
-    const getRiskBadge = (risk: string | null) => {
+    const getRiskBadge = (risk?: string | null) => {
         if (!risk) return null;
         const colors: Record<string, string> = {
             High: "bg-red-500/10 text-red-400 border-red-500/20",
@@ -174,9 +176,9 @@ export function PatientsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
                     { label: "Total Patients", value: patients.length, color: "text-blue-400" },
-                    { label: "High Risk", value: patients.filter(p => (p as any).latest_risk_level === "High").length, color: "text-red-400" },
-                    { label: "Medium Risk", value: patients.filter(p => (p as any).latest_risk_level === "Medium").length, color: "text-amber-400" },
-                    { label: "Low Risk", value: patients.filter(p => (p as any).latest_risk_level === "Low").length, color: "text-emerald-400" },
+                    { label: "High Risk", value: patients.filter(p => p.latest_risk_level === "High").length, color: "text-red-400" },
+                    { label: "Medium Risk", value: patients.filter(p => p.latest_risk_level === "Medium").length, color: "text-amber-400" },
+                    { label: "Low Risk", value: patients.filter(p => p.latest_risk_level === "Low").length, color: "text-emerald-400" },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -241,10 +243,10 @@ export function PatientsPage() {
                                         <td className="p-4 text-slate-500">{patient.phone || "-"}</td>
                                         <td className="p-4">
                                             <span className="px-2 py-1 bg-slate-800 rounded text-xs">
-                                                {(patient as any).screening_count || 0}
+                                                {patient.screening_count || 0}
                                             </span>
                                         </td>
-                                        <td className="p-4">{getRiskBadge((patient as any).latest_risk_level)}</td>
+                                        <td className="p-4">{getRiskBadge(patient.latest_risk_level)}</td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
@@ -327,11 +329,11 @@ export function PatientsPage() {
                                     <p className="text-slate-400 text-sm">No screenings recorded</p>
                                 ) : (
                                     <div className="space-y-3">
-                                        {selectedPatient.screenings.map((s: any) => (
+                                        {selectedPatient.screenings.map((s) => (
                                             <div key={s.id} className="bg-slate-800/50 rounded-lg p-4 border border-white/5">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-sm text-slate-400">
-                                                        {new Date(s.created_at).toLocaleDateString()}
+                                                        {formatDate(s.created_at)}
                                                     </span>
                                                     {getRiskBadge(s.risk_level)}
                                                 </div>
@@ -359,7 +361,7 @@ export function PatientsPage() {
                                     <p className="text-slate-400 text-sm">No recommendations</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {selectedPatient.recommendations.map((r: any) => (
+                                        {selectedPatient.recommendations.map((r) => (
                                             <div key={r.id} className={`p-3 rounded-lg border ${r.priority === 'high'
                                                 ? 'bg-red-500/10 border-red-500/20'
                                                 : r.priority === 'medium'
@@ -384,12 +386,12 @@ export function PatientsPage() {
                                     <p className="text-slate-400 text-sm">No appointments scheduled</p>
                                 ) : (
                                     <div className="space-y-2">
-                                        {selectedPatient.appointments.map((a: any) => (
+                                        {selectedPatient.appointments.map((a) => (
                                             <div key={a.id} className="bg-slate-800/50 rounded-lg p-3 border border-white/5 flex items-center justify-between">
                                                 <div>
                                                     <p className="text-white text-sm">{a.reason}</p>
                                                     <p className="text-slate-400 text-xs">
-                                                        {new Date(a.scheduled_date).toLocaleString()}
+                                                        {formatDateTime(a.scheduled_date)}
                                                     </p>
                                                 </div>
                                                 <span className={`text-xs px-2 py-1 rounded ${a.status === 'scheduled' ? 'bg-blue-500/20 text-blue-400' :

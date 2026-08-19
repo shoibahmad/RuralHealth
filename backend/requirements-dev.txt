@@ -9,3 +9,6 @@ pytest-cov>=6.0,<8.0
 
 # Lint and format
 ruff>=0.9,<1.0
+
+# Dependency vulnerability auditing (also run in CI)
+pip-audit>=2.7,<3.0

@@ -33,6 +33,8 @@ export type {
     HealthWorkerInput,
     HealthWorkerWithStats,
     Patient,
+    PatientDetail,
+    Recommendation,
     Screening,
     User,
     VillageStats,

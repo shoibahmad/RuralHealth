@@ -6,7 +6,7 @@
 const DB_NAME = 'RuralHealthDB';
 const DB_VERSION = 1;
 
-interface LocalPatient {
+export interface LocalPatient {
     localId: string;
     serverId?: number;
     synced: boolean;
@@ -20,7 +20,7 @@ interface LocalPatient {
     createdAt: Date;
 }
 
-interface LocalScreening {
+export interface LocalScreening {
     localId: string;
     serverId?: number;
     patientLocalId: string;
@@ -41,12 +41,20 @@ interface LocalScreening {
     createdAt: Date;
 }
 
-interface SyncQueueItem {
+/** Fields a queued screening carries in addition to its measurements. */
+export type QueuedScreeningData = LocalScreening['data'] & {
+    patientLocalId: string;
+};
+
+/** A queued write is either a patient record or a screening record. */
+export type SyncQueuePayload = LocalPatient['data'] | QueuedScreeningData;
+
+export interface SyncQueueItem {
     id: string;
     type: 'patient' | 'screening';
     action: 'create' | 'update' | 'delete';
     localId: string;
-    data: any;
+    data: SyncQueuePayload;
     attempts: number;
     lastAttempt?: Date;
     error?: string;
@@ -372,4 +380,3 @@ class DatabaseService {
 
 // Export singleton instance
 export const db = new DatabaseService();
-export type { LocalPatient, LocalScreening, SyncQueueItem };

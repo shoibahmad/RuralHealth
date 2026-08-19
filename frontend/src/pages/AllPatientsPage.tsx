@@ -8,20 +8,25 @@ import { Label } from "../components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/ToastContext";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
-import { firestoreService } from "../services/firestoreService";
+import { firestoreService, type Patient } from "../services/firestoreService";
+import { createLogger } from "../lib/logger";
+import { formatDate } from "../lib/dates";
+import { errorMessage } from "../lib/errors";
+
+const log = createLogger("AllPatientsPage");
 
 export function AllPatientsPage() {
     // const { user } = useAuth(); // Unused
     const navigate = useNavigate();
-    const [patients, setPatients] = useState<any[]>([]);
+    const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [riskFilter, setRiskFilter] = useState("");
     const [page, setPage] = useState(1);
     const [total, setTotal] = useState(0);
-    const [editingPatient, setEditingPatient] = useState<any>(null);
+    const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
-    const [patientToDelete, setPatientToDelete] = useState<any>(null);
+    const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const { showToast } = useToast();
 
@@ -47,7 +52,7 @@ export function AllPatientsPage() {
             }
 
             if (riskFilter) {
-                filtered = filtered.filter((p: any) => p.latest_risk_level === riskFilter);
+                filtered = filtered.filter((p) => p.latest_risk_level === riskFilter);
             }
 
             setTotal(filtered.length);
@@ -58,7 +63,7 @@ export function AllPatientsPage() {
 
             setPatients(paginated);
         } catch (error) {
-            console.error('Failed to fetch patients:', error);
+            log.error('Failed to fetch patients', error);
         } finally {
             setLoading(false);
         }
@@ -69,7 +74,7 @@ export function AllPatientsPage() {
         fetchPatients();
     };
 
-    const handleEditPatient = (patient: any) => {
+    const handleEditPatient = (patient: Patient) => {
         setEditingPatient({ ...patient });
         setShowEditModal(true);
     };
@@ -78,6 +83,8 @@ export function AllPatientsPage() {
         if (!editingPatient) return;
 
         try {
+            if (!editingPatient.id) return;
+
             await firestoreService.updatePatient(editingPatient.id, {
                 full_name: editingPatient.full_name,
                 age: editingPatient.age,
@@ -89,12 +96,12 @@ export function AllPatientsPage() {
             setShowEditModal(false);
             fetchPatients();
         } catch (error) {
-            console.error('Failed to update patient:', error);
+            log.error('Failed to update patient', error);
         }
     };
 
     const handleConfirmDelete = async () => {
-        if (!patientToDelete) return;
+        if (!patientToDelete?.id) return;
         setLoading(true);
         try {
             await firestoreService.deletePatient(patientToDelete.id);
@@ -102,9 +109,9 @@ export function AllPatientsPage() {
             setIsDeleteModalOpen(false);
             setPatientToDelete(null);
             fetchPatients();
-        } catch (error: any) {
-            console.error("Failed to delete patient:", error);
-            showToast(error.message || "Failed to delete patient", "error");
+        } catch (error: unknown) {
+            log.error("Failed to delete patient", error);
+            showToast(errorMessage(error, "Failed to delete patient"), "error");
         } finally {
             setLoading(false);
         }
@@ -241,7 +248,7 @@ export function AllPatientsPage() {
                                             )}
                                         </td>
                                         <td className="p-6 text-slate-500 text-xs">
-                                            {new Date(patient.created_at).toLocaleDateString()}
+                                            {formatDate(patient.created_at)}
                                         </td>
                                         <td className="p-6 text-right">
                                             <div className="flex items-center justify-end gap-2">

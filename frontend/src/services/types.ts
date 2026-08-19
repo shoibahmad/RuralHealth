@@ -103,6 +103,25 @@ export interface Appointment {
     created_at: string | Timestamp;
 }
 
+export interface Recommendation {
+    id?: string;
+    patient_id: string;
+    screening_id?: string;
+    category: "diet" | "exercise" | "medication" | "lifestyle" | "followup";
+    title: string;
+    description: string;
+    priority: "low" | "medium" | "high";
+    is_completed?: boolean;
+    created_at: string | Timestamp;
+}
+
+/** A patient together with the records shown on their detail view. */
+export interface PatientDetail extends Patient {
+    screenings: Screening[];
+    appointments: Appointment[];
+    recommendations: Recommendation[];
+}
+
 export interface VillageStats {
     village: string;
     total: number;
