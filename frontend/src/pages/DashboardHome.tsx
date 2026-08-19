@@ -1,18 +1,15 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import {
-    Users,
-    Activity,
-    AlertTriangle,
     TrendingUp,
     ArrowUpRight,
     Search,
-    Calendar,
     Plus,
     Cloud,
     WifiOff,
     RefreshCw,
+    Users,
+    Calendar,
 } from "lucide-react";
 import {
     AreaChart,
@@ -28,43 +25,24 @@ import {
 } from "recharts";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useAuth } from "../context/useAuth";
-import { firestoreService, type DashboardStats } from "../services/firestoreService";
-import { createLogger } from "../lib/logger";
 import { formatDate } from "../lib/dates";
 import { useOffline } from "../context/useOffline";
-
-const log = createLogger("DashboardHome");
+import { useDashboardStats } from "../hooks/useDashboardStats";
 
 export function DashboardHome() {
-    const { user } = useAuth();
     const { isOnline, pendingSyncCount, syncStatus, syncNow } = useOffline();
     const navigate = useNavigate();
-    const [stats, setStats] = useState<DashboardStats | null>(null);
-
-    // Mock local stats for now
-    const localStats = { localPatients: 0, localScreenings: 0 };
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-
-    useEffect(() => {
-        const loadStats = async () => {
-            // Pass user ID only if it's a health worker to filter data
-            // If user is Admin/Officer, they see global stats (conceptually)
-            // For now, firestoreService.getDashboardStats handles some of this logic
-            try {
-                const data = await firestoreService.getDashboardStats(
-                    user?.role === "health_worker" ? user.uid : undefined,
-                );
-                setStats(data);
-            } catch (error) {
-                log.error("Failed to load dashboard stats", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadStats();
-    }, [user]);
+    const {
+        stats,
+        loading,
+        searchTerm,
+        setSearchTerm,
+        statCards,
+        riskDistribution,
+        totalRisk,
+        filteredRecentScreenings,
+        localStats,
+    } = useDashboardStats();
 
     if (loading) {
         return (
@@ -73,54 +51,6 @@ export function DashboardHome() {
             </div>
         );
     }
-
-    const riskDistribution = stats
-        ? [
-              { name: "Low Risk", value: stats.risk_distribution.Low || 0, color: "#10b981" },
-              { name: "Medium", value: stats.risk_distribution.Medium || 0, color: "#f59e0b" },
-              { name: "High Risk", value: stats.risk_distribution.High || 0, color: "#ef4444" },
-          ]
-        : [];
-
-    const totalRisk = riskDistribution.reduce((sum, item) => sum + item.value, 0);
-
-    const statCards = stats
-        ? [
-              {
-                  label: "Total Patients",
-                  value: stats.total_patients.toLocaleString(),
-                  icon: Users,
-                  color: "text-blue-400",
-                  bg: "bg-blue-500/10",
-              },
-              {
-                  label: "Total Screenings",
-                  value: stats.total_screenings.toLocaleString(),
-                  icon: Activity,
-                  color: "text-teal-400",
-                  bg: "bg-teal-500/10",
-              },
-              {
-                  label: "High Risk Cases",
-                  value: stats.high_risk_count.toLocaleString(),
-                  icon: AlertTriangle,
-                  color: "text-red-400",
-                  bg: "bg-red-500/10",
-              },
-              {
-                  label: "Pending Appointments",
-                  value: stats.pending_appointments.toLocaleString(),
-                  icon: Calendar,
-                  color: "text-amber-400",
-                  bg: "bg-amber-500/10",
-              },
-          ]
-        : [];
-
-    const filteredRecentScreenings =
-        stats?.recent_screenings.filter((s) =>
-            s.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()),
-        ) || [];
 
     return (
         <div className="space-y-8 pb-8">
