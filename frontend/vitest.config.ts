@@ -19,7 +19,7 @@ export default defineConfig({
             // right tool. Route components and layouts are deliberately outside the
             // denominator: they are markup around these modules, and are exercised
             // end to end by the container smoke test in CI rather than by jsdom.
-            include: ["src/lib/**/*.ts", "src/services/**/*.ts", "src/pages/screening/**/*.ts"],
+            include: ["src/lib/**/*.ts", "src/services/**/*.ts", "src/hooks/**/*.ts", "src/pages/screening/**/*.ts"],
             exclude: [
                 "src/**/*.test.{ts,tsx}",
                 // Thin wrappers over browser APIs and third-party SDKs. Testing these
@@ -28,6 +28,8 @@ export default defineConfig({
                 "src/lib/sync.ts",
                 "src/lib/firebase.ts",
                 "src/services/db.ts",
+                "src/hooks/useSpeechRecognition.ts",
+                "src/hooks/useOfflineStorage.ts",
                 // Static data, not logic.
                 "src/lib/translations.ts",
             ],
