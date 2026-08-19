@@ -40,8 +40,10 @@ RUN apt-get update \
 
 WORKDIR /app/backend
 
-COPY backend/requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+# Install from the lockfile so the image matches what CI tested, rather than
+# re-resolving the ranges in requirements.txt at build time.
+COPY backend/requirements.lock.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt
 
 COPY backend/ ./
 
