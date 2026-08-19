@@ -160,9 +160,21 @@ Or use the Makefile: `make help` lists every target.
 | `npm run audit:deps` | npm audit plus pip-audit against the lockfiles |
 
 Coverage is gated in CI and the build fails below the floor: **85% backend**
-(currently 92.4%) and **85% frontend lines** (currently 94.2%, measured over
+(currently 92.5%) and **85% frontend lines** (currently 94.2%, measured over
 the logic layers; see `frontend/vitest.config.ts` for what is excluded and
 why).
+
+### 🔒 Zero External Accounts Required for Test Execution
+
+Both test suites run entirely in isolation without requiring live Firebase or
+Google Gemini credentials:
+- **Frontend tests (`npm run test:frontend`)**: Firebase Auth, Firestore
+  collections, and Speech APIs are mocked in-memory via Vitest mocks and MSW
+  fixture patterns (`src/test/setup.ts`, `src/services/firestoreService.test.ts`).
+- **Backend tests (`npm run test:backend`)**: An autouse pytest fixture
+  (`no_gemini_key` in `conftest.py`) strips `GEMINI_API_KEY` so AI pathways take
+  their deterministic local fallback branches. Django tests use an isolated
+  in-memory / test SQLite database.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions,
 [SECURITY.md](SECURITY.md) for the security posture, and
