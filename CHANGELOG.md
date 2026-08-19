@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend test suite: 248 pytest specs covering authentication, patients,
   screenings, dashboards, officer oversight, the patient portal and the AI
   service wrapper, at 92% statement coverage.
-- Frontend test suite: 213 vitest specs covering the validation schemas, risk
+- Frontend test suite: 232 vitest specs covering the validation schemas, risk
   scoring, OCR field mapping, name reconciliation, screening payload assembly,
   dashboard aggregation, the Firestore service layer and the
   name-verification banner.
