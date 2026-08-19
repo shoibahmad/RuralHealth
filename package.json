@@ -1,7 +1,10 @@
 {
   "name": "ruralhealth-ai",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
+  "workspaces": [
+    "frontend"
+  ],
   "description": "AI-assisted health screening platform for rural frontline health workers, with offline-first capture and Gemini-backed risk analysis.",
   "license": "MIT",
   "repository": {
