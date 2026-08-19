@@ -1,173 +1,22 @@
-import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { User, Mail, Lock, Save, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useAuth } from "../context/useAuth";
-import { useToast } from "../context/useToast";
-
-import {
-    updateProfile,
-    updatePassword,
-    reauthenticateWithCredential,
-    EmailAuthProvider,
-} from "firebase/auth";
-import { doc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../lib/firebase";
-import { firestoreService } from "../services/firestoreService";
-
-import { createLogger } from "../lib/logger";
-import { errorMessage } from "../lib/errors";
-
-const log = createLogger("SettingsPage");
+import { useSettingsForm } from "../hooks/useSettingsForm";
 
 export function SettingsPage() {
-    const { user } = useAuth(); // User from context
-    const { showToast } = useToast();
-    const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
-        null,
-    );
-
-    const [profileData, setProfileData] = useState({
-        full_name: "",
-        email: "",
-        age: "",
-        gender: "",
-        village: "",
-        phone: "",
-    });
-
-    const [passwordData, setPasswordData] = useState({
-        current_password: "",
-        new_password: "",
-        confirm_password: "",
-    });
-
-    useEffect(() => {
-        const loadData = async () => {
-            if (user) {
-                // Load Auth Data
-                const baseData = {
-                    full_name: user.displayName || user.full_name || "",
-                    email: user.email || "",
-                    age: "",
-                    gender: "",
-                    village: "",
-                    phone: "",
-                };
-
-                // Load Clinical Data from 'patients' collection
-                try {
-                    const patientDoc = await firestoreService.getPatient(user.uid);
-                    if (patientDoc) {
-                        baseData.age = patientDoc.age?.toString() || "";
-                        baseData.gender = patientDoc.gender || "";
-                        baseData.village = patientDoc.village || "";
-                        baseData.phone = patientDoc.phone || "";
-                    }
-                } catch (err) {
-                    console.error("Failed to load clinical profile:", err);
-                }
-
-                setProfileData(baseData);
-            }
-        };
-        loadData();
-    }, [user]);
-
-    const handleProfileUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage(null);
-
-        try {
-            if (!auth.currentUser) throw new Error("No user logged in");
-
-            // Update Auth Profile
-            if (profileData.full_name !== auth.currentUser.displayName) {
-                await updateProfile(auth.currentUser, {
-                    displayName: profileData.full_name,
-                });
-            }
-
-            // Update Firestore Doc (users collection)
-            await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                full_name: profileData.full_name,
-            });
-
-            // Update Clinical Profile (patients collection)
-            // Linked by UID
-            await firestoreService.setPatient(auth.currentUser.uid, {
-                full_name: profileData.full_name,
-                age: parseInt(profileData.age) || 0,
-                gender: profileData.gender,
-                village: profileData.village,
-                phone: profileData.phone,
-                // created_at will be handled by setPatient if new
-            });
-
-            showToast("Profile updated successfully!", "success");
-            setMessage({ type: "success", text: "Profile updated successfully!" });
-        } catch (error: unknown) {
-            const message = errorMessage(error, "Failed to update profile");
-            log.error("Profile update failed", error);
-            showToast(message, "error");
-            setMessage({ type: "error", text: message });
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const handlePasswordUpdate = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setMessage(null);
-
-        if (passwordData.new_password !== passwordData.confirm_password) {
-            setMessage({ type: "error", text: "New passwords do not match!" });
-            setLoading(false);
-            return;
-        }
-
-        if (passwordData.new_password.length < 6) {
-            setMessage({ type: "error", text: "Password must be at least 6 characters long!" });
-            setLoading(false);
-            return;
-        }
-
-        try {
-            if (!auth.currentUser || !auth.currentUser.email) throw new Error("No user logged in");
-
-            // Re-authenticate first
-            const credential = EmailAuthProvider.credential(
-                auth.currentUser.email,
-                passwordData.current_password,
-            );
-            await reauthenticateWithCredential(auth.currentUser, credential);
-
-            // Update Password
-            await updatePassword(auth.currentUser, passwordData.new_password);
-
-            showToast("Password changed successfully!", "success");
-            setMessage({ type: "success", text: "Password changed successfully!" });
-            setPasswordData({
-                current_password: "",
-                new_password: "",
-                confirm_password: "",
-            });
-        } catch (error: unknown) {
-            log.error("Password change failed", error);
-            showToast(errorMessage(error, "Failed to change password"), "error");
-            setMessage({
-                type: "error",
-                text: errorMessage(error, "Failed to change password. Check current password."),
-            });
-        } finally {
-            setLoading(false);
-        }
-    };
+    const {
+        user,
+        loading,
+        message,
+        profileData,
+        setProfileData,
+        passwordData,
+        setPasswordData,
+        handleProfileUpdate,
+        handlePasswordUpdate,
+    } = useSettingsForm();
 
     return (
         <div className="space-y-8 pb-8 max-w-4xl">
