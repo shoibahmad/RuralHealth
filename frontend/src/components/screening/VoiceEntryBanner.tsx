@@ -1,3 +1,6 @@
+import { createLogger } from "../../lib/logger";
+
+const log = createLogger("VoiceEntryBanner");
 import type { ScreeningFormValues } from "../../lib/schemas";
 import { useState, useCallback } from "react";
 import { Mic, Activity } from "lucide-react";
@@ -25,28 +28,7 @@ export function VoiceEntryBanner({
     const defaultDesc = language === 'en' ? "Tap microphone to auto-fill fields in real-time." : "रीयल-टाइम में फ़ील्ड भरने के लिए माइक्रोफ़ोन टैप करें।";
     const [isProcessing, setIsProcessing] = useState(false);
 
-    const handleSpeechResult = useCallback(async (text: string, isFinal: boolean) => {
-        if (isFinal && text.trim().length > 3) {
-            await processTranscription(text);
-        }
-    }, [data, updateData]);
-
-    const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition({
-        onResult: handleSpeechResult,
-        onError: (err: any) => {
-            console.error("Speech error:", err);
-        }
-    });
-
-    const toggleListening = () => {
-        if (isListening) {
-            stopListening();
-        } else {
-            startListening();
-        }
-    };
-
-    const processTranscription = async (text: string) => {
+    const processTranscription = useCallback(async (text: string) => {
         setIsProcessing(true);
         try {
             const token = localStorage.getItem('token');
@@ -92,7 +74,29 @@ export function VoiceEntryBanner({
         } finally {
             setIsProcessing(false);
         }
+    }, [data, updateData])
+
+    const handleSpeechResult = useCallback(async (text: string, isFinal: boolean) => {
+        if (isFinal && text.trim().length > 3) {
+            await processTranscription(text);
+        }
+    }, [processTranscription]);
+
+    const { isListening, transcript, startListening, stopListening, isSupported } = useSpeechRecognition({
+        onResult: handleSpeechResult,
+        onError: (err: string) => {
+            log.error("Speech recognition failed", err);
+        }
+    });
+
+    const toggleListening = () => {
+        if (isListening) {
+            stopListening();
+        } else {
+            startListening();
+        }
     };
+
 
     if (!isSupported) {
         return (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
@@ -10,7 +10,7 @@ import { auth } from "../lib/firebase";
 import { HeartPulse, Loader2, Eye, EyeOff } from "lucide-react";
 import { motion } from "framer-motion";
 
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/useToast";
 
 import { createLogger } from "../lib/logger";
 import { errorCode } from "../lib/errors";

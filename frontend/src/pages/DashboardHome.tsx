@@ -28,14 +28,14 @@ import {
 } from "recharts";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import {
     firestoreService,
     type DashboardStats,
 } from "../services/firestoreService";
 import { createLogger } from "../lib/logger";
 import { formatDate } from "../lib/dates";
-import { useOffline } from "../context/OfflineContext";
+import { useOffline } from "../context/useOffline";
 
 const log = createLogger("DashboardHome");
 

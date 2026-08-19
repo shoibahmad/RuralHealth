@@ -11,7 +11,7 @@ import { DashboardLayout } from "./components/layout/DashboardLayout";
 import { OfficerLayout } from "./components/layout/OfficerLayout";
 import { PatientLayout } from "./components/layout/PatientLayout";
 import { ScreeningWizard } from "./pages/ScreeningWizard";
-import { useAuth } from "./context/AuthContext";
+import { useAuth } from "./context/useAuth";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import { PatientDashboard } from "./pages/PatientDashboard";
 import { PatientScreeningHistory } from "./pages/PatientScreeningHistory";

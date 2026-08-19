@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Activity } from "lucide-react";
-import { useOffline } from "../context/OfflineContext";
+import { useOffline } from "../context/useOffline";
 
 export function Footer() {
     const { isOnline } = useOffline();

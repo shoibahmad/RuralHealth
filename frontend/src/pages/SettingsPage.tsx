@@ -4,8 +4,8 @@ import { User, Mail, Lock, Save, Loader2, CheckCircle2, AlertCircle } from "luci
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { useAuth } from "../context/AuthContext";
-import { useToast } from "../context/ToastContext";
+import { useAuth } from "../context/useAuth";
+import { useToast } from "../context/useToast";
 
 import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";

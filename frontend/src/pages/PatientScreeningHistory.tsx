@@ -1,10 +1,10 @@
 import { formatDateWith } from "../lib/dates";
 import type { PatientHistory } from "../services/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Activity, Calendar, FileText, TrendingUp, AlertCircle } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 import {
     LineChart,
@@ -23,13 +23,7 @@ export function PatientScreeningHistory() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
-    useEffect(() => {
-        if (user) {
-            fetchHistory();
-        }
-    }, [user]);
-
-    const fetchHistory = async () => {
+    const fetchHistory = useCallback(async () => {
         if (!user) return;
         try {
             const [patientProfile, screenings, appointments] = await Promise.all([
@@ -64,7 +58,14 @@ export function PatientScreeningHistory() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            fetchHistory();
+        }
+    }, [user, fetchHistory]);
+
 
     if (loading) {
         return (

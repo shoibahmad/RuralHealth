@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import { Heart, LayoutDashboard, History, Settings, LogOut, X, Mail, Shield } from "lucide-react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { Button } from "../ui/button";
 import { ConfirmationModal } from "../ui/confirmation-modal";
 import { Footer } from "../Footer";

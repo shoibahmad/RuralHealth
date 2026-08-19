@@ -1,11 +1,11 @@
 import { formatDateWith } from "../lib/dates";
 import type { PatientHistory } from "../services/types";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Activity, Calendar, FileText, TrendingUp } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 import {
     LineChart,
@@ -24,11 +24,7 @@ export function PatientHistoryPage() {
     const [data, setData] = useState<PatientHistory | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        if (id) fetchPatientHistory();
-    }, [id]);
-
-    const fetchPatientHistory = async () => {
+    const fetchPatientHistory = useCallback(async () => {
         try {
             if (!id) return;
             const patient = await firestoreService.getPatient(id);
@@ -53,7 +49,12 @@ export function PatientHistoryPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        if (id) fetchPatientHistory();
+    }, [id, fetchPatientHistory]);
+
 
     if (loading) {
         return (

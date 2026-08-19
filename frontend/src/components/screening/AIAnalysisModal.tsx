@@ -33,9 +33,14 @@ export function AIAnalysisModal({ isOpen, onClose, analysis, patientName, langua
         return () => { window.speechSynthesis.onvoiceschanged = null; };
     }, []);
 
-    useEffect(() => {
+    // Reset the language selection whenever the caller changes it or the modal
+    // reopens. Adjusting during render is what React recommends here; an effect
+    // would render once with the stale value first.
+    const [lastLanguageKey, setLastLanguageKey] = useState(`${language}:${isOpen}`);
+    if (lastLanguageKey !== `${language}:${isOpen}`) {
+        setLastLanguageKey(`${language}:${isOpen}`);
         setLocalLanguage(language);
-    }, [language, isOpen]);
+    }
 
     useEffect(() => {
         return () => {

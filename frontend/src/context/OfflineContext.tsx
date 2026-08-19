@@ -2,46 +2,55 @@
  * Offline Context for managing online/offline state across the app
  */
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { syncService } from '../services/syncService';
-import { useAuth } from './AuthContext';
+import type { SyncStatus } from '../services/syncService';
+import { useAuth } from './useAuth';
+import { createLogger } from '../lib/logger';
+import { OfflineContext } from './contexts';
 
-interface OfflineContextType {
-    isOnline: boolean;
-    pendingSyncCount: number;
-    syncStatus: 'idle' | 'syncing' | 'error' | 'success';
-    syncNow: () => Promise<void>;
-    refreshPendingCount: () => Promise<void>;
-}
-
-const OfflineContext = createContext<OfflineContextType | undefined>(undefined);
+const log = createLogger('OfflineContext');
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [pendingSyncCount, setPendingSyncCount] = useState(0);
-    const [syncStatus, setSyncStatus] = useState<'idle' | 'syncing' | 'error' | 'success'>('idle');
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
 
-    // Update sync service token when auth changes - DEPRECATED for Firebase
-    /*
-    useEffect(() => {
-        syncService.setToken(token);
-    }, [token]);
-    */
+    // Declared before the effects that depend on them, so the dependency
+    // arrays below can name them without reading a binding that is not
+    // initialised yet.
+    const refreshPendingCount = useCallback(async () => {
+        try {
+            const count = await syncService.getPendingCount();
+            setPendingSyncCount(count);
+        } catch (error) {
+            log.error('Failed to get pending sync count', error);
+        }
+    }, []);
 
-    // Listen for online/offline events
+    const syncNow = useCallback(async () => {
+        if (!isOnline || !user) return;
+
+        try {
+            await syncService.syncAll();
+        } catch (error) {
+            log.error('Sync failed', error);
+        }
+    }, [isOnline, user]);
+
+    // Track connectivity, and drain the queue as soon as the device returns.
     useEffect(() => {
         const handleOnline = () => {
-            console.log('Device is online');
+            log.info('Device is online');
             setIsOnline(true);
-            // Auto-sync when coming online
             if (user) {
-                syncNow();
+                void syncNow();
             }
         };
 
         const handleOffline = () => {
-            console.log('Device is offline');
+            log.info('Device is offline');
             setIsOnline(false);
         };
 
@@ -52,43 +61,25 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [user]);
+    }, [user, syncNow]);
 
-    // Subscribe to sync status changes
+    // Mirror the sync service's status, refreshing the badge when it settles.
     useEffect(() => {
-        const unsubscribe = syncService.subscribe((status) => {
+        return syncService.subscribe((status) => {
             setSyncStatus(status);
             if (status === 'success' || status === 'error') {
-                refreshPendingCount();
+                void refreshPendingCount();
             }
         });
+    }, [refreshPendingCount]);
 
-        return unsubscribe;
-    }, []);
-
-    // Initial pending count
+    // Seed the pending count on mount. refreshPendingCount only calls setState
+    // after awaiting IndexedDB, so this is a subscription to an external store
+    // rather than the cascading synchronous update the rule guards against.
     useEffect(() => {
-        refreshPendingCount();
-    }, []);
-
-    const refreshPendingCount = useCallback(async () => {
-        try {
-            const count = await syncService.getPendingCount();
-            setPendingSyncCount(count);
-        } catch (error) {
-            console.error('Failed to get pending sync count:', error);
-        }
-    }, []);
-
-    const syncNow = useCallback(async () => {
-        if (!isOnline || !user) return;
-
-        try {
-            await syncService.syncAll();
-        } catch (error) {
-            console.error('Sync failed:', error);
-        }
-    }, [isOnline, user]);
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- async, see above
+        void refreshPendingCount();
+    }, [refreshPendingCount]);
 
     return (
         <OfflineContext.Provider
@@ -103,12 +94,4 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             {children}
         </OfflineContext.Provider>
     );
-}
-
-export function useOffline() {
-    const context = useContext(OfflineContext);
-    if (context === undefined) {
-        throw new Error('useOffline must be used within an OfflineProvider');
-    }
-    return context;
 }

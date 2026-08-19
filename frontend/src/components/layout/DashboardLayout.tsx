@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { ConfirmationModal } from "../ui/confirmation-modal";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 import { motion, AnimatePresence } from "framer-motion";
 import { Footer } from "../Footer";
 

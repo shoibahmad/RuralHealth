@@ -1,12 +1,12 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Activity, Edit, X, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-// import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
 import { firestoreService, type Patient } from "../services/firestoreService";
 import { createLogger } from "../lib/logger";
@@ -30,11 +30,7 @@ export function AllPatientsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const { showToast } = useToast();
 
-    useEffect(() => {
-        fetchPatients();
-    }, [page, riskFilter]);
-
-    const fetchPatients = async () => {
+    const fetchPatients = useCallback(async () => {
         setLoading(true);
         try {
             // Fetch all patients (Officer view)
@@ -67,7 +63,12 @@ export function AllPatientsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [page, riskFilter, searchTerm]);
+
+    useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
+
 
     const handleSearch = () => {
         setPage(1);

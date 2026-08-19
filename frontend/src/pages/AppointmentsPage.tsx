@@ -1,5 +1,5 @@
 import { formatDateTime, toEpoch } from "../lib/dates";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
     Calendar,
@@ -13,10 +13,14 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../context/useAuth";
 import { firestoreService, type Appointment, type Patient } from "../services/firestoreService";
 import { doc, updateDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+
+import { createLogger } from "../lib/logger";
+
+const log = createLogger("AppointmentsPage");
 
 export function AppointmentsPage() {
     const { user } = useAuth();
@@ -33,14 +37,7 @@ export function AppointmentsPage() {
         notes: ""
     });
 
-    useEffect(() => {
-        if (user) {
-            fetchAppointments();
-            fetchPatients();
-        }
-    }, [user, statusFilter]);
-
-    const fetchAppointments = async () => {
+    const fetchAppointments = useCallback(async () => {
         if (!user) return;
         try {
             const data = await firestoreService.getAppointments(
@@ -62,16 +59,25 @@ export function AppointmentsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user, statusFilter]);
 
-    const fetchPatients = async () => {
+    const fetchPatients = useCallback(async () => {
         try {
             const data = await firestoreService.getPatients();
             setPatients(data);
         } catch (error) {
-            console.error("Error fetching patients:", error);
+            log.error("Failed to fetch patients", error);
         }
-    };
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            fetchAppointments();
+            fetchPatients();
+        }
+    }, [user, fetchAppointments, fetchPatients]);
+
+
 
     const createAppointment = async () => {
         if (!user) return;

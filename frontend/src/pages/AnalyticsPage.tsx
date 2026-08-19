@@ -22,7 +22,7 @@ import {
     Area,
     AreaChart
 } from "recharts";
-// import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 
 interface AnalyticsData {

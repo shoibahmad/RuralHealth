@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Users, Activity, AlertTriangle, TrendingUp } from "lucide-react";
@@ -35,11 +35,7 @@ export function WorkerDetailPage() {
     const [workerData, setWorkerData] = useState<WorkerDetail | null>(null);
     const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        fetchWorkerDetails();
-    }, [id]);
-
-    const fetchWorkerDetails = async () => {
+    const fetchWorkerDetails = useCallback(async () => {
         if (!id) return;
         try {
             // 1. Get Worker Info
@@ -72,7 +68,12 @@ export function WorkerDetailPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [id]);
+
+    useEffect(() => {
+        fetchWorkerDetails();
+    }, [fetchWorkerDetails]);
+
 
     if (loading) {
         return (

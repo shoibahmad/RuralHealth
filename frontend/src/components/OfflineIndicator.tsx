@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { WifiOff, Wifi, RefreshCw, Check, AlertCircle, Cloud, CloudOff } from 'lucide-react';
-import { useOffline } from '../context/OfflineContext';
+import { useOffline } from '../context/useOffline';
 import { Button } from './ui/button';
 
 export function OfflineIndicator() {
@@ -10,8 +10,11 @@ export function OfflineIndicator() {
     const prevOnlineRef = useRef(isOnline);
 
     useEffect(() => {
-        // Only show "Back Online" if we were previously offline
+        // Only show "Back Online" if we were previously offline. This reacts to
+        // a connectivity transition owned by the browser, not to render state,
+        // so an effect is the right tool here.
         if (isOnline && !prevOnlineRef.current) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- external transition, see above
             setShowOnlineBanner(true);
             const timer = setTimeout(() => {
                 setShowOnlineBanner(false);

@@ -1,5 +1,5 @@
 import type { Appointment, Patient, Screening } from "../services/types";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { Activity, Calendar, AlertCircle, CheckCircle, PlusCircle, TrendingUp } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -28,8 +28,8 @@ interface DashboardData {
     active_recommendations: AdviceCard[];
 }
 
-// import { useAuth } from "../context/AuthContext"; // Already imported
-import { useAuth } from "../context/AuthContext";
+// import { useAuth } from "../context/useAuth"; // Already imported
+import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 
 export function PatientDashboard() {
@@ -40,13 +40,7 @@ export function PatientDashboard() {
 
     // Appointment Modal State - Removed unused code
 
-    useEffect(() => {
-        if (user) {
-            fetchDashboard();
-        }
-    }, [user]);
-
-    const fetchDashboard = async () => {
+    const fetchDashboard = useCallback(async () => {
         if (!user) return;
         try {
             const [patientProfile, screenings, appointments] = await Promise.all([
@@ -124,7 +118,14 @@ export function PatientDashboard() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [user]);
+
+    useEffect(() => {
+        if (user) {
+            fetchDashboard();
+        }
+    }, [user, fetchDashboard]);
+
 
     const getRiskColor = (level: string) => {
         switch (level) {

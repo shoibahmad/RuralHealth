@@ -4,11 +4,11 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const showToast = vi.fn();
 const authState: { user: Record<string, unknown> | null } = { user: null };
 
-vi.mock("../../context/AuthContext", () => ({
+vi.mock("../../context/useAuth", () => ({
     useAuth: () => authState,
 }));
 
-vi.mock("../../context/ToastContext", () => ({
+vi.mock("../../context/useToast", () => ({
     useToast: () => ({ showToast }),
 }));
 

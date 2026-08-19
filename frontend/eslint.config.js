@@ -31,20 +31,9 @@ export default defineConfig([
         },
       ],
 
-      // Legacy debt, tracked rather than ignored. New code should type its
-      // values; `npm run lint` enforces a warning budget that can only shrink,
-      // so these cannot accumulate. See CONTRIBUTING.md.
-      '@typescript-eslint/no-explicit-any': 'warn',
-
-      // The context providers export both a component and its hook. Splitting
-      // them is a refactor in its own right; until then this only costs the
-      // dev-server fast refresh, never correctness.
-      'react-refresh/only-export-components': 'warn',
-
-      // Flagged in provider components that seed state from storage on mount.
-      // Correct as written, but worth revisiting when those are refactored.
-      'react-hooks/set-state-in-effect': 'warn',
-      'react-hooks/immutability': 'warn',
+      // Application code carries no `any`. Tests may stub partial third-party
+      // shapes, which the override below allows.
+      '@typescript-eslint/no-explicit-any': 'error',
     },
   },
   {

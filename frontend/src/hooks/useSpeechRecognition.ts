@@ -1,4 +1,7 @@
+import { createLogger } from "../lib/logger";
 import { useState, useCallback, useRef, useEffect } from "react";
+
+const log = createLogger("useSpeechRecognition");
 
 /**
  * Resolve the browser's SpeechRecognition constructor.
@@ -7,12 +10,52 @@ import { useState, useCallback, useRef, useEffect } from "react";
  * declares neither, so the lookup is narrowed here once instead of being
  * silenced at each call site.
  */
-type SpeechRecognitionConstructor = new () => {
+/**
+ * The slice of the Web Speech API this hook uses.
+ *
+ * TypeScript's DOM lib does not declare SpeechRecognition at all, so the
+ * handful of members touched here are declared locally rather than pulling in
+ * a dependency for ambient types.
+ */
+export interface SpeechRecognitionAlternative {
+  transcript: string;
+}
+
+export interface SpeechRecognitionResult {
+  readonly length: number;
+  isFinal: boolean;
+  [index: number]: SpeechRecognitionAlternative;
+}
+
+export interface SpeechRecognitionResultList {
+  readonly length: number;
+  [index: number]: SpeechRecognitionResult;
+}
+
+export interface SpeechRecognitionEvent {
+  resultIndex: number;
+  results: SpeechRecognitionResultList;
+}
+
+export interface SpeechRecognitionErrorEvent {
+  error: string;
+  message?: string;
+}
+
+export interface SpeechRecognitionInstance {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
   start: () => void;
   stop: () => void;
   abort: () => void;
-  [key: string]: unknown;
-};
+  onstart: (() => void) | null;
+  onend: (() => void) | null;
+  onresult: ((event: SpeechRecognitionEvent) => void) | null;
+  onerror: ((event: SpeechRecognitionErrorEvent) => void) | null;
+}
+
+type SpeechRecognitionConstructor = new () => SpeechRecognitionInstance;
 
 function getSpeechRecognition(): SpeechRecognitionConstructor | undefined {
   if (typeof window === "undefined") return undefined;
@@ -27,7 +70,7 @@ function getSpeechRecognition(): SpeechRecognitionConstructor | undefined {
 
 interface SpeechRecognitionOptions {
   onResult?: (text: string, isFinal: boolean) => void;
-  onError?: (error: any) => void;
+  onError?: (error: string) => void;
   lang?: string;
 }
 
@@ -39,7 +82,7 @@ export function useSpeechRecognition({
   // Hooks MUST be at the top and in a consistent order
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognitionInstance | null>(null);
   const onResultRef = useRef(onResult);
   const onErrorRef = useRef(onError);
 
@@ -53,7 +96,7 @@ export function useSpeechRecognition({
     const SpeechRecognition = getSpeechRecognition();
 
     if (!SpeechRecognition) {
-      console.warn("Speech recognition is not supported in this browser.");
+      log.warn("Speech recognition is not supported in this browser");
       return;
     }
 
@@ -66,7 +109,7 @@ export function useSpeechRecognition({
       setIsListening(true);
     };
 
-    recognition.onresult = (event: any) => {
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
       let currentTranscript = "";
       let isFinalResult = false;
 
@@ -84,8 +127,8 @@ export function useSpeechRecognition({
       }
     };
 
-    recognition.onerror = (event: any) => {
-      console.error("Speech recognition error:", event.error);
+    recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
+      log.error("Speech recognition failed", event.error);
       setIsListening(false);
       if (onErrorRef.current) {
         onErrorRef.current(event.error);

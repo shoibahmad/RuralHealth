@@ -4,7 +4,7 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import { Footer } from "../Footer";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "../../context/AuthContext";
+import { useAuth } from "../../context/useAuth";
 
 
 export function PublicLayout() {

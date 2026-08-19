@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import {
     Users,
@@ -19,7 +19,7 @@ import {
     type Patient,
     type PatientDetail,
 } from "../services/firestoreService";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
 import { createLogger } from "../lib/logger";
 import { errorMessage } from "../lib/errors";
@@ -40,11 +40,7 @@ export function PatientsPage() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    useEffect(() => {
-        fetchPatients();
-    }, [searchTerm, riskFilter]);
-
-    const fetchPatients = async () => {
+    const fetchPatients = useCallback(async () => {
         try {
             const allPatients = await firestoreService.getPatients();
 
@@ -68,7 +64,12 @@ export function PatientsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [searchTerm, riskFilter]);
+
+    useEffect(() => {
+        fetchPatients();
+    }, [fetchPatients]);
+
 
     const fetchPatientDetail = async (id: string) => {
         try {
