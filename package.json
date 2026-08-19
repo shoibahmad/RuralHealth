@@ -1,6 +1,6 @@
 {
   "name": "ruralhealth-ai",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "AI-assisted health screening platform for rural frontline health workers, with offline-first capture and Gemini-backed risk analysis.",
   "license": "MIT",
@@ -35,7 +35,7 @@
     "audit:deps": "npm run audit:frontend && npm run audit:backend",
     "audit:frontend": "npm audit --audit-level=high --prefix frontend",
     "audit:backend": "cd backend && python -m pip_audit -r requirements.lock.txt",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "verify": "npm run lint && npm run typecheck && npm run test:coverage && npm run build",
     "docker:up": "docker compose up --build",
     "docker:down": "docker compose down -v"
   },

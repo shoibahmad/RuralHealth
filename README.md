@@ -168,6 +168,23 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions,
 [SECURITY.md](SECURITY.md) for the security posture, and
 [CHANGELOG.md](CHANGELOG.md) for the change history.
 
+### Fresh-clone verification
+
+To prove the entire stack builds and runs from scratch with **no external
+accounts**, use the smoke-test scripts (requires Docker only):
+
+```bash
+# Linux / macOS
+./scripts/smoke-test.sh
+
+# Windows (PowerShell)
+.\scripts\smoke-test.ps1
+```
+
+These scripts build the Docker image, start the stack, hit the health endpoint,
+verify the SPA is served, and exercise the registration API — then tear
+everything down. They exit non-zero on any failure.
+
 ---
 
 ## ⚙️ Configuration Reference

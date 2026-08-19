@@ -38,5 +38,6 @@ RENDER_DEPLOYMENT.md
 .coverage
 .coverage.*
 htmlcov/
+coverage/
 .pytest_cache/
 .ruff_cache/
