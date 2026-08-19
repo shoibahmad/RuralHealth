@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { firestoreService } from "../services/firestoreService";
+import {
+    firestoreService,
+    type DashboardStats,
+} from "../services/firestoreService";
 import {
     BarChart,
     Bar,
@@ -16,7 +19,7 @@ import {
 import { TrendingUp, Users, Activity, MapPin } from "lucide-react";
 
 export function SystemAnalyticsPage() {
-    const [analytics, setAnalytics] = useState<any>(null);
+    const [analytics, setAnalytics] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -57,7 +60,7 @@ export function SystemAnalyticsPage() {
         value: value as number
     }));
 
-    const genderData = (analytics.gender_distribution || []).map((item: any) => ({
+    const genderData = (analytics.gender_distribution || []).map((item) => ({
         name: item.gender,
         value: item.count
     }));
@@ -128,7 +131,7 @@ export function SystemAnalyticsPage() {
                                     fill="#8884d8"
                                     dataKey="value"
                                 >
-                                    {genderData.map((_entry: any, index: number) => (
+                                    {genderData.map((_entry, index: number) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Pie>
@@ -203,7 +206,7 @@ export function SystemAnalyticsPage() {
                             </tr>
                         </thead>
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                            {(analytics.worker_performance || []).map((worker: any, index: number) => (
+                            {(analytics.worker_performance || []).map((worker, index: number) => (
                                 <tr key={index} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4 font-medium text-white">{worker.worker_name}</td>
                                     <td className="p-4">{worker.patients}</td>
@@ -263,9 +266,9 @@ export function SystemAnalyticsPage() {
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                             {(() => {
                                 const geoData = analytics.geographic_distribution || [];
-                                const maxPatients = Math.max(...geoData.map((v: any) => v.total), 1);
+                                const maxPatients = Math.max(...geoData.map((v) => v.total), 1);
                                 
-                                return geoData.map((village: any, index: number) => {
+                                return geoData.map((village, index: number) => {
                                     const riskPercentage = village.total > 0 ? ((village.high_risk / village.total) * 100).toFixed(1) : 0;
                                     return (
                                         <tr key={index} className="hover:bg-white/5 transition-colors">

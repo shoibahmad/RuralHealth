@@ -22,10 +22,27 @@ import {
 } from "recharts";
 // import { useAuth } from "../context/AuthContext";
 import { firestoreService } from "../services/firestoreService";
+import { createLogger } from "../lib/logger";
+
+const log = createLogger("OfficerDashboard");
+
+/** Officer overview, assembled in this component from the raw collections. */
+interface OfficerDashboardStats {
+    overview: {
+        total_patients: number;
+        total_screenings: number;
+        high_risk_count: number;
+        total_workers: number;
+        active_workers: number;
+    };
+    risk_distribution: Record<'Low' | 'Medium' | 'High', number>;
+    monthly_trend: { month: string; screenings: number; patients: number }[];
+    village_stats: { village: string; patient_count: number }[];
+    top_workers: { name: string; screenings: number }[];
+}
 
 export function OfficerDashboard() {
-    // const { token } = useAuth();
-    const [stats, setStats] = useState<any>(null);
+    const [stats, setStats] = useState<OfficerDashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -103,7 +120,7 @@ export function OfficerDashboard() {
             });
 
         } catch (error) {
-            console.error('Failed to fetch stats:', error);
+            log.error('Failed to fetch stats', error);
         } finally {
             setLoading(false);
         }
@@ -122,6 +139,9 @@ export function OfficerDashboard() {
         Medium: '#f59e0b',
         High: '#ef4444'
     };
+
+    // Narrowed once so the JSX below does not repeat the null guard.
+    const villageStats = stats?.village_stats ?? [];
 
     const riskData = stats?.risk_distribution ? [
         { name: 'Low Risk', value: stats.risk_distribution.Low, color: RISK_COLORS.Low },
@@ -338,8 +358,8 @@ export function OfficerDashboard() {
                             </tr>
                         </thead>
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                            {stats?.village_stats?.map((village: any, index: number) => {
-                                const maxCount = stats.village_stats[0]?.patient_count || 1;
+                            {villageStats.map((village, index: number) => {
+                                const maxCount = villageStats[0]?.patient_count || 1;
                                 const percentage = (village.patient_count / maxCount) * 100;
                                 return (
                                     <tr key={index} className="hover:bg-white/5 transition-colors">

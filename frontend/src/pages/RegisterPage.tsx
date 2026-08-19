@@ -9,6 +9,11 @@ import { createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 
+import { createLogger } from "../lib/logger";
+import { errorCode } from "../lib/errors";
+
+const log = createLogger("RegisterPage");
+
 export function RegisterPage() {
     const [formData, setFormData] = useState({
         email: "",
@@ -49,11 +54,11 @@ export function RegisterPage() {
                 navigate("/dashboard");
             }
 
-        } catch (err: any) {
-            console.error(err);
-            if (err.code === 'auth/email-already-in-use') {
+        } catch (err: unknown) {
+            log.error('Account creation failed', err);
+            if (errorCode(err) === 'auth/email-already-in-use') {
                 setError("Email is already registered.");
-            } else if (err.code === 'auth/weak-password') {
+            } else if (errorCode(err) === 'auth/weak-password') {
                 setError("Password should be at least 6 characters.");
             } else {
                 setError("Failed to create account. Please try again.");

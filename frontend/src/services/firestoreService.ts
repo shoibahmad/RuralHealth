@@ -38,6 +38,7 @@ export type {
     Screening,
     User,
     VillageStats,
+    WeeklyScreeningPoint,
     WorkerCaseloadStats,
     WorkerPerformance,
 } from "./types";

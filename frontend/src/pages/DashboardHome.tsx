@@ -29,18 +29,15 @@ import {
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useAuth } from "../context/AuthContext";
-import { firestoreService } from "../services/firestoreService";
+import {
+    firestoreService,
+    type DashboardStats,
+} from "../services/firestoreService";
+import { createLogger } from "../lib/logger";
+import { formatDate } from "../lib/dates";
 import { useOffline } from "../context/OfflineContext";
 
-interface DashboardStats {
-    total_patients: number;
-    total_screenings: number;
-    high_risk_count: number;
-    pending_appointments: number;
-    risk_distribution: Record<string, number>;
-    weekly_screenings: { name: string; date: string; screenings: number; highRisk: number }[];
-    recent_screenings: any[];
-}
+const log = createLogger("DashboardHome");
 
 export function DashboardHome() {
     const { user } = useAuth();
@@ -59,12 +56,12 @@ export function DashboardHome() {
             // If user is Admin/Officer, they see global stats (conceptually)
             // For now, firestoreService.getDashboardStats handles some of this logic
             try {
-                const data: any = await firestoreService.getDashboardStats(
+                const data = await firestoreService.getDashboardStats(
                     user?.role === 'health_worker' ? user.uid : undefined
                 );
                 setStats(data);
             } catch (error) {
-                console.error("Failed to load dashboard stats", error);
+                log.error("Failed to load dashboard stats", error);
             } finally {
                 setLoading(false);
             }
@@ -347,7 +344,7 @@ export function DashboardHome() {
                                 </tr>
                             </thead>
                             <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                                {filteredRecentScreenings.map((screening: any) => (
+                                {filteredRecentScreenings.map((screening) => (
                                     <tr key={screening.id} className="hover:bg-white/5 transition-colors">
                                         <td className="p-4 md:p-6 font-medium text-white">
                                             <div className="flex items-center gap-3">
@@ -374,7 +371,7 @@ export function DashboardHome() {
                                             </span>
                                         </td>
                                         <td className="p-4 md:p-6 text-slate-500 whitespace-nowrap">
-                                            {new Date(screening.created_at).toLocaleDateString()}
+                                            {formatDate(screening.created_at)}
                                         </td>
                                     </tr>
                                 ))}

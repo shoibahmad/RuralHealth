@@ -12,6 +12,11 @@ import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { firestoreService } from "../services/firestoreService";
 
+import { createLogger } from "../lib/logger";
+import { errorMessage } from "../lib/errors";
+
+const log = createLogger("SettingsPage");
+
 export function SettingsPage() {
     const { user } = useAuth(); // User from context
     const { showToast } = useToast();
@@ -98,10 +103,11 @@ export function SettingsPage() {
 
             showToast("Profile updated successfully!", "success");
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
-        } catch (error: any) {
-            console.error(error);
-            showToast(error.message || 'Failed to update profile', "error");
-            setMessage({ type: 'error', text: error.message || 'Failed to update profile' });
+        } catch (error: unknown) {
+            const message = errorMessage(error, 'Failed to update profile');
+            log.error('Profile update failed', error);
+            showToast(message, "error");
+            setMessage({ type: 'error', text: message });
         } finally {
             setLoading(false);
         }
@@ -141,10 +147,13 @@ export function SettingsPage() {
                 new_password: "",
                 confirm_password: ""
             });
-        } catch (error: any) {
-            console.error(error);
-            showToast(error.message || 'Failed to change password', "error");
-            setMessage({ type: 'error', text: error.message || 'Failed to change password. Check current password.' });
+        } catch (error: unknown) {
+            log.error('Password change failed', error);
+            showToast(errorMessage(error, 'Failed to change password'), "error");
+            setMessage({
+                type: 'error',
+                text: errorMessage(error, 'Failed to change password. Check current password.'),
+            });
         } finally {
             setLoading(false);
         }

@@ -12,6 +12,11 @@ import { motion } from "framer-motion";
 
 import { useToast } from "../context/ToastContext";
 
+import { createLogger } from "../lib/logger";
+import { errorCode } from "../lib/errors";
+
+const log = createLogger("LoginPage");
+
 export function LoginPage() {
     const { showToast } = useToast();
     const [email, setEmail] = useState("");
@@ -28,9 +33,9 @@ export function LoginPage() {
         try {
             await sendPasswordResetEmail(auth, email);
             showToast("Password reset email sent! Check your inbox.", "success");
-        } catch (err: any) {
-            console.error(err);
-            if (err.code === 'auth/user-not-found') {
+        } catch (err: unknown) {
+            log.error('Password reset failed', err);
+            if (errorCode(err) === 'auth/user-not-found') {
                 showToast("No user found with this email.", "error");
             } else {
                 showToast("Failed to send reset email. Please try again.", "error");
@@ -61,13 +66,13 @@ export function LoginPage() {
             showToast("Successfully logged in!", "success");
             // Navigation handled by AuthContext or the redirect check above/useEffect
             navigate("/dashboard");
-        } catch (err: any) {
-            console.error(err);
-            if (err.code === 'auth/invalid-credential') {
+        } catch (err: unknown) {
+            log.error('Sign in failed', err);
+            if (errorCode(err) === 'auth/invalid-credential') {
                 setError("Invalid email or password.");
-            } else if (err.code === 'auth/user-not-found') {
+            } else if (errorCode(err) === 'auth/user-not-found') {
                 setError("No user found with this email.");
-            } else if (err.code === 'auth/wrong-password') {
+            } else if (errorCode(err) === 'auth/wrong-password') {
                 setError("Incorrect password.");
             } else {
                 setError("Failed to sign in. Please try again.");

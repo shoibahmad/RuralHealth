@@ -9,6 +9,11 @@ import { useAuth } from "../context/AuthContext";
 import { firestoreService } from "../services/firestoreService";
 import { riskUtils } from "../lib/riskUtils";
 
+import { createLogger } from "../lib/logger";
+import { errorMessage } from "../lib/errors";
+
+const log = createLogger("PatientSelfScreening");
+
 const STEPS = [
     { label: "Vitals", description: "Basic measurements" },
     { label: "Lifestyle", description: "Habits & activities" },
@@ -89,9 +94,9 @@ export function PatientSelfScreening() {
 
             await firestoreService.addScreening(screeningData);
             navigate("/patient/dashboard");
-        } catch (err: any) {
-            console.error(err);
-            setError(err.message || "Failed to submit screening");
+        } catch (err: unknown) {
+            log.error('Screening submission failed', err);
+            setError(errorMessage(err, "Failed to submit screening"));
         } finally {
             setIsSubmitting(false);
         }

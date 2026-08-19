@@ -3,7 +3,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowLeft, Users, Activity, AlertTriangle, TrendingUp } from "lucide-react";
 import { Button } from "../components/ui/button";
-import { firestoreService } from "../services/firestoreService";
+import { firestoreService, type Patient } from "../services/firestoreService";
+import { createLogger } from "../lib/logger";
+
+const log = createLogger("WorkerDetailPage");
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
 import {
@@ -14,10 +17,22 @@ import {
     Tooltip
 } from "recharts";
 
+/** Worker profile plus the caseload figures rendered on this page. */
+interface WorkerDetail {
+    worker: { uid: string; full_name?: string; email?: string };
+    stats: {
+        total_patients: number;
+        total_screenings: number;
+        risk_distribution: Record<'Low' | 'Medium' | 'High', number>;
+        average_risk_score: number;
+    };
+    patients: Patient[];
+}
+
 export function WorkerDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
-    const [workerData, setWorkerData] = useState<any>(null);
+    const [workerData, setWorkerData] = useState<WorkerDetail | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -53,7 +68,7 @@ export function WorkerDetailPage() {
                 patients: patients
             });
         } catch (error) {
-            console.error('Failed to fetch worker details:', error);
+            log.error('Failed to fetch worker details', error);
         } finally {
             setLoading(false);
         }
@@ -206,7 +221,7 @@ export function WorkerDetailPage() {
                     <p className="text-sm text-slate-400 mb-6">Latest patient registrations</p>
 
                     <div className="space-y-3">
-                        {workerData.patients.map((patient: any) => (
+                        {workerData.patients.map((patient) => (
                             <div key={patient.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-white/5 transition-colors">
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm border border-white/10">

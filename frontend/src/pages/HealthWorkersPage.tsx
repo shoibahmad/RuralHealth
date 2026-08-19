@@ -3,12 +3,15 @@ import { motion } from "framer-motion";
 import { Users, Activity, AlertTriangle, Search, Eye } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { firestoreService } from "../services/firestoreService";
+import {
+    firestoreService,
+    type HealthWorkerWithStats,
+} from "../services/firestoreService";
 import { useNavigate } from "react-router-dom";
 
 export function HealthWorkersPage() {
     const navigate = useNavigate();
-    const [workers, setWorkers] = useState<any[]>([]);
+    const [workers, setWorkers] = useState<HealthWorkerWithStats[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
 

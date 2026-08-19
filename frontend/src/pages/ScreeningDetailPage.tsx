@@ -4,14 +4,18 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Activity, FileText, Share2, Printer, Sparkles } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import { firestoreService } from "../services/firestoreService";
+import {
+    firestoreService,
+    type Screening,
+} from "../services/firestoreService";
+import { formatDate } from "../lib/dates";
 import { riskUtils } from "../lib/riskUtils";
 
 export function ScreeningDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [screening, setScreening] = useState<any>(null);
+    const [screening, setScreening] = useState<Screening | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -33,6 +37,14 @@ export function ScreeningDetailPage() {
     if (loading) return <div className="p-8 text-center text-slate-400">Loading screening details...</div>;
     if (!screening) return <div className="p-8 text-center text-red-400">Screening not found.</div>;
 
+    // ai_insights arrives as a markdown string from the Django endpoint but as
+    // the full analysis object when the wizard wrote it client-side, so both
+    // shapes have to be handled before rendering.
+    const insightsText =
+        typeof screening.ai_insights === "string"
+            ? screening.ai_insights
+            : (screening.ai_insights?.formatted_insights ?? "");
+
     const getRiskColor = (level: string) => {
         switch (level) {
             case "High": return "text-red-400 border-red-500/50 bg-red-500/10";
@@ -52,7 +64,7 @@ export function ScreeningDetailPage() {
                     <div>
                         <h1 className="text-2xl font-bold text-white">Screening Report</h1>
                         <p className="text-slate-400">
-                            ID: #{screening.id?.slice(0, 8)} • {new Date(screening.created_at).toLocaleDateString()}
+                            ID: #{screening.id?.slice(0, 8)} • {formatDate(screening.created_at)}
                         </p>
                     </div>
                 </div>
@@ -73,10 +85,10 @@ export function ScreeningDetailPage() {
                     <h2 className="font-semibold text-teal-100">AI Health Insights</h2>
                 </div>
                 <div className="p-6">
-                    {screening.ai_insights ? (
+                    {insightsText ? (
                         <div className="prose prose-invert max-w-none">
                             <div className="whitespace-pre-wrap text-slate-200 leading-relaxed font-light">
-                                {screening.ai_insights.split('**').map((part: string, i: number) =>
+                                {insightsText.split('**').map((part: string, i: number) =>
                                     i % 2 === 1 ? <span key={i} className="font-bold text-white">{part}</span> : part
                                 )}
                             </div>
@@ -109,7 +121,7 @@ export function ScreeningDetailPage() {
                     <FileText className="h-5 w-5 text-blue-400 mb-2" />
                     <p className="text-slate-400 text-sm">BMI Score</p>
                     <p className="text-2xl font-semibold text-white mt-1">
-                        {riskUtils.calculateBMI(screening.height_cm, screening.weight_kg) || '--'}
+                        {riskUtils.calculateBMI(screening.height_cm ?? 0, screening.weight_kg ?? 0) || '--'}
                     </p>
                 </Card>
             </div>

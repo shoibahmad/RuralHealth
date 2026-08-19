@@ -135,6 +135,16 @@ export interface WorkerPerformance {
     completion_rate: number;
 }
 
+/** One day of the trailing screening trend shown on the dashboard. */
+export interface WeeklyScreeningPoint {
+    /** Short weekday label, e.g. "Mon". */
+    name: string;
+    /** ISO date for the point. */
+    date: string;
+    screenings: number;
+    highRisk: number;
+}
+
 export interface DashboardStats {
     total_patients: number;
     total_screenings: number;
@@ -147,7 +157,7 @@ export interface DashboardStats {
     risk_factor_prevalence: Record<string, number>;
     worker_performance: WorkerPerformance[];
     recent_screenings: Screening[];
-    weekly_screenings: unknown[];
+    weekly_screenings: WeeklyScreeningPoint[];
 }
 
 /** Payload for creating a health worker's Firestore profile document. */

@@ -59,7 +59,7 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
             const result = await response.json();
             // console.log("Extracted result:", result); // Debugging
             onDataExtracted(result);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Scanning error:", err);
             setError(language === 'en' 
                 ? "Could not extract data. Tesseract engine encountered an error. Please enter manually." 
