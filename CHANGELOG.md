@@ -12,9 +12,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Backend test suite: 248 pytest specs covering authentication, patients,
   screenings, dashboards, officer oversight, the patient portal and the AI
   service wrapper, at 92% statement coverage.
-- Frontend test suite: 184 vitest specs covering the validation schemas, risk
+- Frontend test suite: 213 vitest specs covering the validation schemas, risk
   scoring, OCR field mapping, name reconciliation, screening payload assembly,
-  the Firestore service layer and the name-verification banner.
+  dashboard aggregation, the Firestore service layer and the
+  name-verification banner.
 - GitHub Actions CI running lint, type checks, tests and a production build on
   every push and pull request, across Python 3.12 and 3.13, plus a Docker build
   that smoke-tests the container's health endpoint.
@@ -43,7 +44,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `screeningPayload`) and a `NameVerificationBanner` component.
 - Typed `firestoreService` end to end, replacing its `any` usage with the
   exported `Patient` / `Screening` / `Appointment` interfaces and adding
-  `DashboardStats`, `HealthWorkerWithStats` and `AiInsights`.
+  `DashboardStats`, `HealthWorkerWithStats` and `AiInsights`. Split its
+  domain types into `services/types.ts` and its aggregation into
+  `services/dashboardStats.ts`, so no source file now exceeds 500 lines.
 - Replaced `print()` diagnostics with the `logging` module across the backend.
 - Settings now load `backend/.env` through python-dotenv, so a fresh clone only
   needs `cp .env.example .env`.
@@ -77,6 +80,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Empty wizard inputs parsed to `0`, so an untaken vital could be stored as a
   real reading of zero. They are now omitted.
 - Resolved all 18 npm audit advisories, including 2 critical and 12 high.
+- `.dockerignore` patterns were matched against the context root only, so
+  `backend/venv` and `frontend/node_modules` were both being sent to the
+  daemon; the build context went from 446 MB to 1.3 MB.
 - Removed two committed SQLite databases from version control and added
   `*.db` / `*.sqlite3` to `.gitignore`.
 

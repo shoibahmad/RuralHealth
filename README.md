@@ -150,7 +150,7 @@ ruff format .           # apply formatting
 
 ```bash
 cd frontend
-npm run test            # 184 tests
+npm run test            # 213 tests
 npm run test:coverage   # with a coverage report
 npm run lint            # ESLint, under a warning budget
 npm run typecheck       # TypeScript, no emit
