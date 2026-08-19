@@ -1,0 +1,48 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "ruralhealth.settings"
+python_files = ["test_*.py", "*_test.py"]
+testpaths = ["api/tests"]
+addopts = "-ra --strict-markers"
+
+[tool.coverage.run]
+source = ["api"]
+omit = [
+    "*/migrations/*",
+    "*/tests/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+exclude = [
+    "venv",
+    "migrations",
+    "staticfiles",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "W",    # pycodestyle warnings
+    "I",    # import sorting
+    "UP",   # pyupgrade
+    "B",    # bugbear
+    "C4",   # comprehensions
+    "DJ",   # Django-specific checks
+]
+ignore = [
+    "B008",   # function call in default argument - common in DRF field definitions
+    "E501",   # long lines are reported by the formatter, not the linter
+    "DJ001",  # null=True on string fields: changing these needs a data migration
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Re-export modules deliberately import names they do not use.
+"api/views/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "preserve"
