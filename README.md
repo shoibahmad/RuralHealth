@@ -1,5 +1,10 @@
 # RuralHealthAI: Empowering Rural Healthcare with AI & Offline Connectivity
 
+[![CI](https://github.com/shoibahmad/RuralHealth/actions/workflows/ci.yml/badge.svg)](https://github.com/shoibahmad/RuralHealth/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Node 22+](https://img.shields.io/badge/node-22+-green.svg)](https://nodejs.org/)
+
 **RuralHealthAI** is a mission-critical digital health platform designed to bring advanced diagnostic capabilities to frontline health workers in underserved rural areas. By transitioning from manual paper-based logs to a smart, AI-driven, and offline-capable system, the platform enables early identification of Non-Communicable Diseases (NCDs) like Hypertension, Diabetes, and cardiovascular risks.
 
 ---
@@ -57,61 +62,120 @@ RuralHealthAI is built with a "Local-First" philosophy to handle the intermitten
 
 ---
 
-## 🚀 Installation & Setup
+## 🚀 Quick Start
+
+The fastest path from a fresh clone to a running system is Docker, which brings
+up PostgreSQL and the combined API/SPA container together and applies
+migrations on startup:
+
+```bash
+git clone https://github.com/shoibahmad/RuralHealth.git
+cd RuralHealth
+docker compose up --build
+```
+
+The application is then served on <http://localhost:8000>.
+
+AI features need a Google AI Studio key. Without one the app runs normally and
+each AI endpoint reports itself unavailable rather than failing:
+
+```bash
+export GEMINI_API_KEY=your-key-here   # read by docker compose
+```
+
+---
+
+## 🛠️ Local Development
 
 ### Prerequisites
-- **Node.js** (v18.0 or higher)
-- **Python** (v3.10 or higher)
-- **Firebase Account** with a Firestore database and Auth enabled.
-- **Google AI Studio API Key** (for Gemini Pro).
+- **Node.js** v22 or higher
+- **Python** v3.12 or higher
+- **Firebase Account** with a Firestore database and Auth enabled
+- **Google AI Studio API Key** (optional; AI features degrade cleanly without one)
 
 ### Step 1: Backend Setup
-1. Clone the repository and navigate to the backend:
+1. Navigate to the backend and create a virtual environment:
    ```bash
    cd backend
-   ```
-2. Set up a virtual environment:
-   ```bash
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-3. Install dependencies:
+2. Install dependencies. Use `requirements-dev.txt` for the test and lint
+   toolchain, or `requirements.txt` for runtime only:
    ```bash
-   pip install -r requirements.txt
+   pip install -r requirements-dev.txt
    ```
-4. Configure environment variables in a `.env` file (see [Configuration](#-configuration)).
-5. Run migrations and start the server:
+3. Create your environment file from the template and fill it in:
+   ```bash
+   cp .env.example .env
+   ```
+4. Run migrations and start the server:
    ```bash
    python manage.py migrate
    python manage.py runserver 0.0.0.0:8000
    ```
 
 ### Step 2: Frontend Setup
-1. Navigate to the frontend directory:
+1. Navigate to the frontend directory and install packages:
    ```bash
    cd frontend
+   npm ci
    ```
-2. Install packages:
+2. Create your environment file from the template and fill it in:
    ```bash
-   npm install
+   cp .env.example .env
    ```
-3. Configure environment variables in a `.env` file (see [Configuration](#-configuration)).
-4. Launch the development server:
+3. Launch the development server, which proxies `/api` to the backend:
    ```bash
    npm run dev
    ```
 
 ---
 
+## ✅ Testing & Quality
+
+Every command below runs in CI on each push and pull request.
+
+### Backend
+
+```bash
+cd backend
+pytest                  # 248 tests
+pytest --cov            # with a coverage report (currently 92%)
+ruff check .            # lint and import ordering
+ruff format .           # apply formatting
+```
+
+### Frontend
+
+```bash
+cd frontend
+npm run test            # 184 tests
+npm run test:coverage   # with a coverage report
+npm run lint            # ESLint, under a warning budget
+npm run typecheck       # TypeScript, no emit
+npm run build           # type check plus production bundle
+```
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions, and
+[CHANGELOG.md](CHANGELOG.md) for the change history.
+
+---
+
 ## ⚙️ Configuration Reference
 
+Copy the templates rather than writing these by hand:
+`backend/.env.example` and `frontend/.env.example`.
+
 ### Backend `.env`
-| Variable | Description |
-| :--- | :--- |
-| `SECRET_KEY` | Django standard security key. |
-| `DEBUG` | Set to `True` for development, `False` for production. |
-| `GEMINI_API_KEY` | API Key from Google AI Studio. |
-| `ALLOWED_HOSTS` | Comma-separated list of domains. |
+| Variable | Required | Description |
+| :--- | :--- | :--- |
+| `SECRET_KEY` | Yes | Django signing key. Generate with `python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"`. |
+| `DEBUG` | No | `True` for development, `False` for production. Defaults to `True`. |
+| `ALLOWED_HOSTS` | No | Comma-separated list of hostnames. Defaults to `*`. |
+| `DATABASE_URL` | No | Postgres URL. Falls back to a local SQLite file when unset. |
+| `GEMINI_API_KEY` | No | Google AI Studio key. AI features are disabled when absent. |
+| `LOG_LEVEL` | No | Logger level for the `api` namespace. Defaults to `DEBUG` when `DEBUG` is on. |
 
 ### Frontend `.env`
 | Variable | Description |
@@ -133,6 +197,27 @@ The backend exposes several key endpoints for core functionality:
 - **Data Management**: `GET /api/screening/patients`, `POST /api/screening/screenings`
 
 For interactive documentation, use the built-in **API Docs** page within the application (accessible via the footer).
+
+---
+
+## 🧭 Project Layout
+
+```
+backend/
+  api/
+    views/            # Endpoints split by domain (auth, patients, screenings, ...)
+    risk.py           # Deterministic screening risk scoring
+    serializers.py    # Request validation and response shaping
+    ai_service.py     # Gemini client wrapper, lazily configured
+    tests/            # pytest suite, one module per domain area
+  ruralhealth/        # Django project settings and URL configuration
+frontend/
+  src/
+    lib/              # Pure logic: schemas, risk scoring, OCR mapping
+    services/         # Firestore and offline sync layers
+    pages/            # Route components
+    components/       # Shared and feature-specific UI
+```
 
 ---
 
