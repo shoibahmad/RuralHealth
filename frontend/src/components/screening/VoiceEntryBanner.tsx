@@ -4,7 +4,6 @@ import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 
-import { translations } from "../../lib/translations";
 
 interface VoiceEntryBannerProps {
     data: any;
@@ -21,7 +20,6 @@ export function VoiceEntryBanner({
     description,
     language
 }: VoiceEntryBannerProps) {
-    const t = translations[language];
     const defaultTitle = language === 'en' ? "Real-time Voice Entry" : "रीयल-टाइम वॉयस एंट्री";
     const defaultDesc = language === 'en' ? "Tap microphone to auto-fill fields in real-time." : "रीयल-टाइम में फ़ील्ड भरने के लिए माइक्रोफ़ोन टैप करें।";
     const [isProcessing, setIsProcessing] = useState(false);

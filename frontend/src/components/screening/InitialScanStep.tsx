@@ -1,12 +1,11 @@
 import { useState, useRef } from "react";
-import { Upload, FileText, Camera, AlertCircle, CheckCircle2, Loader2, FastForward } from "lucide-react";
+import { Upload, FileText, AlertCircle, Loader2, FastForward } from "lucide-react";
 import { Button } from "../ui/button";
-import { motion, AnimatePresence } from "framer-motion";
-import { cn } from "../../lib/utils";
+
 import { translations } from "../../lib/translations";
 
 interface InitialScanStepProps {
-    onDataExtracted: (data: any) => void;
+    onDataExtracted: (data: unknown) => void;
     onSkip: () => void;
     language: "en" | "hi";
 }

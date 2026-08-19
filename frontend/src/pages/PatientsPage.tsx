@@ -20,11 +20,9 @@ import { useToast } from "../context/ToastContext";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
 
 interface PatientDetail extends Patient {
-    screenings: any[];
-    appointments: any[];
-    recommendations: any[];
-    latest_risk_level?: string | null; // Add this if missing in base
-    screening_count?: number; // Add if missing
+    screenings: unknown[];
+    appointments: unknown[];
+    recommendations: unknown[];
 }
 
 export function PatientsPage() {

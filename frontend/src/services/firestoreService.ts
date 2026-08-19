@@ -12,17 +12,9 @@ import {
     Timestamp,
     setDoc
 } from "firebase/firestore";
+import type { DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { db } from "../lib/firebase";
-
-// Helper to sanitize data (remove undefined fields)
-const sanitizeData = (data: any) => {
-    return Object.entries(data).reduce((acc: any, [key, value]) => {
-        if (value !== undefined) {
-            acc[key] = value;
-        }
-        return acc;
-    }, {});
-};
+import type { RiskLevel } from "../lib/schemas";
 
 // Types matching existing interfaces where possible
 export interface User {
@@ -37,6 +29,16 @@ export interface User {
     last_login?: string;
 }
 
+/** A health worker plus the caseload counters shown on the workers page. */
+export interface HealthWorkerWithStats extends User {
+    id: string;
+    stats: {
+        total_patients: number;
+        total_screenings: number;
+        high_risk_patients: number;
+    };
+}
+
 export interface Patient {
     id?: string;
     full_name: string;
@@ -46,6 +48,9 @@ export interface Patient {
     phone?: string;
     health_worker_id?: string; // Reference to User ID
     created_at: string | Timestamp;
+    /** Denormalised counters maintained when a screening is recorded. */
+    screening_count?: number;
+    latest_risk_level?: RiskLevel;
 }
 
 export interface Screening {
@@ -62,11 +67,38 @@ export interface Screening {
     smoking_status?: string;
     alcohol_usage?: string;
     physical_activity?: string;
+    hemoglobin?: number;
+    rbc_count?: number;
+    wbc_count?: number;
+    platelet_count?: number;
+    blood_urea_nitrogen?: number;
+    creatinine?: number;
+    sodium?: number;
+    potassium?: number;
+    chloride?: number;
+    calcium?: number;
+    alt_sgpt?: number;
+    ast_sgot?: number;
+    albumin?: number;
+    total_bilirubin?: number;
     risk_score: number;
-    risk_level: 'Low' | 'Medium' | 'High';
+    risk_level: RiskLevel;
     risk_notes?: string;
-    ai_insights?: string;
+    ai_insights?: string | AiInsights;
     created_at: string | Timestamp;
+}
+
+/** The structured analysis returned by the backend's /api/ai/analyze endpoint. */
+export interface AiInsights {
+    summary?: string;
+    summary_hi?: string;
+    concerns?: string[];
+    concerns_hi?: string[];
+    recommendations?: string[];
+    recommendations_hi?: string[];
+    formatted_insights?: string;
+    formatted_insights_hi?: string;
+    risk_level?: RiskLevel;
 }
 
 export interface Appointment {
@@ -80,9 +112,67 @@ export interface Appointment {
     created_at: string | Timestamp;
 }
 
+export interface VillageStats {
+    village: string;
+    total: number;
+    high_risk: number;
+}
+
+export interface WorkerPerformance {
+    worker_name: string;
+    patients: number;
+    screenings: number;
+    completion_rate: number;
+}
+
+export interface DashboardStats {
+    total_patients: number;
+    total_screenings: number;
+    high_risk_count: number;
+    pending_appointments: number;
+    risk_distribution: Record<RiskLevel, number>;
+    age_distribution: Record<string, number>;
+    gender_distribution: { gender: string; count: number }[];
+    geographic_distribution: VillageStats[];
+    risk_factor_prevalence: Record<string, number>;
+    worker_performance: WorkerPerformance[];
+    recent_screenings: Screening[];
+    weekly_screenings: unknown[];
+}
+
+/** Payload for creating a health worker's Firestore profile document. */
+export type HealthWorkerInput = Pick<User, 'email' | 'full_name'> &
+    Partial<Pick<User, 'village' | 'phone'>>;
+
+/**
+ * Drop keys whose value is `undefined`.
+ *
+ * Firestore rejects documents containing undefined, but optional screening
+ * measurements legitimately end up undefined when they were not taken.
+ */
+const sanitizeData = <T extends Record<string, unknown>>(data: T): Partial<T> => {
+    return Object.entries(data).reduce((acc, [key, value]) => {
+        if (value !== undefined) {
+            acc[key as keyof T] = value as T[keyof T];
+        }
+        return acc;
+    }, {} as Partial<T>);
+};
+
+/** Attach a Firestore document's id to its data. */
+const withId = <T>(snapshot: QueryDocumentSnapshot<DocumentData>): T =>
+    ({ id: snapshot.id, ...snapshot.data() }) as T;
+
+/** Sort newest-first on a date field, avoiding the need for a composite index. */
+const byDateDescending = <T>(items: T[], field: keyof T): T[] =>
+    items.sort(
+        (a, b) =>
+            new Date(b[field] as string).getTime() - new Date(a[field] as string).getTime(),
+    );
+
 export const firestoreService = {
     // --- Users (Health Workers) ---
-    async getHealthWorkers() {
+    async getHealthWorkers(): Promise<HealthWorkerWithStats[]> {
         try {
             // 1. Fetch Workers
             const q = query(
@@ -90,26 +180,23 @@ export const firestoreService = {
                 where("role", "==", "health_worker")
             );
             const snapshot = await getDocs(q);
-            const workers = snapshot.docs.map((doc: any) => {
-                const data = doc.data();
-                return { 
-                    id: doc.id, 
-                    uid: doc.id, 
-                    ...data 
-                } as any;
-            });
+            const workers = snapshot.docs.map((doc) => ({
+                ...doc.data(),
+                id: doc.id,
+                uid: doc.id,
+            }) as User & { id: string });
 
             // 2. Concurrently fetch Patients and Screenings with error fallback
-            let allPatients: any[] = [];
-            let allScreenings: any[] = [];
+            let allPatients: Patient[] = [];
+            let allScreenings: Screening[] = [];
 
             try {
                 const [patientsSnap, screeningsSnap] = await Promise.all([
                     getDocs(collection(db, "patients")),
                     getDocs(collection(db, "screenings"))
                 ]);
-                allPatients = patientsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
-                allScreenings = screeningsSnap.docs.map(d => ({ id: d.id, ...d.data() }));
+                allPatients = patientsSnap.docs.map((d) => withId<Patient>(d));
+                allScreenings = screeningsSnap.docs.map((d) => withId<Screening>(d));
             } catch (err) {
                 console.warn("Permission denied for stats aggregation. Showing workers without full metrics.", err);
                 // Continue with 0 stats if we can't read those specific collections (permission error)
@@ -119,7 +206,7 @@ export const firestoreService = {
             // patientId -> workerId
             const patientToWorkerId = new Map<string, string>();
             allPatients.forEach(p => {
-                if (p.health_worker_id) {
+                if (p.id && p.health_worker_id) {
                     patientToWorkerId.set(p.id, p.health_worker_id);
                 }
             });
@@ -152,7 +239,7 @@ export const firestoreService = {
             });
 
             // 4. Final enrichment
-            return workers.map((worker: any) => ({
+            return workers.map((worker) => ({
                 ...worker,
                 stats: {
                     total_patients: workerPatientCounts.get(worker.uid) || 0,
@@ -167,12 +254,12 @@ export const firestoreService = {
         }
     },
 
-    async createHealthWorker(data: any) {
+    async createHealthWorker(data: HealthWorkerInput) {
         // Creates a Firestore document for the Health Worker.
         // Note: Actual authentication creation is handled separately (e.g., via RegisterPage or Admin SDK).
 
         const docRef = await addDoc(collection(db, "users"), {
-            ...data,
+            ...sanitizeData(data),
             role: 'health_worker',
             created_at: new Date().toISOString(),
             is_active: true
@@ -185,7 +272,7 @@ export const firestoreService = {
     },
 
     // --- Patients ---
-    async getPatients(healthWorkerId?: string) {
+    async getPatients(healthWorkerId?: string): Promise<Patient[]> {
         let q;
         if (healthWorkerId) {
             // Health workers only see their own patients
@@ -199,7 +286,7 @@ export const firestoreService = {
         }
 
         const snapshot = await getDocs(q);
-        const patients = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Patient));
+        const patients = snapshot.docs.map((doc) => withId<Patient>(doc));
 
         // If getting all patients, also include self-registered patient users from users collection
         if (!healthWorkerId) {
@@ -209,15 +296,15 @@ export const firestoreService = {
                     where("role", "==", "patient")
                 );
                 const usersSnapshot = await getDocs(usersQ);
-                
+
                 const patientsMap = new Map<string, Patient>();
                 patients.forEach(p => {
                     if (p.id) patientsMap.set(p.id, p);
                 });
 
-                usersSnapshot.docs.forEach((doc: any) => {
+                usersSnapshot.docs.forEach((doc) => {
                     if (!patientsMap.has(doc.id)) {
-                        const uData = doc.data();
+                        const uData = doc.data() as Partial<Patient>;
                         patientsMap.set(doc.id, {
                             id: doc.id,
                             full_name: uData.full_name || 'Patient',
@@ -227,13 +314,11 @@ export const firestoreService = {
                             phone: uData.phone || '',
                             health_worker_id: uData.health_worker_id || undefined,
                             created_at: uData.created_at || new Date().toISOString()
-                        } as Patient);
+                        });
                     }
                 });
 
-                const merged = Array.from(patientsMap.values());
-                merged.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
-                return merged;
+                return byDateDescending(Array.from(patientsMap.values()), 'created_at');
             } catch (err) {
                 console.error("Error fetching self-registered patient users:", err);
             }
@@ -241,13 +326,13 @@ export const firestoreService = {
 
         // Client-side sort if healthWorkerId was used (to avoid composite index)
         if (healthWorkerId) {
-            patients.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
+            byDateDescending(patients, 'created_at');
         }
 
         return patients;
     },
 
-    async getPatient(id: string) {
+    async getPatient(id: string): Promise<Patient | null> {
         const docRef = doc(db, "patients", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -256,7 +341,7 @@ export const firestoreService = {
         return null;
     },
 
-    async addPatient(patient: Omit<Patient, "id" | "created_at">) {
+    async addPatient(patient: Omit<Patient, "id" | "created_at">): Promise<Patient> {
         const sanitized = sanitizeData(patient);
         const docRef = await addDoc(collection(db, "patients"), {
             ...sanitized,
@@ -267,22 +352,23 @@ export const firestoreService = {
 
     async updatePatient(id: string, data: Partial<Patient>) {
         const docRef = doc(db, "patients", id);
-        await updateDoc(docRef, { ...data } as any);
+        await updateDoc(docRef, sanitizeData(data));
         return { id, ...data };
     },
 
     async setPatient(id: string, data: Partial<Patient>) {
         const docRef = doc(db, "patients", id);
         const docSnap = await getDoc(docRef);
+        const sanitized = sanitizeData(data);
 
         if (docSnap.exists()) {
             await updateDoc(docRef, {
-                ...data,
+                ...sanitized,
                 updated_at: new Date().toISOString()
-            } as any);
+            });
         } else {
             await setDoc(docRef, {
-                ...data,
+                ...sanitized,
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
             });
@@ -295,7 +381,7 @@ export const firestoreService = {
     },
 
     // --- Screenings ---
-    async getScreenings(patientId?: string) {
+    async getScreenings(patientId?: string): Promise<Screening[]> {
         let q;
         if (patientId) {
             q = query(
@@ -307,17 +393,17 @@ export const firestoreService = {
         }
 
         const snapshot = await getDocs(q);
-        const screenings = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Screening));
+        const screenings = snapshot.docs.map((doc) => withId<Screening>(doc));
 
         // Client-side sort if patientId was used
         if (patientId) {
-            screenings.sort((a, b) => new Date(b.created_at as string).getTime() - new Date(a.created_at as string).getTime());
+            byDateDescending(screenings, 'created_at');
         }
 
         return screenings;
     },
 
-    async addScreening(screening: Omit<Screening, "id" | "created_at">) {
+    async addScreening(screening: Omit<Screening, "id" | "created_at">): Promise<Screening> {
         const sanitized = sanitizeData(screening);
         const docRef = await addDoc(collection(db, "screenings"), {
             ...sanitized,
@@ -328,11 +414,11 @@ export const firestoreService = {
 
     async updateScreening(id: string, data: Partial<Screening>) {
         const docRef = doc(db, "screenings", id);
-        await updateDoc(docRef, { ...data } as any);
+        await updateDoc(docRef, sanitizeData(data));
         return { id, ...data };
     },
 
-    async getScreening(id: string) {
+    async getScreening(id: string): Promise<Screening | null> {
         const docRef = doc(db, "screenings", id);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
@@ -342,7 +428,7 @@ export const firestoreService = {
     },
 
     // --- Appointments ---
-    async getAppointments(userId: string, role: string) {
+    async getAppointments(userId: string, role: string): Promise<Appointment[]> {
         let q;
         if (role === 'health_worker') {
             q = query(
@@ -355,29 +441,24 @@ export const firestoreService = {
         }
 
         const snapshot = await getDocs(q);
-        const appointments = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Appointment));
+        const appointments = snapshot.docs.map((doc) => withId<Appointment>(doc));
 
         // Client-side sort to avoid needing a composite index
-        appointments.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
-
-        return appointments;
+        return byDateDescending(appointments, 'scheduled_date');
     },
 
-    async getAppointmentsForPatient(patientId: string) {
+    async getAppointmentsForPatient(patientId: string): Promise<Appointment[]> {
         const q = query(
             collection(db, "appointments"),
             where("patient_id", "==", patientId)
         );
         const snapshot = await getDocs(q);
-        const appointments = snapshot.docs.map((doc: any) => ({ id: doc.id, ...doc.data() } as Appointment));
+        const appointments = snapshot.docs.map((doc) => withId<Appointment>(doc));
 
-        // Client-side sort
-        appointments.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
-
-        return appointments;
+        return byDateDescending(appointments, 'scheduled_date');
     },
 
-    async addAppointment(appointment: Omit<Appointment, "id" | "created_at">) {
+    async addAppointment(appointment: Omit<Appointment, "id" | "created_at">): Promise<Appointment> {
         const sanitized = sanitizeData(appointment);
         const docRef = await addDoc(collection(db, "appointments"), {
             ...sanitized,
@@ -387,8 +468,8 @@ export const firestoreService = {
     },
 
     // --- Stats / Dashboard ---
-    async getDashboardStats(healthWorkerId?: string) {
-        // Fetch stats for dashboard. 
+    async getDashboardStats(healthWorkerId?: string): Promise<DashboardStats> {
+        // Fetch stats for dashboard.
         // Optimization Note: In production, use Distributed Counters or aggregated stats documents.
 
         const [patients, screenings, appointments] = await Promise.all([
@@ -396,24 +477,19 @@ export const firestoreService = {
             this.getScreenings(), // Filtering by HW would require composite index or client filter
             healthWorkerId
                 ? this.getAppointments(healthWorkerId, 'health_worker')
-                : getDocs(collection(db, "appointments")).then((s: any) => s.docs.map((d: any) => ({ id: d.id, ...d.data() } as Appointment)))
+                : getDocs(collection(db, "appointments")).then((s) =>
+                    s.docs.map((d) => withId<Appointment>(d))
+                )
         ]);
 
-        // Filter screenings if HW is strictly managed (can also filter in query if index exists)
-        // For MVP, we'll assume we can view all or filter in memory
-        const relevantScreenings = healthWorkerId
-            ? screenings // In a real app, join with patients or store HW ID on screening
-            : screenings;
-
-        const highRisk = relevantScreenings.filter(s => s.risk_level === 'High').length;
-        const pendingAppointments = appointments.filter((a: Appointment) => a.status === 'scheduled').length;
+        const highRisk = screenings.filter(s => s.risk_level === 'High').length;
+        const pendingAppointments = appointments.filter(a => a.status === 'scheduled').length;
 
         // Risk Distribution
-        // Risk Distribution
-        const riskDist: Record<'Low' | 'Medium' | 'High', number> = { Low: 0, Medium: 0, High: 0 };
-        relevantScreenings.forEach((s: Screening) => {
-            if (s.risk_level && riskDist[s.risk_level as keyof typeof riskDist] !== undefined) {
-                riskDist[s.risk_level as keyof typeof riskDist]++;
+        const riskDist: Record<RiskLevel, number> = { Low: 0, Medium: 0, High: 0 };
+        screenings.forEach((s) => {
+            if (s.risk_level && riskDist[s.risk_level] !== undefined) {
+                riskDist[s.risk_level]++;
             }
         });
 
@@ -438,7 +514,7 @@ export const firestoreService = {
 
         // Geographic Distribution
         const villageStats: Record<string, { total: number, high_risk: number }> = {};
-        
+
         // 1. Initialize villages from patients
         patients.forEach(p => {
             const v = (p.village || 'Unknown').trim();
@@ -446,40 +522,39 @@ export const firestoreService = {
             villageStats[v].total++;
         });
 
-        // 2. Map screenings to villages via case-insensitive ID lookup
-        relevantScreenings.forEach(s => {
+        // 2. Map screenings to villages via patient lookup
+        screenings.forEach(s => {
             const patient = patients.find(p => p.id === s.patient_id);
             const v = (patient?.village || 'Unknown').trim();
-            
+
             if (villageStats[v] && s.risk_level === 'High') {
                 villageStats[v].high_risk++;
             }
         });
 
         // 3. Convert to array and sort by total patients descending
-        const geographicDist = Object.entries(villageStats)
+        const geographicDist: VillageStats[] = Object.entries(villageStats)
             .map(([village, stats]) => ({ village, ...stats }))
             .sort((a, b) => b.total - a.total);
 
         // Risk Factor Prevalence (%)
         const riskFactors = {
-            "Hypertension": relevantScreenings.filter(s => (s.systolic_bp || 0) >= 140 || (s.diastolic_bp || 0) >= 90).length,
-            "Diabetes": relevantScreenings.filter(s => (s.glucose_level || 0) >= 200).length,
-            "Smoking": relevantScreenings.filter(s => s.smoking_status === 'Current').length,
-            "Obesity": relevantScreenings.filter(s => (s.weight_kg || 0) / (Math.pow((s.height_cm || 0) / 100, 2) || 1) >= 30).length,
-            "Alcohol": relevantScreenings.filter(s => s.alcohol_usage === 'Frequent').length
+            "Hypertension": screenings.filter(s => (s.systolic_bp || 0) >= 140 || (s.diastolic_bp || 0) >= 90).length,
+            "Diabetes": screenings.filter(s => (s.glucose_level || 0) >= 200).length,
+            "Smoking": screenings.filter(s => s.smoking_status === 'Current').length,
+            "Obesity": screenings.filter(s => (s.weight_kg || 0) / (Math.pow((s.height_cm || 0) / 100, 2) || 1) >= 30).length,
+            "Alcohol": screenings.filter(s => s.alcohol_usage === 'Frequent').length
         };
         const riskFactorPrevalence = Object.fromEntries(
-            Object.entries(riskFactors).map(([key, count]) => [key, relevantScreenings.length > 0 ? Math.round((count / relevantScreenings.length) * 100) : 0])
+            Object.entries(riskFactors).map(([key, count]) => [key, screenings.length > 0 ? Math.round((count / screenings.length) * 100) : 0])
         );
 
         // Worker Performance
         const workers = await this.getHealthWorkers();
-        const workerPerformance = workers.map(worker => {
+        const workerPerformance: WorkerPerformance[] = workers.map(worker => {
             const workerPatients = patients.filter(p => p.health_worker_id === worker.uid);
-            // This is a simplification; in a real app, screenings would have worker_id
-            // For now, assume screenings are linked to patients who are linked to workers
-            const workerScreenings = relevantScreenings.filter(s => {
+            // Screenings are linked to patients, who are in turn linked to workers.
+            const workerScreenings = screenings.filter(s => {
                 const p = patients.find(pat => pat.id === s.patient_id);
                 return p?.health_worker_id === worker.uid;
             });
@@ -493,7 +568,7 @@ export const firestoreService = {
 
         return {
             total_patients: patients.length,
-            total_screenings: relevantScreenings.length,
+            total_screenings: screenings.length,
             high_risk_count: highRisk,
             pending_appointments: pendingAppointments,
             risk_distribution: riskDist,
@@ -502,7 +577,7 @@ export const firestoreService = {
             geographic_distribution: geographicDist,
             risk_factor_prevalence: riskFactorPrevalence,
             worker_performance: workerPerformance,
-            recent_screenings: relevantScreenings.slice(0, 5),
+            recent_screenings: screenings.slice(0, 5),
             weekly_screenings: []
         };
     }

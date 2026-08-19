@@ -46,8 +46,11 @@ class SyncService {
     if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
       try {
         const registration = await navigator.serviceWorker.ready;
-        // @ts-ignore
-        await registration.sync.register('sync-data');
+        // The Background Sync API is not in TypeScript's DOM lib yet.
+        const syncManager = (registration as ServiceWorkerRegistration & {
+          sync?: { register: (tag: string) => Promise<void> };
+        }).sync;
+        await syncManager?.register('sync-data');
         console.log('Background sync registered');
       } catch (error) {
         console.error('Background sync registration failed:', error);

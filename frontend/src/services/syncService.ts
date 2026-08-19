@@ -222,7 +222,8 @@ class SyncService {
     }
 
     private async syncScreening(item: SyncQueueItem, patientServerId: number): Promise<number | null> {
-        const { patientLocalId, ...screeningData } = item.data;
+        // patientLocalId is an offline-only key and must not reach the server.
+        const { patientLocalId: _localId, ...screeningData } = item.data;
 
         const response = await fetch('/api/screening/screenings', {
             method: 'POST',

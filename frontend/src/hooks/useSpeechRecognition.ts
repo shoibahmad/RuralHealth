@@ -1,5 +1,30 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 
+/**
+ * Resolve the browser's SpeechRecognition constructor.
+ *
+ * Chromium exposes it only under the webkit prefix and TypeScript's DOM lib
+ * declares neither, so the lookup is narrowed here once instead of being
+ * silenced at each call site.
+ */
+type SpeechRecognitionConstructor = new () => {
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  [key: string]: unknown;
+};
+
+function getSpeechRecognition(): SpeechRecognitionConstructor | undefined {
+  if (typeof window === "undefined") return undefined;
+
+  const globalWindow = window as Window & {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  };
+
+  return globalWindow.SpeechRecognition ?? globalWindow.webkitSpeechRecognition;
+}
+
 interface SpeechRecognitionOptions {
   onResult?: (text: string, isFinal: boolean) => void;
   onError?: (error: any) => void;
@@ -25,8 +50,7 @@ export function useSpeechRecognition({
   }, [onResult, onError]);
 
   useEffect(() => {
-    // @ts-ignore
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = getSpeechRecognition();
 
     if (!SpeechRecognition) {
       console.warn("Speech recognition is not supported in this browser.");
@@ -78,8 +102,8 @@ export function useSpeechRecognition({
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
-        } catch (e) {
-          // Ignore errors on cleanup
+        } catch {
+          // Already stopped; nothing to clean up.
         }
       }
     };
@@ -111,9 +135,6 @@ export function useSpeechRecognition({
     transcript,
     startListening,
     stopListening,
-    isSupported: !!(
-      // @ts-ignore
-      typeof window !== 'undefined' && (window.SpeechRecognition || window.webkitSpeechRecognition)
-    ),
+    isSupported: !!getSpeechRecognition(),
   };
 }
