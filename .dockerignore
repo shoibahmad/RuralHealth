@@ -1,22 +1,44 @@
-node_modules
-dist
-.env
-__pycache__
-*.pyc
-venv
+# Patterns are matched against the context root, so nested directories need an
+# explicit **/ prefix - plain "venv" would not exclude backend/venv.
+
+# Dependencies and build output
+**/node_modules
+**/venv
+**/.venv
+**/dist
+**/build
+**/staticfiles
+**/.vite
+
+# Python bytecode and caches
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.ruff_cache
+**/.mypy_cache
+
+# Secrets and local databases
+**/.env
+**/.env.local
+**/.env.*.local
+**/*.db
+**/*.sqlite3
+
+# Version control and editor state
 .git
 .gitignore
-.vscode
-ruralhealth.db
-ruralhealth_django.db
-
-# Build artifacts and tooling caches
-coverage
-.pytest_cache
-.ruff_cache
-htmlcov
-.coverage
-*.md
 .github
+**/.vscode
+**/.idea
+.claude
+
+# Test and coverage artifacts
+**/coverage
+**/htmlcov
+**/.coverage
+**/.coverage.*
+
+# Documentation and reports; not needed to build the image
+*.md
 trainplex-report
-backend/staticfiles
+resources
