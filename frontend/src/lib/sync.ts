@@ -1,7 +1,4 @@
 // Sync service for online/offline data synchronization
-// import { db } from './db';
-
-// const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
 
 class SyncService {
   private isOnline: boolean = navigator.onLine;

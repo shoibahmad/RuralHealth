@@ -1,4 +1,6 @@
 """Shared fixtures for the API test suite."""
+import uuid
+
 import pytest
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
@@ -7,7 +9,10 @@ from api.models import Patient
 
 User = get_user_model()
 
-TEST_PASSWORD = 'testpass123'
+# Generated per run so no credential-shaped literal is ever committed; secret
+# scanners flag those even in test fixtures. Must satisfy the serializer's
+# minimum length and Django's password validators.
+TEST_PASSWORD = f'pw-{uuid.uuid4().hex}'
 
 
 @pytest.fixture(autouse=True)

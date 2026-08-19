@@ -22,7 +22,6 @@ import {
     Area,
     AreaChart
 } from "recharts";
-// import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 
 interface AnalyticsData {
@@ -36,7 +35,6 @@ interface AnalyticsData {
 const COLORS = ['#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
 
 export function AnalyticsPage() {
-    // const { token } = useAuth(); // Unused
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
     const [loading, setLoading] = useState(true);
 

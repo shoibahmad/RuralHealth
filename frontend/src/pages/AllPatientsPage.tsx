@@ -4,7 +4,6 @@ import { Search, Filter, Activity, Edit, X, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-// import { useAuth } from "../context/useAuth";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
@@ -16,7 +15,6 @@ import { errorMessage } from "../lib/errors";
 const log = createLogger("AllPatientsPage");
 
 export function AllPatientsPage() {
-    // const { user } = useAuth(); // Unused
     const navigate = useNavigate();
     const [patients, setPatients] = useState<Patient[]>([]);
     const [loading, setLoading] = useState(true);
@@ -68,7 +66,6 @@ export function AllPatientsPage() {
     useEffect(() => {
         fetchPatients();
     }, [fetchPatients]);
-
 
     const handleSearch = () => {
         setPage(1);

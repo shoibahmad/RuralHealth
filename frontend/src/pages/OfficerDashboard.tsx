@@ -20,7 +20,6 @@ import {
     BarChart,
     Bar
 } from "recharts";
-// import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 import { createLogger } from "../lib/logger";
 

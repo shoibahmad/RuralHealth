@@ -28,7 +28,6 @@ interface DashboardData {
     active_recommendations: AdviceCard[];
 }
 
-// import { useAuth } from "../context/useAuth"; // Already imported
 import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 
@@ -125,7 +124,6 @@ export function PatientDashboard() {
             fetchDashboard();
         }
     }, [user, fetchDashboard]);
-
 
     const getRiskColor = (level: string) => {
         switch (level) {
