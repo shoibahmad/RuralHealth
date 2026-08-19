@@ -1,6 +1,14 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle, Sparkles } from "lucide-react";
+import {
+    ArrowLeft,
+    ArrowRight,
+    Save,
+    Loader2,
+    CheckCircle2,
+    AlertCircle,
+    Sparkles,
+} from "lucide-react";
 import { motion } from "framer-motion";
 
 import { Button } from "../components/ui/button";
@@ -100,7 +108,9 @@ export function ScreeningWizard() {
                     <div className="h-20 w-20 bg-teal-500/20 text-teal-400 rounded-full flex items-center justify-center mb-6">
                         <Loader2 className="h-10 w-10 animate-spin" />
                     </div>
-                    <h2 className="text-2xl font-bold text-white mb-2">Saving &amp; Analyzing...</h2>
+                    <h2 className="text-2xl font-bold text-white mb-2">
+                        Saving &amp; Analyzing...
+                    </h2>
                     <p className="text-slate-400 mb-8">
                         Gemini AI is analyzing patient vitals and lab reports...
                     </p>

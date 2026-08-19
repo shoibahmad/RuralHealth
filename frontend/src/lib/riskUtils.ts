@@ -8,7 +8,7 @@ export interface RiskFactors {
 
 export interface RiskResult {
     score: number;
-    level: 'Low' | 'Medium' | 'High';
+    level: "Low" | "Medium" | "High";
     notes: string;
 }
 
@@ -24,7 +24,7 @@ export const riskUtils = {
         }
 
         // Smoking
-        if (data.smoking_status === 'smoker') {
+        if (data.smoking_status === "smoker") {
             score += 2;
             notes.push("Smoker (+2)");
         }
@@ -44,14 +44,14 @@ export const riskUtils = {
         }
 
         // Determine Level
-        let level: 'Low' | 'Medium' | 'High' = 'Low';
-        if (score >= 4) level = 'High';
-        else if (score >= 2) level = 'Medium';
+        let level: "Low" | "Medium" | "High" = "Low";
+        if (score >= 4) level = "High";
+        else if (score >= 2) level = "Medium";
 
         return {
             score,
             level,
-            notes: notes.join(", ") || "No significant risk factors identified."
+            notes: notes.join(", ") || "No significant risk factors identified.",
         };
     },
 
@@ -62,20 +62,27 @@ export const riskUtils = {
         return bmi;
     },
 
-    generateInsights(data: RiskFactors & { riskLevel: string, bmi?: number, glucose?: number }): string {
+    generateInsights(
+        data: RiskFactors & { riskLevel: string; bmi?: number; glucose?: number },
+    ): string {
         let insights = `**AI Health Assessment**\n\nBased on the screening data, the patient is categorized as **${data.riskLevel} Risk**.\n\n**Key Observations:**\n`;
 
-        if (data.age > 50) insights += `- Patient age (${data.age}) increases susceptibility to chronic conditions.\n`;
-        if (data.bmi && data.bmi > 25) insights += `- BMI of ${data.bmi} indicates overweight/obesity, a major risk factor.\n`;
-        if (data.systolic_bp && data.systolic_bp > 130) insights += `- Elevated Systolic BP (${data.systolic_bp} mmHg) suggests hypertension.\n`;
-        if (data.smoking_status === 'smoker') insights += `- Smoking history significantly elevates cardiovascular risk.\n`;
-        if (data.glucose && data.glucose > 140) insights += `- Random glucose level of ${data.glucose} mg/dL requires further diabetes screening.\n`;
+        if (data.age > 50)
+            insights += `- Patient age (${data.age}) increases susceptibility to chronic conditions.\n`;
+        if (data.bmi && data.bmi > 25)
+            insights += `- BMI of ${data.bmi} indicates overweight/obesity, a major risk factor.\n`;
+        if (data.systolic_bp && data.systolic_bp > 130)
+            insights += `- Elevated Systolic BP (${data.systolic_bp} mmHg) suggests hypertension.\n`;
+        if (data.smoking_status === "smoker")
+            insights += `- Smoking history significantly elevates cardiovascular risk.\n`;
+        if (data.glucose && data.glucose > 140)
+            insights += `- Random glucose level of ${data.glucose} mg/dL requires further diabetes screening.\n`;
 
         insights += `\n**Recommendations:**\n`;
-        if (data.riskLevel === 'High') {
+        if (data.riskLevel === "High") {
             insights += `1. **Immediate Referral**: Schedule appointment with Medical Officer within 24 hours.\n`;
             insights += `2. **BP Monitoring**: Daily blood pressure checks recommended.\n`;
-        } else if (data.riskLevel === 'Medium') {
+        } else if (data.riskLevel === "Medium") {
             insights += `1. **Lifestyle Change**: Reduce salt intake and increase physical activity.\n`;
             insights += `2. **Follow-up**: Re-screen in 1 month.\n`;
         } else {
@@ -84,5 +91,5 @@ export const riskUtils = {
         }
 
         return insights;
-    }
+    },
 };

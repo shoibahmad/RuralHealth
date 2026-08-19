@@ -8,11 +8,7 @@ import {
     flattenObject,
     unwrapExtractionResponse,
 } from "../../lib/ocrMapping";
-import {
-    buildNameNotice,
-    filesOnBehalfOfOthers,
-    type NameNotice,
-} from "../../lib/nameMatching";
+import { buildNameNotice, filesOnBehalfOfOthers, type NameNotice } from "../../lib/nameMatching";
 import { riskUtils } from "../../lib/riskUtils";
 import { validateScreeningForm } from "../../lib/schemas";
 import {
@@ -217,9 +213,7 @@ export function useScreeningWizard() {
         let patientId = user?.uid;
 
         if (!isSelfScreening) {
-            const created = await firestoreService.addPatient(
-                buildPatientPayload(form, user?.uid),
-            );
+            const created = await firestoreService.addPatient(buildPatientPayload(form, user?.uid));
             patientId = created.id;
         } else {
             await firestoreService.setPatient(patientId!, buildPatientPayload(form));

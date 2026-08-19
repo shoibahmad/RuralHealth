@@ -59,9 +59,7 @@ export function NameVerificationBanner({
                 <AlertCircle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
                 <div className="flex-1">
                     <p className="font-semibold text-amber-300">
-                        {language === "en"
-                            ? "Report Mismatch Detected"
-                            : "रिपोर्ट मेल नहीं खाती"}
+                        {language === "en" ? "Report Mismatch Detected" : "रिपोर्ट मेल नहीं खाती"}
                     </p>
                     <p className="text-amber-400/80 mt-1">
                         {language === "en"

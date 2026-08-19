@@ -150,7 +150,10 @@ describe("geographicDistribution", () => {
 
     it("trims village names so spacing does not split a village in two", () => {
         const result = geographicDistribution(
-            [patient({ id: "p1", village: " Chandpur " }), patient({ id: "p2", village: "Chandpur" })],
+            [
+                patient({ id: "p1", village: " Chandpur " }),
+                patient({ id: "p2", village: "Chandpur" }),
+            ],
             [],
         );
 
@@ -187,9 +190,9 @@ describe("riskFactorPrevalence", () => {
 
     it("counts obesity from height and weight", () => {
         // 100kg at 160cm is a BMI of 39.
-        expect(
-            riskFactorPrevalence([screening({ height_cm: 160, weight_kg: 100 })]).Obesity,
-        ).toBe(100);
+        expect(riskFactorPrevalence([screening({ height_cm: 160, weight_kg: 100 })]).Obesity).toBe(
+            100,
+        );
     });
 
     it("does not treat a missing height as obese", () => {
@@ -290,9 +293,7 @@ describe("buildDashboardStats", () => {
     it("caps recent screenings at five", () => {
         const stats = buildDashboardStats({
             patients: [],
-            screenings: Array.from({ length: 9 }, (_, i) =>
-                screening({ id: `s${i}` }),
-            ),
+            screenings: Array.from({ length: 9 }, (_, i) => screening({ id: `s${i}` })),
             appointments: [],
             workers: [],
         });

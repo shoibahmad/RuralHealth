@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import type { ReactNode } from "react";
-import {
-    onAuthStateChanged,
-    signOut
-} from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import type { User as FirebaseUser } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
@@ -37,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                             ...firebaseUser,
                             role: userData.role,
                             full_name: userData.full_name,
-                            phone: userData.phone
+                            phone: userData.phone,
                         });
                     } else {
                         // Fallback if user doc doesn't exist yet
@@ -66,15 +63,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
 
     return (
-        <AuthContext.Provider value={{
-            user,
-            loading,
-            logout,
-            isAuthenticated: !!user,
-            isHealthOfficer: user?.role === 'health_officer' || user?.role === 'admin',
-            isHealthWorker: user?.role === 'health_worker' || !user?.role, // Default to worker if undefined for now
-            isPatient: user?.role === 'patient'
-        }}>
+        <AuthContext.Provider
+            value={{
+                user,
+                loading,
+                logout,
+                isAuthenticated: !!user,
+                isHealthOfficer: user?.role === "health_officer" || user?.role === "admin",
+                isHealthWorker: user?.role === "health_worker" || !user?.role, // Default to worker if undefined for now
+                isPatient: user?.role === "patient",
+            }}
+        >
             {!loading && children}
         </AuthContext.Provider>
     );

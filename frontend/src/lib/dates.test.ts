@@ -7,9 +7,7 @@ const timestamp = (iso: string) => ({ toDate: () => new Date(iso) });
 
 describe("toDate", () => {
     it("parses an ISO string", () => {
-        expect(toDate("2026-03-01T00:00:00Z")?.toISOString()).toBe(
-            "2026-03-01T00:00:00.000Z",
-        );
+        expect(toDate("2026-03-01T00:00:00Z")?.toISOString()).toBe("2026-03-01T00:00:00.000Z");
     });
 
     it("converts a Firestore Timestamp", () => {

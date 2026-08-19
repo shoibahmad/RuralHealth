@@ -1,4 +1,5 @@
 """Tests for screening creation, validation and role scoping."""
+
 import pytest
 from django.urls import reverse
 
@@ -23,9 +24,7 @@ def screening_payload(patient, **overrides):
 
 
 class TestCreateScreening:
-    def test_scores_a_healthy_screening_as_low_risk(
-        self, auth_client, health_worker, patient
-    ):
+    def test_scores_a_healthy_screening_as_low_risk(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('screenings'), screening_payload(patient), format='json'
         )
@@ -35,9 +34,7 @@ class TestCreateScreening:
         assert response.data['risk_score'] == 0
         assert response.data['risk_notes'] == 'No significant risk factors detected.'
 
-    def test_scores_a_dangerous_screening_as_high_risk(
-        self, auth_client, health_worker, patient
-    ):
+    def test_scores_a_dangerous_screening_as_high_risk(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('screenings'),
             screening_payload(
@@ -86,9 +83,7 @@ class TestCreateScreening:
             format='json',
         )
 
-        recommendations = Recommendation.objects.filter(
-            screening_id=response.data['id']
-        )
+        recommendations = Recommendation.objects.filter(screening_id=response.data['id'])
         titles = set(recommendations.values_list('title', flat=True))
 
         assert 'Blood Pressure Management' in titles
@@ -127,9 +122,7 @@ class TestCreateScreening:
         assert 'patient_id' in response.data
 
     def test_requires_authentication(self, api_client, patient):
-        response = api_client.post(
-            reverse('screenings'), screening_payload(patient), format='json'
-        )
+        response = api_client.post(reverse('screenings'), screening_payload(patient), format='json')
 
         assert response.status_code == 401
 
@@ -148,9 +141,7 @@ class TestScreeningValidation:
             ('weight_kg', 900),
         ],
     )
-    def test_rejects_out_of_range_vitals(
-        self, auth_client, health_worker, patient, field, value
-    ):
+    def test_rejects_out_of_range_vitals(self, auth_client, health_worker, patient, field, value):
         response = auth_client(health_worker).post(
             reverse('screenings'),
             screening_payload(patient, **{field: value}),
@@ -171,9 +162,7 @@ class TestScreeningValidation:
             ('creatinine', 0.001),
         ],
     )
-    def test_rejects_out_of_range_labs(
-        self, auth_client, health_worker, patient, field, value
-    ):
+    def test_rejects_out_of_range_labs(self, auth_client, health_worker, patient, field, value):
         response = auth_client(health_worker).post(
             reverse('screenings'),
             screening_payload(patient, **{field: value}),
@@ -183,9 +172,7 @@ class TestScreeningValidation:
         assert response.status_code == 400
         assert field in response.data
 
-    def test_rejects_diastolic_at_or_above_systolic(
-        self, auth_client, health_worker, patient
-    ):
+    def test_rejects_diastolic_at_or_above_systolic(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('screenings'),
             screening_payload(patient, systolic_bp=120, diastolic_bp=130),
@@ -195,9 +182,7 @@ class TestScreeningValidation:
         assert response.status_code == 400
         assert 'diastolic_bp' in response.data
 
-    def test_rejects_an_unknown_smoking_status(
-        self, auth_client, health_worker, patient
-    ):
+    def test_rejects_an_unknown_smoking_status(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('screenings'),
             screening_payload(patient, smoking_status='Sometimes'),
@@ -216,9 +201,7 @@ class TestScreeningValidation:
 
         assert response.status_code == 400
 
-    def test_accepts_a_screening_with_only_a_patient_id(
-        self, auth_client, health_worker, patient
-    ):
+    def test_accepts_a_screening_with_only_a_patient_id(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('screenings'), {'patient_id': patient.id}, format='json'
         )
@@ -250,9 +233,7 @@ class TestListScreenings:
 
         assert len(response.data) == 2
 
-    def test_filters_by_patient_and_risk(
-        self, auth_client, health_officer, patient, other_patient
-    ):
+    def test_filters_by_patient_and_risk(self, auth_client, health_officer, patient, other_patient):
         Screening.objects.create(patient=patient, risk_level='Low', risk_score=0)
         Screening.objects.create(patient=patient, risk_level='High', risk_score=70)
         Screening.objects.create(patient=other_patient, risk_level='High', risk_score=80)
@@ -276,9 +257,7 @@ class TestPatientSelfScreening:
             village='Selfville',
         )
 
-    def test_patient_can_screen_themselves(
-        self, auth_client, patient_user, patient_profile
-    ):
+    def test_patient_can_screen_themselves(self, auth_client, patient_user, patient_profile):
         response = auth_client(patient_user).post(
             reverse('patient_self_screening'),
             {'systolic_bp': 150, 'diastolic_bp': 95, 'smoking_status': 'Current'},
@@ -315,18 +294,14 @@ class TestPatientSelfScreening:
 
         assert response.status_code == 400
 
-    def test_returns_404_before_the_profile_is_set_up(
-        self, auth_client, patient_user
-    ):
+    def test_returns_404_before_the_profile_is_set_up(self, auth_client, patient_user):
         response = auth_client(patient_user).post(
             reverse('patient_self_screening'), {'systolic_bp': 120}, format='json'
         )
 
         assert response.status_code == 404
 
-    def test_a_health_worker_cannot_use_the_patient_portal(
-        self, auth_client, health_worker
-    ):
+    def test_a_health_worker_cannot_use_the_patient_portal(self, auth_client, health_worker):
         response = auth_client(health_worker).post(
             reverse('patient_self_screening'), {'systolic_bp': 120}, format='json'
         )

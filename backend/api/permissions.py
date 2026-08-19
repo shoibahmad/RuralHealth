@@ -6,9 +6,9 @@ class IsHealthOfficer(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.role in ['health_officer', 'admin']
+            request.user
+            and request.user.is_authenticated
+            and request.user.role in ['health_officer', 'admin']
         )
 
 
@@ -17,9 +17,7 @@ class IsHealthWorker(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.role == 'health_worker'
+            request.user and request.user.is_authenticated and request.user.role == 'health_worker'
         )
 
 
@@ -40,8 +38,4 @@ class IsPatient(permissions.BasePermission):
     """Permission for Patients only."""
 
     def has_permission(self, request, view):
-        return (
-            request.user and
-            request.user.is_authenticated and
-            request.user.role == 'patient'
-        )
+        return request.user and request.user.is_authenticated and request.user.role == 'patient'

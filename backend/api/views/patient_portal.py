@@ -1,4 +1,5 @@
 """Endpoints backing the patient-facing portal."""
+
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.response import Response
@@ -40,9 +41,7 @@ class PatientPortalView(APIView):
 
     def profile_required(self):
         """Return a 404 response when the caller has no patient profile yet."""
-        return Response(
-            {'detail': PROFILE_REQUIRED_DETAIL}, status=status.HTTP_404_NOT_FOUND
-        )
+        return Response({'detail': PROFILE_REQUIRED_DETAIL}, status=status.HTTP_404_NOT_FOUND)
 
 
 class PatientDashboardView(PatientPortalView):
@@ -52,9 +51,7 @@ class PatientDashboardView(PatientPortalView):
         if self.patient is None:
             return self.profile_required()
 
-        screenings = Screening.objects.filter(patient=self.patient).order_by(
-            '-created_at'
-        )
+        screenings = Screening.objects.filter(patient=self.patient).order_by('-created_at')
         latest_screening = screenings.first()
 
         upcoming_appointments = Appointment.objects.filter(
@@ -72,9 +69,7 @@ class PatientDashboardView(PatientPortalView):
                 'patient': PatientSerializer(self.patient).data,
                 'total_screenings': screenings.count(),
                 'latest_screening': (
-                    ScreeningSerializer(latest_screening).data
-                    if latest_screening
-                    else None
+                    ScreeningSerializer(latest_screening).data if latest_screening else None
                 ),
                 'upcoming_appointments': AppointmentSerializer(
                     upcoming_appointments, many=True
@@ -95,9 +90,7 @@ class PatientSelfScreeningView(PatientPortalView):
 
         # patient_id always comes from the session, never from the request body,
         # so a patient cannot file a screening against somebody else's record.
-        data = {
-            key: value for key, value in request.data.items() if key != 'patient_id'
-        }
+        data = {key: value for key, value in request.data.items() if key != 'patient_id'}
         data['patient_id'] = self.patient.id
 
         serializer = ScreeningCreateSerializer(data=data)
@@ -105,9 +98,7 @@ class PatientSelfScreeningView(PatientPortalView):
 
         screening = record_screening(self.patient, serializer.validated_data)
 
-        return Response(
-            ScreeningSerializer(screening).data, status=status.HTTP_201_CREATED
-        )
+        return Response(ScreeningSerializer(screening).data, status=status.HTTP_201_CREATED)
 
 
 class PatientScreeningHistoryView(PatientPortalView):
@@ -120,12 +111,8 @@ class PatientScreeningHistoryView(PatientPortalView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        screenings = Screening.objects.filter(patient=self.patient).order_by(
-            '-created_at'
-        )
-        appointments = Appointment.objects.filter(patient=self.patient).order_by(
-            '-scheduled_date'
-        )
+        screenings = Screening.objects.filter(patient=self.patient).order_by('-created_at')
+        appointments = Appointment.objects.filter(patient=self.patient).order_by('-scheduled_date')
         recommendations = Recommendation.objects.filter(patient=self.patient).order_by(
             '-created_at'
         )
@@ -135,9 +122,7 @@ class PatientScreeningHistoryView(PatientPortalView):
                 'patient': PatientSerializer(self.patient).data,
                 'screenings': ScreeningSerializer(screenings, many=True).data,
                 'appointments': AppointmentSerializer(appointments, many=True).data,
-                'recommendations': RecommendationSerializer(
-                    recommendations, many=True
-                ).data,
+                'recommendations': RecommendationSerializer(recommendations, many=True).data,
             }
         )
 

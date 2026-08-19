@@ -13,7 +13,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
 } from "recharts";
 
 export function PatientScreeningHistory() {
@@ -29,16 +29,16 @@ export function PatientScreeningHistory() {
             const [patientProfile, screenings, appointments] = await Promise.all([
                 firestoreService.getPatient(user.uid),
                 firestoreService.getScreenings(user.uid),
-                firestoreService.getAppointmentsForPatient(user.uid)
+                firestoreService.getAppointmentsForPatient(user.uid),
             ]);
 
             // Robustly handle patient profile (fallback to AuthContext if not in 'patients' collection)
             const patient = patientProfile || {
                 id: user.uid,
-                full_name: user.displayName || user.full_name || 'Patient',
+                full_name: user.displayName || user.full_name || "Patient",
                 age: 0,
-                gender: 'Not Set',
-                village: 'Not Set',
+                gender: "Not Set",
+                village: "Not Set",
                 created_at: new Date().toISOString(),
             };
 
@@ -65,7 +65,6 @@ export function PatientScreeningHistory() {
             fetchHistory();
         }
     }, [user, fetchHistory]);
-
 
     if (loading) {
         return (
@@ -94,12 +93,15 @@ export function PatientScreeningHistory() {
     const { screenings } = data;
 
     // Prepare chart data
-    const chartData = screenings.slice().reverse().map((s) => ({
-        date: formatDateWith(s.created_at, { month: 'short', day: 'numeric' }),
-        risk_score: s.risk_score || 0,
-        systolic_bp: s.systolic_bp || 0,
-        glucose: s.glucose_level || 0
-    }));
+    const chartData = screenings
+        .slice()
+        .reverse()
+        .map((s) => ({
+            date: formatDateWith(s.created_at, { month: "short", day: "numeric" }),
+            risk_score: s.risk_score || 0,
+            systolic_bp: s.systolic_bp || 0,
+            glucose: s.glucose_level || 0,
+        }));
 
     return (
         <div className="space-y-8 pb-8">
@@ -107,7 +109,9 @@ export function PatientScreeningHistory() {
             <div className="flex items-center justify-between">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">My Health History</h1>
-                    <p className="text-slate-400">Complete record of your screenings and health data</p>
+                    <p className="text-slate-400">
+                        Complete record of your screenings and health data
+                    </p>
                 </div>
             </div>
 
@@ -123,7 +127,9 @@ export function PatientScreeningHistory() {
                             <Activity className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-white">{data.total_screenings}</h3>
+                            <h3 className="text-2xl font-bold text-white">
+                                {data.total_screenings}
+                            </h3>
                             <p className="text-sm text-slate-400">Total Screenings</p>
                         </div>
                     </div>
@@ -136,15 +142,20 @@ export function PatientScreeningHistory() {
                     className="glass-card p-6 rounded-2xl border border-white/5"
                 >
                     <div className="flex items-center gap-4">
-                        <div className={`h-12 w-12 rounded-xl flex items-center justify-center ${data.latest_screening?.risk_level === 'High' ? 'bg-red-500/10 text-red-400' :
-                            data.latest_screening?.risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400' :
-                                'bg-emerald-500/10 text-emerald-400'
-                            }`}>
+                        <div
+                            className={`h-12 w-12 rounded-xl flex items-center justify-center ${
+                                data.latest_screening?.risk_level === "High"
+                                    ? "bg-red-500/10 text-red-400"
+                                    : data.latest_screening?.risk_level === "Medium"
+                                      ? "bg-amber-500/10 text-amber-400"
+                                      : "bg-emerald-500/10 text-emerald-400"
+                            }`}
+                        >
                             <TrendingUp className="h-6 w-6" />
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-white">
-                                {data.latest_screening?.risk_level || 'N/A'}
+                                {data.latest_screening?.risk_level || "N/A"}
                             </h3>
                             <p className="text-sm text-slate-400">Latest Risk Level</p>
                         </div>
@@ -162,7 +173,9 @@ export function PatientScreeningHistory() {
                             <Calendar className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-white">{data.appointments?.length || 0}</h3>
+                            <h3 className="text-2xl font-bold text-white">
+                                {data.appointments?.length || 0}
+                            </h3>
                             <p className="text-sm text-slate-400">Appointments</p>
                         </div>
                     </div>
@@ -179,7 +192,9 @@ export function PatientScreeningHistory() {
                             <FileText className="h-6 w-6" />
                         </div>
                         <div>
-                            <h3 className="text-2xl font-bold text-white">{data.recommendations?.length || 0}</h3>
+                            <h3 className="text-2xl font-bold text-white">
+                                {data.recommendations?.length || 0}
+                            </h3>
                             <p className="text-sm text-slate-400">Recommendations</p>
                         </div>
                     </div>
@@ -198,18 +213,39 @@ export function PatientScreeningHistory() {
                     <div className="h-[300px] w-full">
                         <ResponsiveContainer width="100%" height="100%">
                             <LineChart data={chartData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
-                                <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                                <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#334155"
+                                    opacity={0.3}
+                                    vertical={false}
+                                />
+                                <XAxis
+                                    dataKey="date"
+                                    stroke="#64748b"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                />
+                                <YAxis
+                                    stroke="#64748b"
+                                    fontSize={12}
+                                    tickLine={false}
+                                    axisLine={false}
+                                />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                                 <Line
                                     type="monotone"
                                     dataKey="risk_score"
                                     stroke="#2dd4bf"
                                     strokeWidth={3}
-                                    dot={{ fill: '#2dd4bf', r: 4 }}
+                                    dot={{ fill: "#2dd4bf", r: 4 }}
                                 />
                             </LineChart>
                         </ResponsiveContainer>
@@ -249,28 +285,33 @@ export function PatientScreeningHistory() {
                                 >
                                     <td className="p-6 font-medium text-white">
                                         {formatDateWith(screening.created_at, {
-                                            year: 'numeric',
-                                            month: 'short',
-                                            day: 'numeric'
+                                            year: "numeric",
+                                            month: "short",
+                                            day: "numeric",
                                         })}
                                     </td>
                                     <td className="p-6">
                                         {screening.systolic_bp && screening.diastolic_bp
                                             ? `${screening.systolic_bp}/${screening.diastolic_bp}`
-                                            : 'N/A'}
+                                            : "N/A"}
                                     </td>
-                                    <td className="p-6">{screening.heart_rate || 'N/A'}</td>
-                                    <td className="p-6">{screening.glucose_level || 'N/A'}</td>
+                                    <td className="p-6">{screening.heart_rate || "N/A"}</td>
+                                    <td className="p-6">{screening.glucose_level || "N/A"}</td>
                                     <td className="p-6">
                                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
-                                            {screening.risk_score?.toFixed(1) || '0'}
+                                            {screening.risk_score?.toFixed(1) || "0"}
                                         </span>
                                     </td>
                                     <td className="p-6">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${screening.risk_level === 'High' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                            screening.risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                                'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                            }`}>
+                                        <span
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                screening.risk_level === "High"
+                                                    ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                                    : screening.risk_level === "Medium"
+                                                      ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                                      : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                            }`}
+                                        >
                                             {screening.risk_level}
                                         </span>
                                     </td>

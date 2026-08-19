@@ -1,59 +1,61 @@
 // Sync service for online/offline data synchronization
 
 class SyncService {
-  private isOnline: boolean = navigator.onLine;
-  // private syncInProgress: boolean = false;
+    private isOnline: boolean = navigator.onLine;
+    // private syncInProgress: boolean = false;
 
-  constructor() {
-    // Listen for online/offline events
-    window.addEventListener('online', () => {
-      this.isOnline = true;
-      console.log('App is online');
-      this.syncData();
-    });
+    constructor() {
+        // Listen for online/offline events
+        window.addEventListener("online", () => {
+            this.isOnline = true;
+            console.log("App is online");
+            this.syncData();
+        });
 
-    window.addEventListener('offline', () => {
-      this.isOnline = false;
-      console.log('App is offline');
-    });
+        window.addEventListener("offline", () => {
+            this.isOnline = false;
+            console.log("App is offline");
+        });
 
-    // Listen for service worker messages
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data.type === 'SYNC_DATA') {
-          this.syncData();
+        // Listen for service worker messages
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.addEventListener("message", (event) => {
+                if (event.data.type === "SYNC_DATA") {
+                    this.syncData();
+                }
+            });
         }
-      });
     }
-  }
 
-  getOnlineStatus(): boolean {
-    return this.isOnline;
-  }
-
-  async syncData(): Promise<void> {
-    // Legacy sync is disabled as we have migrated to Firestore.
-    // Firestore SDK handles offline persistence and synchronization automatically.
-    console.log('Legacy sync disabled. Firestore handles offline persistence automatically.');
-    return;
-  }
-
-  // Register background sync if supported
-  async registerBackgroundSync(): Promise<void> {
-    if ('serviceWorker' in navigator && 'sync' in ServiceWorkerRegistration.prototype) {
-      try {
-        const registration = await navigator.serviceWorker.ready;
-        // The Background Sync API is not in TypeScript's DOM lib yet.
-        const syncManager = (registration as ServiceWorkerRegistration & {
-          sync?: { register: (tag: string) => Promise<void> };
-        }).sync;
-        await syncManager?.register('sync-data');
-        console.log('Background sync registered');
-      } catch (error) {
-        console.error('Background sync registration failed:', error);
-      }
+    getOnlineStatus(): boolean {
+        return this.isOnline;
     }
-  }
+
+    async syncData(): Promise<void> {
+        // Legacy sync is disabled as we have migrated to Firestore.
+        // Firestore SDK handles offline persistence and synchronization automatically.
+        console.log("Legacy sync disabled. Firestore handles offline persistence automatically.");
+        return;
+    }
+
+    // Register background sync if supported
+    async registerBackgroundSync(): Promise<void> {
+        if ("serviceWorker" in navigator && "sync" in ServiceWorkerRegistration.prototype) {
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                // The Background Sync API is not in TypeScript's DOM lib yet.
+                const syncManager = (
+                    registration as ServiceWorkerRegistration & {
+                        sync?: { register: (tag: string) => Promise<void> };
+                    }
+                ).sync;
+                await syncManager?.register("sync-data");
+                console.log("Background sync registered");
+            } catch (error) {
+                console.error("Background sync registration failed:", error);
+            }
+        }
+    }
 }
 
 export const syncService = new SyncService();

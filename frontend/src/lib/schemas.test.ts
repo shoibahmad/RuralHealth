@@ -263,9 +263,7 @@ describe("ScreeningFormSchema", () => {
         });
 
         expect(result.success).toBe(false);
-        expect(result.errors.diastolic_bp).toBe(
-            "Diastolic pressure must be lower than systolic",
-        );
+        expect(result.errors.diastolic_bp).toBe("Diastolic pressure must be lower than systolic");
     });
 
     it("allows an equal-looking pair only when systolic is higher", () => {
@@ -314,9 +312,11 @@ describe("ScreeningFormSchema", () => {
 
 describe("stripUndefined", () => {
     it("removes undefined values that Firestore would reject", () => {
-        expect(
-            stripUndefined({ a: 1, b: undefined, c: "x", d: null }),
-        ).toEqual({ a: 1, c: "x", d: null });
+        expect(stripUndefined({ a: 1, b: undefined, c: "x", d: null })).toEqual({
+            a: 1,
+            c: "x",
+            d: null,
+        });
     });
 
     it("keeps falsy values that are genuine readings", () => {

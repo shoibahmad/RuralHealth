@@ -9,13 +9,7 @@ import { createLogger } from "../lib/logger";
 const log = createLogger("WorkerDetailPage");
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../lib/firebase";
-import {
-    PieChart,
-    Pie,
-    Cell,
-    ResponsiveContainer,
-    Tooltip
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 
 /** Worker profile plus the caseload figures rendered on this page. */
 interface WorkerDetail {
@@ -23,7 +17,7 @@ interface WorkerDetail {
     stats: {
         total_patients: number;
         total_screenings: number;
-        risk_distribution: Record<'Low' | 'Medium' | 'High', number>;
+        risk_distribution: Record<"Low" | "Medium" | "High", number>;
         average_risk_score: number;
     };
     patients: Patient[];
@@ -59,12 +53,12 @@ export function WorkerDetailPage() {
                 worker: { ...worker, uid: id },
                 stats: {
                     ...stats,
-                    average_risk_score: 3.2 // Mock average for now
+                    average_risk_score: 3.2, // Mock average for now
                 },
-                patients: patients
+                patients: patients,
             });
         } catch (error) {
-            log.error('Failed to fetch worker details', error);
+            log.error("Failed to fetch worker details", error);
         } finally {
             setLoading(false);
         }
@@ -73,7 +67,6 @@ export function WorkerDetailPage() {
     useEffect(() => {
         fetchWorkerDetails();
     }, [fetchWorkerDetails]);
-
 
     if (loading) {
         return (
@@ -92,15 +85,23 @@ export function WorkerDetailPage() {
     }
 
     const RISK_COLORS = {
-        Low: '#10b981',
-        Medium: '#f59e0b',
-        High: '#ef4444'
+        Low: "#10b981",
+        Medium: "#f59e0b",
+        High: "#ef4444",
     };
 
     const riskData = [
-        { name: 'Low Risk', value: workerData.stats.risk_distribution.Low, color: RISK_COLORS.Low },
-        { name: 'Medium Risk', value: workerData.stats.risk_distribution.Medium, color: RISK_COLORS.Medium },
-        { name: 'High Risk', value: workerData.stats.risk_distribution.High, color: RISK_COLORS.High }
+        { name: "Low Risk", value: workerData.stats.risk_distribution.Low, color: RISK_COLORS.Low },
+        {
+            name: "Medium Risk",
+            value: workerData.stats.risk_distribution.Medium,
+            color: RISK_COLORS.Medium,
+        },
+        {
+            name: "High Risk",
+            value: workerData.stats.risk_distribution.High,
+            color: RISK_COLORS.High,
+        },
     ];
 
     return (
@@ -109,13 +110,15 @@ export function WorkerDetailPage() {
                 <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => navigate('/officer/workers')}
+                    onClick={() => navigate("/officer/workers")}
                     className="text-slate-300 hover:text-white hover:bg-white/10"
                 >
                     <ArrowLeft className="h-5 w-5" />
                 </Button>
                 <div>
-                    <h1 className="text-2xl font-bold text-white">{workerData.worker.full_name || 'Health Worker'}</h1>
+                    <h1 className="text-2xl font-bold text-white">
+                        {workerData.worker.full_name || "Health Worker"}
+                    </h1>
                     <p className="text-slate-400">{workerData.worker.email}</p>
                 </div>
             </div>
@@ -128,29 +131,29 @@ export function WorkerDetailPage() {
                         value: workerData.stats.total_patients,
                         icon: Users,
                         color: "text-blue-400",
-                        bg: "bg-blue-500/10"
+                        bg: "bg-blue-500/10",
                     },
                     {
                         label: "Total Screenings",
                         value: workerData.stats.total_screenings,
                         icon: Activity,
                         color: "text-teal-400",
-                        bg: "bg-teal-500/10"
+                        bg: "bg-teal-500/10",
                     },
                     {
                         label: "High Risk Cases",
                         value: workerData.stats.risk_distribution.High,
                         icon: AlertTriangle,
                         color: "text-red-400",
-                        bg: "bg-red-500/10"
+                        bg: "bg-red-500/10",
                     },
                     {
                         label: "Avg Risk Score",
                         value: workerData.stats.average_risk_score,
                         icon: TrendingUp,
                         color: "text-amber-400",
-                        bg: "bg-amber-500/10"
-                    }
+                        bg: "bg-amber-500/10",
+                    },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -159,7 +162,9 @@ export function WorkerDetailPage() {
                         transition={{ delay: i * 0.1 }}
                         className="glass-card p-6 rounded-2xl border border-white/5"
                     >
-                        <div className={`h-12 w-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}>
+                        <div
+                            className={`h-12 w-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}
+                        >
                             <stat.icon className="h-6 w-6" />
                         </div>
                         <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
@@ -192,11 +197,20 @@ export function WorkerDetailPage() {
                                     dataKey="value"
                                 >
                                     {riskData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={entry.color}
+                                            stroke="none"
+                                        />
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -204,7 +218,10 @@ export function WorkerDetailPage() {
                     <div className="flex justify-center gap-4 mt-6">
                         {riskData.map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: item.color }}
+                                />
                                 <span className="text-xs text-slate-300">{item.name}</span>
                             </div>
                         ))}
@@ -223,21 +240,33 @@ export function WorkerDetailPage() {
 
                     <div className="space-y-3">
                         {workerData.patients.map((patient) => (
-                            <div key={patient.id} className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-white/5 transition-colors">
+                            <div
+                                key={patient.id}
+                                className="flex items-center justify-between p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:bg-white/5 transition-colors"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm border border-white/10">
                                         {patient.full_name.charAt(0)}
                                     </div>
                                     <div>
-                                        <p className="font-medium text-white">{patient.full_name}</p>
-                                        <p className="text-xs text-slate-400">{patient.village} • Age {patient.age}</p>
+                                        <p className="font-medium text-white">
+                                            {patient.full_name}
+                                        </p>
+                                        <p className="text-xs text-slate-400">
+                                            {patient.village} • Age {patient.age}
+                                        </p>
                                     </div>
                                 </div>
                                 {patient.latest_risk_level && (
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${patient.latest_risk_level === 'High' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                        patient.latest_risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                            'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                        }`}>
+                                    <span
+                                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                            patient.latest_risk_level === "High"
+                                                ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                                : patient.latest_risk_level === "Medium"
+                                                  ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                                  : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                        }`}
+                                    >
                                         {patient.latest_risk_level}
                                     </span>
                                 )}

@@ -1,4 +1,5 @@
 """Patient CRUD and history endpoints."""
+
 from django.db.models import Q
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -71,9 +72,7 @@ class PatientListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         patient = serializer.save(health_worker=request.user)
 
-        return Response(
-            PatientSerializer(patient).data, status=status.HTTP_201_CREATED
-        )
+        return Response(PatientSerializer(patient).data, status=status.HTTP_201_CREATED)
 
 
 class PatientDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -102,9 +101,7 @@ class PatientHistoryView(APIView):
         try:
             patient = Patient.objects.get(id=pk)
         except Patient.DoesNotExist:
-            return Response(
-                {'detail': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
 
         if request.user.role == 'health_worker' and patient.health_worker != request.user:
             return Response(
@@ -113,12 +110,8 @@ class PatientHistoryView(APIView):
             )
 
         screenings = Screening.objects.filter(patient=patient).order_by('-created_at')
-        appointments = Appointment.objects.filter(patient=patient).order_by(
-            '-scheduled_date'
-        )
-        recommendations = Recommendation.objects.filter(patient=patient).order_by(
-            '-created_at'
-        )
+        appointments = Appointment.objects.filter(patient=patient).order_by('-scheduled_date')
+        recommendations = Recommendation.objects.filter(patient=patient).order_by('-created_at')
 
         latest = screenings.first()
 
@@ -127,12 +120,8 @@ class PatientHistoryView(APIView):
                 'patient': PatientSerializer(patient).data,
                 'screenings': ScreeningSerializer(screenings, many=True).data,
                 'appointments': AppointmentSerializer(appointments, many=True).data,
-                'recommendations': RecommendationSerializer(
-                    recommendations, many=True
-                ).data,
+                'recommendations': RecommendationSerializer(recommendations, many=True).data,
                 'total_screenings': screenings.count(),
-                'latest_screening': (
-                    ScreeningSerializer(latest).data if latest else None
-                ),
+                'latest_screening': (ScreeningSerializer(latest).data if latest else None),
             }
         )

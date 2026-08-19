@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { WifiOff, Wifi, RefreshCw, Check, AlertCircle, Cloud, CloudOff } from 'lucide-react';
-import { useOffline } from '../context/useOffline';
-import { Button } from './ui/button';
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { WifiOff, Wifi, RefreshCw, Check, AlertCircle, Cloud, CloudOff } from "lucide-react";
+import { useOffline } from "../context/useOffline";
+import { Button } from "./ui/button";
 
 export function OfflineIndicator() {
     const { isOnline, pendingSyncCount, syncStatus, syncNow } = useOffline();
@@ -38,7 +38,9 @@ export function OfflineIndicator() {
                     >
                         <div className="h-2 w-2 rounded-full bg-white animate-pulse" />
                         <WifiOff className="h-4 w-4" />
-                        <span>Offline Mode: Data will be synced automatically when connection returns.</span>
+                        <span>
+                            Offline Mode: Data will be synced automatically when connection returns.
+                        </span>
                     </motion.div>
                 ) : showOnlineBanner ? (
                     <motion.div
@@ -57,7 +59,7 @@ export function OfflineIndicator() {
 
             {/* Sync Status Badge - Show when there's pending data or syncing */}
             <AnimatePresence>
-                {(pendingSyncCount > 0 || syncStatus === 'syncing') && (
+                {(pendingSyncCount > 0 || syncStatus === "syncing") && (
                     <motion.div
                         initial={{ scale: 0, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
@@ -66,34 +68,46 @@ export function OfflineIndicator() {
                     >
                         <div className="glass-card rounded-xl p-4 border border-white/10 shadow-2xl min-w-[200px]">
                             <div className="flex items-center gap-3">
-                                {syncStatus === 'syncing' ? (
+                                {syncStatus === "syncing" ? (
                                     <>
                                         <div className="h-10 w-10 rounded-full bg-teal-500/20 flex items-center justify-center">
                                             <RefreshCw className="h-5 w-5 text-teal-400 animate-spin" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium text-sm">Syncing...</p>
-                                            <p className="text-slate-400 text-xs">{pendingSyncCount} items pending</p>
+                                            <p className="text-white font-medium text-sm">
+                                                Syncing...
+                                            </p>
+                                            <p className="text-slate-400 text-xs">
+                                                {pendingSyncCount} items pending
+                                            </p>
                                         </div>
                                     </>
-                                ) : syncStatus === 'success' ? (
+                                ) : syncStatus === "success" ? (
                                     <>
                                         <div className="h-10 w-10 rounded-full bg-green-500/20 flex items-center justify-center">
                                             <Check className="h-5 w-5 text-green-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium text-sm">Sync Complete</p>
-                                            <p className="text-slate-400 text-xs">All data saved to server</p>
+                                            <p className="text-white font-medium text-sm">
+                                                Sync Complete
+                                            </p>
+                                            <p className="text-slate-400 text-xs">
+                                                All data saved to server
+                                            </p>
                                         </div>
                                     </>
-                                ) : syncStatus === 'error' ? (
+                                ) : syncStatus === "error" ? (
                                     <>
                                         <div className="h-10 w-10 rounded-full bg-red-500/20 flex items-center justify-center">
                                             <AlertCircle className="h-5 w-5 text-red-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium text-sm">Sync Failed</p>
-                                            <p className="text-slate-400 text-xs">{pendingSyncCount} items pending</p>
+                                            <p className="text-white font-medium text-sm">
+                                                Sync Failed
+                                            </p>
+                                            <p className="text-slate-400 text-xs">
+                                                {pendingSyncCount} items pending
+                                            </p>
                                         </div>
                                     </>
                                 ) : (
@@ -102,15 +116,19 @@ export function OfflineIndicator() {
                                             <CloudOff className="h-5 w-5 text-amber-400" />
                                         </div>
                                         <div>
-                                            <p className="text-white font-medium text-sm">Pending Sync</p>
-                                            <p className="text-slate-400 text-xs">{pendingSyncCount} items waiting</p>
+                                            <p className="text-white font-medium text-sm">
+                                                Pending Sync
+                                            </p>
+                                            <p className="text-slate-400 text-xs">
+                                                {pendingSyncCount} items waiting
+                                            </p>
                                         </div>
                                     </>
                                 )}
                             </div>
 
                             {/* Sync button when online and has pending items */}
-                            {isOnline && pendingSyncCount > 0 && syncStatus !== 'syncing' && (
+                            {isOnline && pendingSyncCount > 0 && syncStatus !== "syncing" && (
                                 <Button
                                     onClick={syncNow}
                                     size="sm"
@@ -132,7 +150,7 @@ export function OfflineIndicator() {
 export function OfflineStatusBadge() {
     const { isOnline, pendingSyncCount, syncStatus } = useOffline();
 
-    if (isOnline && pendingSyncCount === 0 && syncStatus === 'idle') {
+    if (isOnline && pendingSyncCount === 0 && syncStatus === "idle") {
         return null;
     }
 
@@ -145,7 +163,7 @@ export function OfflineStatusBadge() {
                 </div>
             ) : pendingSyncCount > 0 ? (
                 <div className="flex items-center gap-1.5 px-2 py-1 rounded-full bg-blue-500/20 text-blue-400 text-xs font-medium">
-                    {syncStatus === 'syncing' ? (
+                    {syncStatus === "syncing" ? (
                         <RefreshCw className="h-3 w-3 animate-spin" />
                     ) : (
                         <Cloud className="h-3 w-3" />

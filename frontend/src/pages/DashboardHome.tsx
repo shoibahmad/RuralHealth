@@ -12,7 +12,7 @@ import {
     Plus,
     Cloud,
     WifiOff,
-    RefreshCw
+    RefreshCw,
 } from "lucide-react";
 import {
     AreaChart,
@@ -24,15 +24,12 @@ import {
     ResponsiveContainer,
     PieChart,
     Pie,
-    Cell
+    Cell,
 } from "recharts";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useAuth } from "../context/useAuth";
-import {
-    firestoreService,
-    type DashboardStats,
-} from "../services/firestoreService";
+import { firestoreService, type DashboardStats } from "../services/firestoreService";
 import { createLogger } from "../lib/logger";
 import { formatDate } from "../lib/dates";
 import { useOffline } from "../context/useOffline";
@@ -57,7 +54,7 @@ export function DashboardHome() {
             // For now, firestoreService.getDashboardStats handles some of this logic
             try {
                 const data = await firestoreService.getDashboardStats(
-                    user?.role === 'health_worker' ? user.uid : undefined
+                    user?.role === "health_worker" ? user.uid : undefined,
                 );
                 setStats(data);
             } catch (error) {
@@ -77,24 +74,53 @@ export function DashboardHome() {
         );
     }
 
-    const riskDistribution = stats ? [
-        { name: 'Low Risk', value: stats.risk_distribution.Low || 0, color: '#10b981' },
-        { name: 'Medium', value: stats.risk_distribution.Medium || 0, color: '#f59e0b' },
-        { name: 'High Risk', value: stats.risk_distribution.High || 0, color: '#ef4444' },
-    ] : [];
+    const riskDistribution = stats
+        ? [
+              { name: "Low Risk", value: stats.risk_distribution.Low || 0, color: "#10b981" },
+              { name: "Medium", value: stats.risk_distribution.Medium || 0, color: "#f59e0b" },
+              { name: "High Risk", value: stats.risk_distribution.High || 0, color: "#ef4444" },
+          ]
+        : [];
 
     const totalRisk = riskDistribution.reduce((sum, item) => sum + item.value, 0);
 
-    const statCards = stats ? [
-        { label: "Total Patients", value: stats.total_patients.toLocaleString(), icon: Users, color: "text-blue-400", bg: "bg-blue-500/10" },
-        { label: "Total Screenings", value: stats.total_screenings.toLocaleString(), icon: Activity, color: "text-teal-400", bg: "bg-teal-500/10" },
-        { label: "High Risk Cases", value: stats.high_risk_count.toLocaleString(), icon: AlertTriangle, color: "text-red-400", bg: "bg-red-500/10" },
-        { label: "Pending Appointments", value: stats.pending_appointments.toLocaleString(), icon: Calendar, color: "text-amber-400", bg: "bg-amber-500/10" }
-    ] : [];
+    const statCards = stats
+        ? [
+              {
+                  label: "Total Patients",
+                  value: stats.total_patients.toLocaleString(),
+                  icon: Users,
+                  color: "text-blue-400",
+                  bg: "bg-blue-500/10",
+              },
+              {
+                  label: "Total Screenings",
+                  value: stats.total_screenings.toLocaleString(),
+                  icon: Activity,
+                  color: "text-teal-400",
+                  bg: "bg-teal-500/10",
+              },
+              {
+                  label: "High Risk Cases",
+                  value: stats.high_risk_count.toLocaleString(),
+                  icon: AlertTriangle,
+                  color: "text-red-400",
+                  bg: "bg-red-500/10",
+              },
+              {
+                  label: "Pending Appointments",
+                  value: stats.pending_appointments.toLocaleString(),
+                  icon: Calendar,
+                  color: "text-amber-400",
+                  bg: "bg-amber-500/10",
+              },
+          ]
+        : [];
 
-    const filteredRecentScreenings = stats?.recent_screenings.filter(s =>
-        s.patient_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    ) || [];
+    const filteredRecentScreenings =
+        stats?.recent_screenings.filter((s) =>
+            s.patient_name?.toLowerCase().includes(searchTerm.toLowerCase()),
+        ) || [];
 
     return (
         <div className="space-y-8 pb-8">
@@ -103,10 +129,11 @@ export function DashboardHome() {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-4 rounded-xl border ${!isOnline
-                        ? 'bg-amber-500/10 border-amber-500/20'
-                        : 'bg-blue-500/10 border-blue-500/20'
-                        }`}
+                    className={`p-4 rounded-xl border ${
+                        !isOnline
+                            ? "bg-amber-500/10 border-amber-500/20"
+                            : "bg-blue-500/10 border-blue-500/20"
+                    }`}
                 >
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -116,14 +143,17 @@ export function DashboardHome() {
                                 <Cloud className="h-5 w-5 text-blue-400" />
                             )}
                             <div>
-                                <p className={`font-medium ${!isOnline ? 'text-amber-400' : 'text-blue-400'}`}>
-                                    {!isOnline ? 'You\'re Offline' : `${pendingSyncCount} items pending sync`}
+                                <p
+                                    className={`font-medium ${!isOnline ? "text-amber-400" : "text-blue-400"}`}
+                                >
+                                    {!isOnline
+                                        ? "You're Offline"
+                                        : `${pendingSyncCount} items pending sync`}
                                 </p>
                                 <p className="text-sm text-slate-400">
                                     {!isOnline
                                         ? `${localStats.localPatients} patients, ${localStats.localScreenings} screenings saved locally`
-                                        : 'Data will sync automatically or click Sync Now'
-                                    }
+                                        : "Data will sync automatically or click Sync Now"}
                                 </p>
                             </div>
                         </div>
@@ -131,10 +161,10 @@ export function DashboardHome() {
                             <Button
                                 onClick={syncNow}
                                 size="sm"
-                                disabled={syncStatus === 'syncing'}
+                                disabled={syncStatus === "syncing"}
                                 className="bg-blue-500 hover:bg-blue-600"
                             >
-                                {syncStatus === 'syncing' ? (
+                                {syncStatus === "syncing" ? (
                                     <RefreshCw className="h-4 w-4 animate-spin" />
                                 ) : (
                                     <>
@@ -152,10 +182,12 @@ export function DashboardHome() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-xl md:text-2xl font-bold text-white">Dashboard Overview</h1>
-                    <p className="text-slate-400 mt-1 text-sm md:text-base">Welcome back! Here's what's happening today.</p>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">
+                        Welcome back! Here's what's happening today.
+                    </p>
                 </div>
                 <Button
-                    onClick={() => navigate('/dashboard/screen')}
+                    onClick={() => navigate("/dashboard/screen")}
                     className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 w-full sm:w-auto"
                 >
                     <Plus className="h-4 w-4 mr-2" />
@@ -173,11 +205,15 @@ export function DashboardHome() {
                         transition={{ delay: i * 0.1 }}
                         className="glass-card p-6 rounded-2xl border border-white/5 relative overflow-hidden group"
                     >
-                        <div className={`absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500 ${stat.color}`}>
+                        <div
+                            className={`absolute top-0 right-0 p-4 opacity-10 group-hover:scale-125 transition-transform duration-500 ${stat.color}`}
+                        >
                             <stat.icon className="h-24 w-24" />
                         </div>
                         <div className="relative z-10">
-                            <div className={`h-12 w-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}>
+                            <div
+                                className={`h-12 w-12 rounded-xl ${stat.bg} ${stat.color} flex items-center justify-center mb-4`}
+                            >
                                 <stat.icon className="h-6 w-6" />
                             </div>
                             <h3 className="text-3xl font-bold text-white mb-1">{stat.value}</h3>
@@ -197,13 +233,17 @@ export function DashboardHome() {
                 >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
                         <div>
-                            <h2 className="text-base md:text-lg font-bold text-white">Screening Activity</h2>
-                            <p className="text-xs md:text-sm text-slate-400">Weekly screening volume (last 7 days)</p>
+                            <h2 className="text-base md:text-lg font-bold text-white">
+                                Screening Activity
+                            </h2>
+                            <p className="text-xs md:text-sm text-slate-400">
+                                Weekly screening volume (last 7 days)
+                            </p>
                         </div>
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => navigate('/dashboard/analytics')}
+                            onClick={() => navigate("/dashboard/analytics")}
                             className="text-teal-400 hover:text-white hover:bg-teal-500/10 w-full sm:w-auto"
                         >
                             View Analytics <ArrowUpRight className="ml-2 h-4 w-4" />
@@ -214,17 +254,52 @@ export function DashboardHome() {
                             <ResponsiveContainer width="100%" height="100%">
                                 <AreaChart data={stats.weekly_screenings}>
                                     <defs>
-                                        <linearGradient id="colorScreenings" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#2dd4bf" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#2dd4bf" stopOpacity={0} />
+                                        <linearGradient
+                                            id="colorScreenings"
+                                            x1="0"
+                                            y1="0"
+                                            x2="0"
+                                            y2="1"
+                                        >
+                                            <stop
+                                                offset="5%"
+                                                stopColor="#2dd4bf"
+                                                stopOpacity={0.3}
+                                            />
+                                            <stop
+                                                offset="95%"
+                                                stopColor="#2dd4bf"
+                                                stopOpacity={0}
+                                            />
                                         </linearGradient>
                                     </defs>
-                                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
-                                    <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                                    <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                                    <CartesianGrid
+                                        strokeDasharray="3 3"
+                                        stroke="#334155"
+                                        opacity={0.3}
+                                        vertical={false}
+                                    />
+                                    <XAxis
+                                        dataKey="name"
+                                        stroke="#64748b"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
+                                    <YAxis
+                                        stroke="#64748b"
+                                        fontSize={12}
+                                        tickLine={false}
+                                        axisLine={false}
+                                    />
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
-                                        itemStyle={{ color: '#2dd4bf' }}
+                                        contentStyle={{
+                                            backgroundColor: "#0f172a",
+                                            border: "1px solid #1e293b",
+                                            borderRadius: "8px",
+                                            color: "#fff",
+                                        }}
+                                        itemStyle={{ color: "#2dd4bf" }}
                                     />
                                     <Area
                                         type="monotone"
@@ -251,8 +326,12 @@ export function DashboardHome() {
                     transition={{ delay: 0.5 }}
                     className="glass-card p-4 md:p-6 rounded-2xl border border-white/5 flex flex-col"
                 >
-                    <h2 className="text-base md:text-lg font-bold text-white mb-2">Risk Distribution</h2>
-                    <p className="text-xs md:text-sm text-slate-400 mb-6">Current patient risk levels</p>
+                    <h2 className="text-base md:text-lg font-bold text-white mb-2">
+                        Risk Distribution
+                    </h2>
+                    <p className="text-xs md:text-sm text-slate-400 mb-6">
+                        Current patient risk levels
+                    </p>
 
                     <div className="flex-1 min-h-[200px] relative">
                         {totalRisk > 0 ? (
@@ -268,13 +347,22 @@ export function DashboardHome() {
                                         dataKey="value"
                                     >
                                         {riskDistribution.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={entry.color} stroke="none" />
+                                            <Cell
+                                                key={`cell-${index}`}
+                                                fill={entry.color}
+                                                stroke="none"
+                                            />
                                         ))}
                                     </Pie>
                                     <Tooltip
-                                        contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
-                                        itemStyle={{ color: '#fff' }}
-                                        labelStyle={{ color: '#fff' }}
+                                        contentStyle={{
+                                            backgroundColor: "#0f172a",
+                                            border: "1px solid #1e293b",
+                                            borderRadius: "8px",
+                                            color: "#fff",
+                                        }}
+                                        itemStyle={{ color: "#fff" }}
+                                        labelStyle={{ color: "#fff" }}
                                     />
                                 </PieChart>
                             </ResponsiveContainer>
@@ -285,15 +373,22 @@ export function DashboardHome() {
                         )}
                         {totalRisk > 0 && (
                             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                <span className="text-2xl md:text-3xl font-bold text-white">{totalRisk}</span>
-                                <span className="text-xs text-slate-400 uppercase tracking-widest">Screenings</span>
+                                <span className="text-2xl md:text-3xl font-bold text-white">
+                                    {totalRisk}
+                                </span>
+                                <span className="text-xs text-slate-400 uppercase tracking-widest">
+                                    Screenings
+                                </span>
                             </div>
                         )}
                     </div>
                     <div className="flex flex-wrap justify-center gap-3 md:gap-4 mt-6">
                         {riskDistribution.map((item, i) => (
                             <div key={i} className="flex items-center gap-2">
-                                <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                                <div
+                                    className="w-3 h-3 rounded-full flex-shrink-0"
+                                    style={{ backgroundColor: item.color }}
+                                />
                                 <span className="text-xs text-slate-300">{item.name}</span>
                             </div>
                         ))}
@@ -311,7 +406,9 @@ export function DashboardHome() {
                 <div className="p-4 md:p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
                         <h2 className="text-lg font-bold text-white">Recent Screenings</h2>
-                        <p className="text-sm text-slate-400">Latest health assessments performed</p>
+                        <p className="text-sm text-slate-400">
+                            Latest health assessments performed
+                        </p>
                     </div>
                     <div className="relative w-full sm:w-64">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
@@ -328,8 +425,7 @@ export function DashboardHome() {
                         <div className="p-8 text-center text-slate-500">
                             {stats?.recent_screenings.length === 0
                                 ? "No screenings yet. Create your first screening to see data here."
-                                : "No matching patients found."
-                            }
+                                : "No matching patients found."}
                         </div>
                     ) : (
                         <table className="w-full text-left border-collapse min-w-[640px]">
@@ -345,29 +441,40 @@ export function DashboardHome() {
                             </thead>
                             <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                                 {filteredRecentScreenings.map((screening) => (
-                                    <tr key={screening.id} className="hover:bg-white/5 transition-colors">
+                                    <tr
+                                        key={screening.id}
+                                        className="hover:bg-white/5 transition-colors"
+                                    >
                                         <td className="p-4 md:p-6 font-medium text-white">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-8 w-8 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-xs border border-white/10 flex-shrink-0">
-                                                    {screening.patient_name?.charAt(0) || '?'}
+                                                    {screening.patient_name?.charAt(0) || "?"}
                                                 </div>
-                                                <span className="truncate">{screening.patient_name || 'Unknown'}</span>
+                                                <span className="truncate">
+                                                    {screening.patient_name || "Unknown"}
+                                                </span>
                                             </div>
                                         </td>
                                         <td className="p-4 md:p-6 whitespace-nowrap">
                                             {screening.systolic_bp && screening.diastolic_bp
                                                 ? `${screening.systolic_bp}/${screening.diastolic_bp}`
-                                                : '-'
-                                            }
+                                                : "-"}
                                         </td>
-                                        <td className="p-4 md:p-6 whitespace-nowrap">{screening.glucose_level || '-'} mg/dL</td>
+                                        <td className="p-4 md:p-6 whitespace-nowrap">
+                                            {screening.glucose_level || "-"} mg/dL
+                                        </td>
                                         <td className="p-4 md:p-6">{screening.risk_score || 0}</td>
                                         <td className="p-4 md:p-6">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${screening.risk_level === 'High' ? 'bg-red-500/10 text-red-400 border-red-500/20' :
-                                                screening.risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                                                    'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                                                }`}>
-                                                {screening.risk_level || 'Low'}
+                                            <span
+                                                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border whitespace-nowrap ${
+                                                    screening.risk_level === "High"
+                                                        ? "bg-red-500/10 text-red-400 border-red-500/20"
+                                                        : screening.risk_level === "Medium"
+                                                          ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
+                                                          : "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
+                                                }`}
+                                            >
+                                                {screening.risk_level || "Low"}
                                             </span>
                                         </td>
                                         <td className="p-4 md:p-6 text-slate-500 whitespace-nowrap">
@@ -387,7 +494,7 @@ export function DashboardHome() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
-                    onClick={() => navigate('/dashboard/patients')}
+                    onClick={() => navigate("/dashboard/patients")}
                     className="glass-card p-6 rounded-xl border border-white/5 cursor-pointer hover:border-teal-500/30 transition-colors group"
                 >
                     <Users className="h-8 w-8 text-teal-400 mb-3 group-hover:scale-110 transition-transform" />
@@ -399,7 +506,7 @@ export function DashboardHome() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.8 }}
-                    onClick={() => navigate('/dashboard/appointments')}
+                    onClick={() => navigate("/dashboard/appointments")}
                     className="glass-card p-6 rounded-xl border border-white/5 cursor-pointer hover:border-cyan-500/30 transition-colors group"
                 >
                     <Calendar className="h-8 w-8 text-cyan-400 mb-3 group-hover:scale-110 transition-transform" />
@@ -411,7 +518,7 @@ export function DashboardHome() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.9 }}
-                    onClick={() => navigate('/dashboard/analytics')}
+                    onClick={() => navigate("/dashboard/analytics")}
                     className="glass-card p-6 rounded-xl border border-white/5 cursor-pointer hover:border-purple-500/30 transition-colors group"
                 >
                     <TrendingUp className="h-8 w-8 text-purple-400 mb-3 group-hover:scale-110 transition-transform" />

@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Django's command-line utility for administrative tasks."""
+
 import os
 import sys
 
@@ -8,6 +9,7 @@ def load_env():
     """Load environment variables from .env file."""
     try:
         import pathlib
+
         env_path = pathlib.Path(__file__).resolve().parent / '.env'
         if env_path.exists():
             with open(env_path) as f:
@@ -18,6 +20,7 @@ def load_env():
                         os.environ.setdefault(key.strip(), value.strip())
     except Exception:
         pass
+
 
 def main():
     """Run administrative tasks."""

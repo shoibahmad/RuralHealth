@@ -132,10 +132,7 @@ export const firestoreService = {
     // --- Patients ---
     async getPatients(healthWorkerId?: string): Promise<Patient[]> {
         const patientQuery = healthWorkerId
-            ? query(
-                  collection(db, "patients"),
-                  where("health_worker_id", "==", healthWorkerId),
-              )
+            ? query(collection(db, "patients"), where("health_worker_id", "==", healthWorkerId))
             : query(collection(db, "patients"), orderBy("created_at", "desc"));
 
         const snapshot = await getDocs(patientQuery);
@@ -257,10 +254,7 @@ export const firestoreService = {
     async getAppointments(userId: string, role: string): Promise<Appointment[]> {
         const appointmentQuery =
             role === "health_worker"
-                ? query(
-                      collection(db, "appointments"),
-                      where("health_worker_id", "==", userId),
-                  )
+                ? query(collection(db, "appointments"), where("health_worker_id", "==", userId))
                 : query(collection(db, "appointments"), orderBy("scheduled_date", "desc"));
 
         const snapshot = await getDocs(appointmentQuery);

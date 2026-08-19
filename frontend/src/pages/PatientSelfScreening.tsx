@@ -4,7 +4,13 @@ import { ArrowLeft, ArrowRight, Save, Loader2, CheckCircle2, AlertCircle } from 
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../components/ui/select";
 import { useAuth } from "../context/useAuth";
 import { firestoreService } from "../services/firestoreService";
 import { riskUtils } from "../lib/riskUtils";
@@ -71,7 +77,7 @@ export function PatientSelfScreening() {
                 age: age,
                 systolic_bp: parseInt(formData.systolic_bp) || undefined,
                 diastolic_bp: parseInt(formData.diastolic_bp) || undefined,
-                smoking_status: formData.smoking_status
+                smoking_status: formData.smoking_status,
             });
 
             const screeningData = {
@@ -88,14 +94,14 @@ export function PatientSelfScreening() {
                 glucose_level: parseFloat(formData.glucose_level) || undefined,
                 cholesterol_level: parseFloat(formData.cholesterol_level) || undefined,
                 risk_score: riskResult.score,
-                risk_level: riskResult.level as 'Low' | 'Medium' | 'High',
-                risk_notes: riskResult.notes
+                risk_level: riskResult.level as "Low" | "Medium" | "High",
+                risk_notes: riskResult.notes,
             };
 
             await firestoreService.addScreening(screeningData);
             navigate("/patient/dashboard");
         } catch (err: unknown) {
-            log.error('Screening submission failed', err);
+            log.error("Screening submission failed", err);
             setError(errorMessage(err, "Failed to submit screening"));
         } finally {
             setIsSubmitting(false);
@@ -117,20 +123,26 @@ export function PatientSelfScreening() {
                         <div key={index} className="flex items-center flex-1">
                             <div className="flex flex-col items-center flex-1">
                                 <div
-                                    className={`h-10 w-10 rounded-full flex items-center justify-center font-bold transition-all ${index <= currentStep
-                                        ? "bg-pink-500 text-white"
-                                        : "bg-white/5 text-slate-400"
-                                        }`}
+                                    className={`h-10 w-10 rounded-full flex items-center justify-center font-bold transition-all ${
+                                        index <= currentStep
+                                            ? "bg-pink-500 text-white"
+                                            : "bg-white/5 text-slate-400"
+                                    }`}
                                 >
-                                    {index < currentStep ? <CheckCircle2 className="h-5 w-5" /> : index + 1}
+                                    {index < currentStep ? (
+                                        <CheckCircle2 className="h-5 w-5" />
+                                    ) : (
+                                        index + 1
+                                    )}
                                 </div>
                                 <p className="text-sm font-medium text-white mt-2">{step.label}</p>
                                 <p className="text-xs text-slate-400">{step.description}</p>
                             </div>
                             {index < STEPS.length - 1 && (
                                 <div
-                                    className={`h-1 flex-1 mx-2 rounded ${index < currentStep ? "bg-pink-500" : "bg-white/5"
-                                        }`}
+                                    className={`h-1 flex-1 mx-2 rounded ${
+                                        index < currentStep ? "bg-pink-500" : "bg-white/5"
+                                    }`}
                                 />
                             )}
                         </div>
@@ -180,7 +192,9 @@ export function PatientSelfScreening() {
                                         id="diastolic_bp"
                                         type="number"
                                         value={formData.diastolic_bp}
-                                        onChange={(e) => updateField("diastolic_bp", e.target.value)}
+                                        onChange={(e) =>
+                                            updateField("diastolic_bp", e.target.value)
+                                        }
                                         placeholder="e.g., 80"
                                     />
                                 </div>
@@ -201,15 +215,22 @@ export function PatientSelfScreening() {
                     {/* Step 1: Lifestyle */}
                     {currentStep === 1 && (
                         <div className="space-y-4">
-                            <h2 className="text-xl font-bold text-white mb-4">Lifestyle Information</h2>
+                            <h2 className="text-xl font-bold text-white mb-4">
+                                Lifestyle Information
+                            </h2>
                             <div className="grid grid-cols-1 gap-4">
                                 <div>
                                     <Label htmlFor="smoking_status">Smoking Status</Label>
                                     <Select
                                         value={formData.smoking_status}
-                                        onValueChange={(value) => updateField("smoking_status", value)}
+                                        onValueChange={(value) =>
+                                            updateField("smoking_status", value)
+                                        }
                                     >
-                                        <SelectTrigger id="smoking_status" className="bg-slate-900/50 border-white/10 text-white">
+                                        <SelectTrigger
+                                            id="smoking_status"
+                                            className="bg-slate-900/50 border-white/10 text-white"
+                                        >
                                             <SelectValue placeholder="Select status" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -223,9 +244,14 @@ export function PatientSelfScreening() {
                                     <Label htmlFor="alcohol_usage">Alcohol Usage</Label>
                                     <Select
                                         value={formData.alcohol_usage}
-                                        onValueChange={(value) => updateField("alcohol_usage", value)}
+                                        onValueChange={(value) =>
+                                            updateField("alcohol_usage", value)
+                                        }
                                     >
-                                        <SelectTrigger id="alcohol_usage" className="bg-slate-900/50 border-white/10 text-white">
+                                        <SelectTrigger
+                                            id="alcohol_usage"
+                                            className="bg-slate-900/50 border-white/10 text-white"
+                                        >
                                             <SelectValue placeholder="Select usage" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -240,9 +266,14 @@ export function PatientSelfScreening() {
                                     <Label htmlFor="physical_activity">Physical Activity</Label>
                                     <Select
                                         value={formData.physical_activity}
-                                        onValueChange={(value) => updateField("physical_activity", value)}
+                                        onValueChange={(value) =>
+                                            updateField("physical_activity", value)
+                                        }
                                     >
-                                        <SelectTrigger id="physical_activity" className="bg-slate-900/50 border-white/10 text-white">
+                                        <SelectTrigger
+                                            id="physical_activity"
+                                            className="bg-slate-900/50 border-white/10 text-white"
+                                        >
                                             <SelectValue placeholder="Select activity level" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -261,9 +292,12 @@ export function PatientSelfScreening() {
                     {/* Step 2: Lab Results */}
                     {currentStep === 2 && (
                         <div className="space-y-4">
-                            <h2 className="text-xl font-bold text-white mb-4">Lab Results (Optional)</h2>
+                            <h2 className="text-xl font-bold text-white mb-4">
+                                Lab Results (Optional)
+                            </h2>
                             <p className="text-slate-400 text-sm mb-4">
-                                If you have recent lab results, you can enter them here. Otherwise, you can skip this step.
+                                If you have recent lab results, you can enter them here. Otherwise,
+                                you can skip this step.
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div>
@@ -272,17 +306,23 @@ export function PatientSelfScreening() {
                                         id="glucose_level"
                                         type="number"
                                         value={formData.glucose_level}
-                                        onChange={(e) => updateField("glucose_level", e.target.value)}
+                                        onChange={(e) =>
+                                            updateField("glucose_level", e.target.value)
+                                        }
                                         placeholder="e.g., 100"
                                     />
                                 </div>
                                 <div>
-                                    <Label htmlFor="cholesterol_level">Cholesterol Level (mg/dL)</Label>
+                                    <Label htmlFor="cholesterol_level">
+                                        Cholesterol Level (mg/dL)
+                                    </Label>
                                     <Input
                                         id="cholesterol_level"
                                         type="number"
                                         value={formData.cholesterol_level}
-                                        onChange={(e) => updateField("cholesterol_level", e.target.value)}
+                                        onChange={(e) =>
+                                            updateField("cholesterol_level", e.target.value)
+                                        }
                                         placeholder="e.g., 180"
                                     />
                                 </div>

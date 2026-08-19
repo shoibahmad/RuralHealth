@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-    firestoreService,
-    type DashboardStats,
-} from "../services/firestoreService";
+import { firestoreService, type DashboardStats } from "../services/firestoreService";
 import {
     BarChart,
     Bar,
@@ -14,7 +11,7 @@ import {
     YAxis,
     CartesianGrid,
     Tooltip,
-    ResponsiveContainer
+    ResponsiveContainer,
 } from "recharts";
 import { TrendingUp, Users, Activity, MapPin } from "lucide-react";
 
@@ -32,7 +29,7 @@ export function SystemAnalyticsPage() {
 
             setAnalytics(stats);
         } catch (error) {
-            console.error('Failed to fetch analytics:', error);
+            console.error("Failed to fetch analytics:", error);
         } finally {
             setLoading(false);
         }
@@ -57,26 +54,30 @@ export function SystemAnalyticsPage() {
     // Prepare data for charts
     const ageData = Object.entries(analytics.age_distribution || {}).map(([key, value]) => ({
         name: key,
-        value: value as number
+        value: value as number,
     }));
 
     const genderData = (analytics.gender_distribution || []).map((item) => ({
         name: item.gender,
-        value: item.count
+        value: item.count,
     }));
 
-    const riskFactorData = Object.entries(analytics.risk_factor_prevalence || {}).map(([key, value]) => ({
-        name: key,
-        percentage: value as number
-    }));
+    const riskFactorData = Object.entries(analytics.risk_factor_prevalence || {}).map(
+        ([key, value]) => ({
+            name: key,
+            percentage: value as number,
+        }),
+    );
 
-    const COLORS = ['#2dd4bf', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
+    const COLORS = ["#2dd4bf", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"];
 
     return (
         <div className="space-y-8 pb-8">
             <div>
                 <h1 className="text-2xl font-bold text-white mb-2">System Analytics</h1>
-                <p className="text-slate-400">Comprehensive health insights and population statistics</p>
+                <p className="text-slate-400">
+                    Comprehensive health insights and population statistics
+                </p>
             </div>
 
             {/* Age Distribution */}
@@ -97,11 +98,32 @@ export function SystemAnalyticsPage() {
                 <div className="h-[300px] w-full">
                     <ResponsiveContainer width="100%" height="100%">
                         <BarChart data={ageData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
-                            <XAxis dataKey="name" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#334155"
+                                opacity={0.3}
+                                vertical={false}
+                            />
+                            <XAxis
+                                dataKey="name"
+                                stroke="#64748b"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                stroke="#64748b"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                contentStyle={{
+                                    backgroundColor: "#0f172a",
+                                    border: "1px solid #1e293b",
+                                    borderRadius: "8px",
+                                    color: "#fff",
+                                }}
                             />
                             <Bar dataKey="value" fill="#3b82f6" radius={[8, 8, 0, 0]} />
                         </BarChart>
@@ -126,17 +148,27 @@ export function SystemAnalyticsPage() {
                                     cx="50%"
                                     cy="50%"
                                     labelLine={false}
-                                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                                    label={({ name, percent }) =>
+                                        `${name}: ${((percent || 0) * 100).toFixed(0)}%`
+                                    }
                                     outerRadius={80}
                                     fill="#8884d8"
                                     dataKey="value"
                                 >
                                     {genderData.map((_entry, index: number) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={COLORS[index % COLORS.length]}
+                                        />
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -156,7 +188,9 @@ export function SystemAnalyticsPage() {
                         </div>
                         <div>
                             <h2 className="text-lg font-bold text-white">Risk Factor Prevalence</h2>
-                            <p className="text-sm text-slate-400">Percentage of population affected</p>
+                            <p className="text-sm text-slate-400">
+                                Percentage of population affected
+                            </p>
                         </div>
                     </div>
                     <div className="space-y-4">
@@ -164,7 +198,9 @@ export function SystemAnalyticsPage() {
                             <div key={index}>
                                 <div className="flex items-center justify-between mb-2">
                                     <span className="text-sm text-slate-300">{factor.name}</span>
-                                    <span className="text-sm font-bold text-white">{factor.percentage}%</span>
+                                    <span className="text-sm font-bold text-white">
+                                        {factor.percentage}%
+                                    </span>
                                 </div>
                                 <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
                                     <div
@@ -191,7 +227,9 @@ export function SystemAnalyticsPage() {
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-white">Worker Performance</h2>
-                        <p className="text-sm text-slate-400">Screening completion rates by health worker</p>
+                        <p className="text-sm text-slate-400">
+                            Screening completion rates by health worker
+                        </p>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -208,7 +246,9 @@ export function SystemAnalyticsPage() {
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                             {(analytics.worker_performance || []).map((worker, index: number) => (
                                 <tr key={index} className="hover:bg-white/5 transition-colors">
-                                    <td className="p-4 font-medium text-white">{worker.worker_name}</td>
+                                    <td className="p-4 font-medium text-white">
+                                        {worker.worker_name}
+                                    </td>
                                     <td className="p-4">{worker.patients}</td>
                                     <td className="p-4">{worker.screenings}</td>
                                     <td className="p-4">
@@ -220,11 +260,16 @@ export function SystemAnalyticsPage() {
                                         <div className="flex items-center gap-3">
                                             <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[200px]">
                                                 <div
-                                                    className={`h-full rounded-full transition-all duration-500 ${worker.completion_rate >= 80 ? 'bg-gradient-to-r from-emerald-500 to-teal-500' :
-                                                        worker.completion_rate >= 50 ? 'bg-gradient-to-r from-amber-500 to-orange-500' :
-                                                            'bg-gradient-to-r from-red-500 to-pink-500'
-                                                        }`}
-                                                    style={{ width: `${Math.min(worker.completion_rate, 100)}%` }}
+                                                    className={`h-full rounded-full transition-all duration-500 ${
+                                                        worker.completion_rate >= 80
+                                                            ? "bg-gradient-to-r from-emerald-500 to-teal-500"
+                                                            : worker.completion_rate >= 50
+                                                              ? "bg-gradient-to-r from-amber-500 to-orange-500"
+                                                              : "bg-gradient-to-r from-red-500 to-pink-500"
+                                                    }`}
+                                                    style={{
+                                                        width: `${Math.min(worker.completion_rate, 100)}%`,
+                                                    }}
                                                 />
                                             </div>
                                         </div>
@@ -249,7 +294,9 @@ export function SystemAnalyticsPage() {
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-white">Geographic Distribution</h2>
-                        <p className="text-sm text-slate-400">Patient and risk distribution by village</p>
+                        <p className="text-sm text-slate-400">
+                            Patient and risk distribution by village
+                        </p>
                     </div>
                 </div>
                 <div className="overflow-x-auto">
@@ -267,12 +314,20 @@ export function SystemAnalyticsPage() {
                             {(() => {
                                 const geoData = analytics.geographic_distribution || [];
                                 const maxPatients = Math.max(...geoData.map((v) => v.total), 1);
-                                
+
                                 return geoData.map((village, index: number) => {
-                                    const riskPercentage = village.total > 0 ? ((village.high_risk / village.total) * 100).toFixed(1) : 0;
+                                    const riskPercentage =
+                                        village.total > 0
+                                            ? ((village.high_risk / village.total) * 100).toFixed(1)
+                                            : 0;
                                     return (
-                                        <tr key={index} className="hover:bg-white/5 transition-colors">
-                                            <td className="p-4 font-medium text-white">{village.village}</td>
+                                        <tr
+                                            key={index}
+                                            className="hover:bg-white/5 transition-colors"
+                                        >
+                                            <td className="p-4 font-medium text-white">
+                                                {village.village}
+                                            </td>
                                             <td className="p-4">{village.total}</td>
                                             <td className="p-4">
                                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
@@ -285,7 +340,9 @@ export function SystemAnalyticsPage() {
                                                     <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden max-w-[200px]">
                                                         <div
                                                             className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500"
-                                                            style={{ width: `${Math.min((village.total / maxPatients) * 100, 100)}%` }}
+                                                            style={{
+                                                                width: `${Math.min((village.total / maxPatients) * 100, 100)}%`,
+                                                            }}
                                                         />
                                                     </div>
                                                 </div>

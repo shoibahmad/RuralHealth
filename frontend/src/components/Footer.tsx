@@ -15,11 +15,12 @@ export function Footer() {
                             <span className="text-xl font-bold text-white">RuralHealthAI</span>
                         </Link>
                         <p className="text-sm text-slate-400">
-                            Empowering rural healthcare through AI-powered screening and early detection.
+                            Empowering rural healthcare through AI-powered screening and early
+                            detection.
                         </p>
                         <div className="flex gap-4">
-                            <a 
-                                href="#" 
+                            <a
+                                href="#"
                                 onClick={(e) => e.preventDefault()}
                                 className="text-slate-400 hover:text-teal-400 transition-colors"
                             >
@@ -27,8 +28,8 @@ export function Footer() {
                                     <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
                                 </svg>
                             </a>
-                            <a 
-                                href="#" 
+                            <a
+                                href="#"
                                 onClick={(e) => e.preventDefault()}
                                 className="text-slate-400 hover:text-teal-400 transition-colors"
                             >
@@ -44,22 +45,34 @@ export function Footer() {
                         <h3 className="text-white font-semibold mb-4">Quick Links</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link to="/about" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/about"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     About Us
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/how-it-works" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/how-it-works"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     How It Works
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/features" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/features"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     Features
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/api-docs" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/api-docs"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     API Documentation
                                 </Link>
                             </li>
@@ -71,17 +84,26 @@ export function Footer() {
                         <h3 className="text-white font-semibold mb-4">Legal</h3>
                         <ul className="space-y-2">
                             <li>
-                                <Link to="/privacy-policy" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/privacy-policy"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/terms-conditions" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/terms-conditions"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     Terms & Conditions
                                 </Link>
                             </li>
                             <li>
-                                <Link to="/data-security" className="text-sm text-slate-400 hover:text-teal-400 transition-colors">
+                                <Link
+                                    to="/data-security"
+                                    className="text-sm text-slate-400 hover:text-teal-400 transition-colors"
+                                >
                                     Data Security
                                 </Link>
                             </li>
@@ -93,11 +115,15 @@ export function Footer() {
                         <h3 className="text-white font-semibold mb-4">Project Team</h3>
                         <ul className="space-y-3">
                             <li className="text-sm text-slate-400">
-                                <span className="block text-teal-400 font-medium mb-1">Developed by:</span>
+                                <span className="block text-teal-400 font-medium mb-1">
+                                    Developed by:
+                                </span>
                                 Alisha Shad & Atifa Kaisar
                             </li>
                             <li className="text-sm text-slate-400">
-                                <span className="block text-teal-400 font-medium mb-1">Institution:</span>
+                                <span className="block text-teal-400 font-medium mb-1">
+                                    Institution:
+                                </span>
                                 Integral University, Lucknow
                             </li>
                         </ul>
@@ -106,12 +132,17 @@ export function Footer() {
 
                 <div className="border-t border-white/5 mt-8 pt-8 text-center">
                     <p className="text-sm text-slate-400">
-                        © {new Date().getFullYear()} RuralHealthAI. All rights reserved. Built with ❤️ for rural communities.
+                        © {new Date().getFullYear()} RuralHealthAI. All rights reserved. Built with
+                        ❤️ for rural communities.
                     </p>
                     <div className="flex items-center justify-center gap-2 mt-4">
-                        <div className={`h-2 w-2 rounded-full ${isOnline ? 'bg-emerald-500' : 'bg-rose-500'} shadow-[0_0_8px_rgba(0,0,0,0.5)]`} />
-                        <span className={`text-xs font-medium ${isOnline ? 'text-emerald-400/80' : 'text-rose-400/80'}`}>
-                            {isOnline ? 'System Online' : 'Offline Mode Active'}
+                        <div
+                            className={`h-2 w-2 rounded-full ${isOnline ? "bg-emerald-500" : "bg-rose-500"} shadow-[0_0_8px_rgba(0,0,0,0.5)]`}
+                        />
+                        <span
+                            className={`text-xs font-medium ${isOnline ? "text-emerald-400/80" : "text-rose-400/80"}`}
+                        >
+                            {isOnline ? "System Online" : "Offline Mode Active"}
                         </span>
                     </div>
                 </div>

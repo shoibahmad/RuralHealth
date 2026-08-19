@@ -2,15 +2,10 @@
  * Sync Service for handling online/offline data synchronization
  */
 
-import { db } from './db';
-import type {
-    LocalPatient,
-    LocalScreening,
-    QueuedScreeningData,
-    SyncQueueItem,
-} from './db';
+import { db } from "./db";
+import type { LocalPatient, LocalScreening, QueuedScreeningData, SyncQueueItem } from "./db";
 
-export type SyncStatus = 'idle' | 'syncing' | 'error' | 'success';
+export type SyncStatus = "idle" | "syncing" | "error" | "success";
 
 export interface SyncResult {
     success: boolean;
@@ -37,8 +32,8 @@ function errorMessage(error: unknown): string {
  * "not recorded" rather than zero.
  */
 function toFloat(value: string | number | undefined | null): number | undefined {
-    if (value === undefined || value === null || value === '') return undefined;
-    const parsed = typeof value === 'number' ? value : parseFloat(value);
+    if (value === undefined || value === null || value === "") return undefined;
+    const parsed = typeof value === "number" ? value : parseFloat(value);
     return Number.isNaN(parsed) ? undefined : parsed;
 }
 
@@ -48,7 +43,7 @@ function toInt(value: string | number | undefined | null): number | undefined {
 }
 
 function toText(value: string | number | undefined | null): string | undefined {
-    if (value === undefined || value === null || value === '') return undefined;
+    if (value === undefined || value === null || value === "") return undefined;
     return String(value);
 }
 
@@ -72,7 +67,7 @@ class SyncService {
     }
 
     private notifyListeners(status: SyncStatus) {
-        this.listeners.forEach(cb => cb(status));
+        this.listeners.forEach((cb) => cb(status));
     }
 
     // Save patient locally (for offline use)
@@ -82,10 +77,10 @@ class SyncService {
             localId,
             synced: false,
             data: {
-                full_name: String(patientData.full_name ?? ''),
+                full_name: String(patientData.full_name ?? ""),
                 age: toInt(patientData.age) ?? 0,
-                gender: String(patientData.gender ?? ''),
-                village: String(patientData.village ?? ''),
+                gender: String(patientData.gender ?? ""),
+                village: String(patientData.village ?? ""),
                 phone: patientData.phone ? String(patientData.phone) : undefined,
             },
             createdAt: new Date(),
@@ -93,13 +88,13 @@ class SyncService {
 
         await db.savePatient(localPatient);
         await db.addToSyncQueue({
-            type: 'patient',
-            action: 'create',
+            type: "patient",
+            action: "create",
             localId,
             data: localPatient.data,
         });
 
-        console.log('Patient saved locally:', localId);
+        console.log("Patient saved locally:", localId);
         return localId;
     }
 
@@ -130,35 +125,35 @@ class SyncService {
 
         await db.saveScreening(localScreening);
         await db.addToSyncQueue({
-            type: 'screening',
-            action: 'create',
+            type: "screening",
+            action: "create",
             localId,
             data: { ...localScreening.data, patientLocalId },
         });
 
-        console.log('Screening saved locally:', localId);
+        console.log("Screening saved locally:", localId);
         return localId;
     }
 
     // Sync all pending data to server
     async syncAll(): Promise<SyncResult> {
         if (this.isSyncing) {
-            console.log('Sync already in progress');
-            return { success: false, synced: 0, failed: 0, errors: ['Sync already in progress'] };
+            console.log("Sync already in progress");
+            return { success: false, synced: 0, failed: 0, errors: ["Sync already in progress"] };
         }
 
         if (!this.isOnline()) {
-            console.log('Cannot sync: offline');
-            return { success: false, synced: 0, failed: 0, errors: ['Device is offline'] };
+            console.log("Cannot sync: offline");
+            return { success: false, synced: 0, failed: 0, errors: ["Device is offline"] };
         }
 
         if (!this.token) {
-            console.log('Cannot sync: no auth token');
-            return { success: false, synced: 0, failed: 0, errors: ['Not authenticated'] };
+            console.log("Cannot sync: no auth token");
+            return { success: false, synced: 0, failed: 0, errors: ["Not authenticated"] };
         }
 
         this.isSyncing = true;
-        this.notifyListeners('syncing');
+        this.notifyListeners("syncing");
 
         const result: SyncResult = {
             success: true,
@@ -176,7 +171,7 @@ class SyncService {
 
             // First, get existing mappings from already synced patients
             const patients = await db.getAllPatients();
-            patients.forEach(p => {
+            patients.forEach((p) => {
                 if (p.serverId) {
                     patientIdMap.set(p.localId, p.serverId);
                 }
@@ -184,7 +179,7 @@ class SyncService {
 
             for (const item of queue) {
                 try {
-                    if (item.type === 'patient') {
+                    if (item.type === "patient") {
                         const serverId = await this.syncPatient(item);
                         if (serverId) {
                             patientIdMap.set(item.localId, serverId);
@@ -192,7 +187,7 @@ class SyncService {
                             await db.removeFromSyncQueue(item.id);
                             result.synced++;
                         }
-                    } else if (item.type === 'screening') {
+                    } else if (item.type === "screening") {
                         // Get patient server ID
                         const { patientLocalId } = item.data as QueuedScreeningData;
                         let patientServerId = patientIdMap.get(patientLocalId);
@@ -205,13 +200,20 @@ class SyncService {
 
                         if (!patientServerId) {
                             // Patient not synced yet, skip this screening
-                            console.log('Skipping screening - patient not yet synced:', patientLocalId);
+                            console.log(
+                                "Skipping screening - patient not yet synced:",
+                                patientLocalId,
+                            );
                             continue;
                         }
 
                         const serverId = await this.syncScreening(item, patientServerId);
                         if (serverId) {
-                            await db.updateScreeningServerId(item.localId, serverId, patientServerId);
+                            await db.updateScreeningServerId(
+                                item.localId,
+                                serverId,
+                                patientServerId,
+                            );
                             await db.removeFromSyncQueue(item.id);
                             result.synced++;
                         }
@@ -229,26 +231,26 @@ class SyncService {
             }
 
             result.success = result.failed === 0;
-            this.notifyListeners(result.success ? 'success' : 'error');
+            this.notifyListeners(result.success ? "success" : "error");
         } catch (error: unknown) {
-            console.error('Sync failed:', error);
+            console.error("Sync failed:", error);
             result.success = false;
             result.errors.push(errorMessage(error));
-            this.notifyListeners('error');
+            this.notifyListeners("error");
         } finally {
             this.isSyncing = false;
-            setTimeout(() => this.notifyListeners('idle'), 3000);
+            setTimeout(() => this.notifyListeners("idle"), 3000);
         }
 
-        console.log('Sync result:', result);
+        console.log("Sync result:", result);
         return result;
     }
 
     private async syncPatient(item: SyncQueueItem): Promise<number | null> {
-        const response = await fetch('/api/screening/patients', {
-            method: 'POST',
+        const response = await fetch("/api/screening/patients", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.token}`,
             },
             body: JSON.stringify(item.data),
@@ -256,22 +258,24 @@ class SyncService {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.detail || 'Failed to sync patient');
+            throw new Error(error.detail || "Failed to sync patient");
         }
 
         const patient = await response.json();
         return patient.id;
     }
 
-    private async syncScreening(item: SyncQueueItem, patientServerId: number): Promise<number | null> {
+    private async syncScreening(
+        item: SyncQueueItem,
+        patientServerId: number,
+    ): Promise<number | null> {
         // patientLocalId is an offline-only key and must not reach the server.
-        const { patientLocalId: _localId, ...screeningData } =
-            item.data as QueuedScreeningData;
+        const { patientLocalId: _localId, ...screeningData } = item.data as QueuedScreeningData;
 
-        const response = await fetch('/api/screening/screenings', {
-            method: 'POST',
+        const response = await fetch("/api/screening/screenings", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.token}`,
             },
             body: JSON.stringify({
@@ -282,7 +286,7 @@ class SyncService {
 
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.detail || 'Failed to sync screening');
+            throw new Error(error.detail || "Failed to sync screening");
         }
 
         const screening = await response.json();

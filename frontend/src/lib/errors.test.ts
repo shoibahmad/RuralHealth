@@ -15,12 +15,9 @@ describe("errorMessage", () => {
         expect(errorMessage("plain failure")).toBe("plain failure");
     });
 
-    it.each(["message", "detail", "error"])(
-        "reads the %s key off a thrown object",
-        (key) => {
-            expect(errorMessage({ [key]: "from object" })).toBe("from object");
-        },
-    );
+    it.each(["message", "detail", "error"])("reads the %s key off a thrown object", (key) => {
+        expect(errorMessage({ [key]: "from object" })).toBe("from object");
+    });
 
     it("prefers message over detail when both are present", () => {
         expect(errorMessage({ message: "first", detail: "second" })).toBe("first");

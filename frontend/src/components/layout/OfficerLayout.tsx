@@ -1,6 +1,16 @@
 import { useState } from "react";
 import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
-import { Activity, LayoutDashboard, Users, BarChart3, LogOut, Settings, X, Mail, Shield } from "lucide-react";
+import {
+    Activity,
+    LayoutDashboard,
+    Users,
+    BarChart3,
+    LogOut,
+    Settings,
+    X,
+    Mail,
+    Shield,
+} from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { Button } from "../ui/button";
 import { ConfirmationModal } from "../ui/confirmation-modal";
@@ -49,15 +59,18 @@ export function OfficerLayout() {
                             <div className="hidden lg:flex items-center gap-1">
                                 {NAV_ITEMS.map((item) => {
                                     const Icon = item.icon;
-                                    const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+                                    const isActive =
+                                        location.pathname === item.path ||
+                                        location.pathname.startsWith(item.path + "/");
                                     return (
                                         <Link
                                             key={item.path}
                                             to={item.path}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isActive
-                                                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                                                : "text-slate-400 hover:text-white hover:bg-white/5"
-                                                }`}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                                                isActive
+                                                    ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                                            }`}
                                         >
                                             <Icon className="h-4 w-4" />
                                             {item.label}
@@ -69,7 +82,9 @@ export function OfficerLayout() {
 
                         <div className="flex items-center gap-4">
                             <div className="hidden sm:flex flex-col items-end">
-                                <span className="text-sm font-semibold text-slate-100">{user?.full_name || user?.email}</span>
+                                <span className="text-sm font-semibold text-slate-100">
+                                    {user?.full_name || user?.email}
+                                </span>
                                 <span className="text-xs text-slate-400">Health Officer</span>
                             </div>
                             <button
@@ -78,7 +93,9 @@ export function OfficerLayout() {
                             >
                                 <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center">
                                     <span className="font-bold text-white text-sm">
-                                        {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || "O"}
+                                        {user?.full_name
+                                            ? user.full_name.charAt(0).toUpperCase()
+                                            : user?.email?.charAt(0).toUpperCase() || "O"}
                                     </span>
                                 </div>
                             </button>
@@ -147,7 +164,9 @@ export function OfficerLayout() {
                                     <div className="h-20 w-20 rounded-full bg-gradient-to-br from-purple-400 to-blue-600 p-[3px] shadow-lg shadow-purple-500/30 mb-4">
                                         <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center">
                                             <span className="font-bold text-white text-2xl">
-                                                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || "O"}
+                                                {user?.full_name
+                                                    ? user.full_name.charAt(0).toUpperCase()
+                                                    : user?.email?.charAt(0).toUpperCase() || "O"}
                                             </span>
                                         </div>
                                     </div>
@@ -155,7 +174,9 @@ export function OfficerLayout() {
                                         {user?.full_name || "Officer"}
                                     </h3>
                                     <p className="text-sm text-purple-400 font-medium uppercase tracking-wide">
-                                        {user?.role ? user.role.replace('_', ' ') : "Health Officer"}
+                                        {user?.role
+                                            ? user.role.replace("_", " ")
+                                            : "Health Officer"}
                                     </p>
                                 </div>
 
@@ -183,7 +204,9 @@ export function OfficerLayout() {
                                             <div className="flex-1">
                                                 <p className="text-xs text-slate-400 mb-1">Role</p>
                                                 <p className="text-sm text-white font-medium capitalize">
-                                                    {user?.role ? user.role.replace('_', ' ') : "Health Officer"}
+                                                    {user?.role
+                                                        ? user.role.replace("_", " ")
+                                                        : "Health Officer"}
                                                 </p>
                                             </div>
                                         </div>
@@ -197,7 +220,9 @@ export function OfficerLayout() {
                                     </p>
                                     {NAV_ITEMS.map((item) => {
                                         const Icon = item.icon;
-                                        const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
+                                        const isActive =
+                                            location.pathname === item.path ||
+                                            location.pathname.startsWith(item.path + "/");
                                         return (
                                             <Link
                                                 key={item.path}
@@ -206,10 +231,11 @@ export function OfficerLayout() {
                                             >
                                                 <Button
                                                     variant="ghost"
-                                                    className={`w-full justify-start ${isActive
-                                                        ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                                                        : "text-slate-300 hover:text-white hover:bg-white/5"
-                                                        }`}
+                                                    className={`w-full justify-start ${
+                                                        isActive
+                                                            ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                                            : "text-slate-300 hover:text-white hover:bg-white/5"
+                                                    }`}
                                                 >
                                                     <Icon className="mr-3 h-4 w-4" />
                                                     {item.label}

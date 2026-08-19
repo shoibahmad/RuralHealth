@@ -1,13 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import {
-    BarChart3,
-    TrendingUp,
-    MapPin,
-    Users,
-    Activity,
-    AlertTriangle
-} from "lucide-react";
+import { BarChart3, TrendingUp, MapPin, Users, Activity, AlertTriangle } from "lucide-react";
 import {
     BarChart,
     Bar,
@@ -20,7 +13,7 @@ import {
     Pie,
     Cell,
     Area,
-    AreaChart
+    AreaChart,
 } from "recharts";
 import { firestoreService } from "../services/firestoreService";
 
@@ -32,7 +25,7 @@ interface AnalyticsData {
     risk_factor_counts: Record<string, number>;
 }
 
-const COLORS = ['#14b8a6', '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899'];
+const COLORS = ["#14b8a6", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"];
 
 export function AnalyticsPage() {
     const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
@@ -46,7 +39,7 @@ export function AnalyticsPage() {
         try {
             const [patients, screenings] = await Promise.all([
                 firestoreService.getPatients(),
-                firestoreService.getScreenings()
+                firestoreService.getScreenings(),
             ]);
 
             // Village Stats
@@ -56,9 +49,9 @@ export function AnalyticsPage() {
             // Gender Distribution
             const genderMap: Record<string, number> = {};
 
-            patients.forEach(p => {
+            patients.forEach((p) => {
                 // Village
-                const v = p.village || 'Unknown';
+                const v = p.village || "Unknown";
                 villageMap[v] = (villageMap[v] || 0) + 1;
 
                 // Age (Group by 10s)
@@ -67,38 +60,44 @@ export function AnalyticsPage() {
                 ageMap[ageKey] = (ageMap[ageKey] || 0) + 1;
 
                 // Gender
-                const g = p.gender || 'Unknown';
+                const g = p.gender || "Unknown";
                 genderMap[g] = (genderMap[g] || 0) + 1;
             });
 
             // Monthly Trend
             const trendMap: Record<string, number> = {};
             const riskMap: Record<string, number> = {
-                'Smoking': 0,
-                'Alcohol': 0,
-                'Inactivity': 0,
-                'High BP': 0
+                Smoking: 0,
+                Alcohol: 0,
+                Inactivity: 0,
+                "High BP": 0,
             };
 
-            screenings.forEach(s => {
+            screenings.forEach((s) => {
                 // Trend
                 const date = new Date(s.created_at as string); // Cast timestamp
-                const month = date.toLocaleString('default', { month: 'short' });
+                const month = date.toLocaleString("default", { month: "short" });
                 trendMap[month] = (trendMap[month] || 0) + 1;
 
                 // Risks
-                if (s.smoking_status && s.smoking_status !== 'Never') riskMap['Smoking']++;
-                if (s.alcohol_usage && s.alcohol_usage !== 'None') riskMap['Alcohol']++;
-                if (s.physical_activity === 'Sedentary') riskMap['Inactivity']++;
-                if ((s.systolic_bp || 0) > 140) riskMap['High BP']++;
+                if (s.smoking_status && s.smoking_status !== "Never") riskMap["Smoking"]++;
+                if (s.alcohol_usage && s.alcohol_usage !== "None") riskMap["Alcohol"]++;
+                if (s.physical_activity === "Sedentary") riskMap["Inactivity"]++;
+                if ((s.systolic_bp || 0) > 140) riskMap["High BP"]++;
             });
 
             const data: AnalyticsData = {
-                village_stats: Object.entries(villageMap).map(([k, v]) => ({ village: k, patient_count: v })),
+                village_stats: Object.entries(villageMap).map(([k, v]) => ({
+                    village: k,
+                    patient_count: v,
+                })),
                 age_distribution: ageMap,
-                gender_distribution: Object.entries(genderMap).map(([k, v]) => ({ gender: k, count: v })),
+                gender_distribution: Object.entries(genderMap).map(([k, v]) => ({
+                    gender: k,
+                    count: v,
+                })),
                 monthly_trend: Object.entries(trendMap).map(([k, v]) => ({ month: k, count: v })),
-                risk_factor_counts: riskMap
+                risk_factor_counts: riskMap,
             };
 
             setAnalytics(data);
@@ -118,26 +117,22 @@ export function AnalyticsPage() {
     }
 
     if (!analytics) {
-        return (
-            <div className="text-center text-slate-400 py-8">
-                Failed to load analytics data
-            </div>
-        );
+        return <div className="text-center text-slate-400 py-8">Failed to load analytics data</div>;
     }
 
     const ageData = Object.entries(analytics.age_distribution).map(([age, count]) => ({
         name: age,
-        value: count
+        value: count,
     }));
 
-    const genderData = analytics.gender_distribution.map(g => ({
+    const genderData = analytics.gender_distribution.map((g) => ({
         name: g.gender,
-        value: g.count
+        value: g.count,
     }));
 
     const riskFactorData = Object.entries(analytics.risk_factor_counts).map(([factor, count]) => ({
         name: factor,
-        count: count
+        count: count,
     }));
 
     return (
@@ -148,7 +143,9 @@ export function AnalyticsPage() {
                     <BarChart3 className="h-7 w-7 text-teal-400" />
                     Analytics Dashboard
                 </h1>
-                <p className="text-slate-400 mt-1">Comprehensive health screening insights and trends</p>
+                <p className="text-slate-400 mt-1">
+                    Comprehensive health screening insights and trends
+                </p>
             </div>
 
             {/* Monthly Trend Chart */}
@@ -170,11 +167,32 @@ export function AnalyticsPage() {
                                     <stop offset="95%" stopColor="#14b8a6" stopOpacity={0} />
                                 </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
-                            <XAxis dataKey="month" stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
+                            <CartesianGrid
+                                strokeDasharray="3 3"
+                                stroke="#334155"
+                                opacity={0.3}
+                                vertical={false}
+                            />
+                            <XAxis
+                                dataKey="month"
+                                stroke="#64748b"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
+                            <YAxis
+                                stroke="#64748b"
+                                fontSize={12}
+                                tickLine={false}
+                                axisLine={false}
+                            />
                             <Tooltip
-                                contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                contentStyle={{
+                                    backgroundColor: "#0f172a",
+                                    border: "1px solid #1e293b",
+                                    borderRadius: "8px",
+                                    color: "#fff",
+                                }}
                             />
                             <Area
                                 type="monotone"
@@ -204,11 +222,27 @@ export function AnalyticsPage() {
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={analytics.village_stats} layout="vertical">
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} horizontal={false} />
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#334155"
+                                    opacity={0.3}
+                                    horizontal={false}
+                                />
                                 <XAxis type="number" stroke="#64748b" fontSize={12} />
-                                <YAxis type="category" dataKey="village" stroke="#64748b" fontSize={12} width={100} />
+                                <YAxis
+                                    type="category"
+                                    dataKey="village"
+                                    stroke="#64748b"
+                                    fontSize={12}
+                                    width={100}
+                                />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                                 <Bar dataKey="patient_count" fill="#06b6d4" radius={[0, 4, 4, 0]} />
                             </BarChart>
@@ -230,11 +264,21 @@ export function AnalyticsPage() {
                     <div className="h-[300px]">
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={ageData}>
-                                <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} vertical={false} />
+                                <CartesianGrid
+                                    strokeDasharray="3 3"
+                                    stroke="#334155"
+                                    opacity={0.3}
+                                    vertical={false}
+                                />
                                 <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
                                 <YAxis stroke="#64748b" fontSize={12} />
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                                 <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} />
                             </BarChart>
@@ -264,14 +308,25 @@ export function AnalyticsPage() {
                                     outerRadius={100}
                                     paddingAngle={5}
                                     dataKey="value"
-                                    label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}
+                                    label={({ name, percent }) =>
+                                        `${name} ${((percent ?? 0) * 100).toFixed(0)}%`
+                                    }
                                 >
                                     {genderData.map((_, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} stroke="none" />
+                                        <Cell
+                                            key={`cell-${index}`}
+                                            fill={COLORS[index % COLORS.length]}
+                                            stroke="none"
+                                        />
                                     ))}
                                 </Pie>
                                 <Tooltip
-                                    contentStyle={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderRadius: '8px', color: '#fff' }}
+                                    contentStyle={{
+                                        backgroundColor: "#0f172a",
+                                        border: "1px solid #1e293b",
+                                        borderRadius: "8px",
+                                        color: "#fff",
+                                    }}
                                 />
                             </PieChart>
                         </ResponsiveContainer>
@@ -296,13 +351,17 @@ export function AnalyticsPage() {
                                 <div className="flex-1 h-4 bg-slate-800 rounded-full overflow-hidden">
                                     <motion.div
                                         initial={{ width: 0 }}
-                                        animate={{ width: `${Math.min((factor.count / Math.max(...riskFactorData.map(f => f.count))) * 100, 100)}%` }}
+                                        animate={{
+                                            width: `${Math.min((factor.count / Math.max(...riskFactorData.map((f) => f.count))) * 100, 100)}%`,
+                                        }}
                                         transition={{ delay: 0.5 + i * 0.1, duration: 0.5 }}
                                         className="h-full rounded-full"
                                         style={{ backgroundColor: COLORS[i % COLORS.length] }}
                                     />
                                 </div>
-                                <div className="w-12 text-right text-sm text-slate-400">{factor.count}</div>
+                                <div className="w-12 text-right text-sm text-slate-400">
+                                    {factor.count}
+                                </div>
                             </div>
                         ))}
                     </div>

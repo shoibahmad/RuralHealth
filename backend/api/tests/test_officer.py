@@ -1,4 +1,5 @@
 """Tests for health-officer oversight endpoints and their access control."""
+
 import pytest
 from django.urls import reverse
 
@@ -87,15 +88,11 @@ class TestHealthWorkerDetail:
         assert response.data['stats']['average_risk_score'] == 0
 
     def test_unknown_worker_returns_404(self, auth_client, health_officer):
-        response = auth_client(health_officer).get(
-            reverse('health_worker_detail', args=[9999])
-        )
+        response = auth_client(health_officer).get(reverse('health_worker_detail', args=[9999]))
 
         assert response.status_code == 404
 
-    def test_an_officer_id_is_not_a_valid_worker_id(
-        self, auth_client, health_officer
-    ):
+    def test_an_officer_id_is_not_a_valid_worker_id(self, auth_client, health_officer):
         response = auth_client(health_officer).get(
             reverse('health_worker_detail', args=[health_officer.id])
         )
@@ -134,28 +131,18 @@ class TestAllPatients:
 
         assert len(response.data['results']) == 5
 
-    def test_caps_an_oversized_page_size(
-        self, auth_client, health_officer, many_patients
-    ):
-        response = auth_client(health_officer).get(
-            reverse('all_patients'), {'page_size': 10000}
-        )
+    def test_caps_an_oversized_page_size(self, auth_client, health_officer, many_patients):
+        response = auth_client(health_officer).get(reverse('all_patients'), {'page_size': 10000})
 
         assert response.data['page_size'] == 100
 
     def test_rejects_a_non_numeric_page(self, auth_client, health_officer):
-        response = auth_client(health_officer).get(
-            reverse('all_patients'), {'page': 'first'}
-        )
+        response = auth_client(health_officer).get(reverse('all_patients'), {'page': 'first'})
 
         assert response.status_code == 400
 
-    def test_applies_the_search_filter(
-        self, auth_client, health_officer, patient, other_patient
-    ):
-        response = auth_client(health_officer).get(
-            reverse('all_patients'), {'search': 'Sunita'}
-        )
+    def test_applies_the_search_filter(self, auth_client, health_officer, patient, other_patient):
+        response = auth_client(health_officer).get(reverse('all_patients'), {'search': 'Sunita'})
 
         assert response.data['total'] == 1
         assert response.data['results'][0]['full_name'] == 'Sunita Devi'
@@ -189,9 +176,7 @@ class TestUpdateWorkerStatus:
 
         assert response.status_code == 404
 
-    def test_a_worker_cannot_reactivate_themselves(
-        self, auth_client, health_worker
-    ):
+    def test_a_worker_cannot_reactivate_themselves(self, auth_client, health_worker):
         response = auth_client(health_worker).patch(
             reverse('update_worker', args=[health_worker.id]),
             {'is_active': True},
@@ -202,9 +187,7 @@ class TestUpdateWorkerStatus:
 
 
 class TestUpdatePatient:
-    def test_updates_patient_demographics(
-        self, auth_client, health_officer, patient
-    ):
+    def test_updates_patient_demographics(self, auth_client, health_officer, patient):
         response = auth_client(health_officer).patch(
             reverse('update_patient', args=[patient.id]),
             {'village': 'New Village', 'age': 53},
@@ -229,9 +212,7 @@ class TestUpdatePatient:
         patient.refresh_from_db()
         assert patient.health_worker == other_worker
 
-    def test_rejects_reassignment_to_a_non_worker(
-        self, auth_client, health_officer, patient
-    ):
+    def test_rejects_reassignment_to_a_non_worker(self, auth_client, health_officer, patient):
         response = auth_client(health_officer).patch(
             reverse('update_patient', args=[patient.id]),
             {'health_worker_id': health_officer.id},
@@ -258,24 +239,16 @@ class TestUpdatePatient:
 
 
 class TestSystemAnalytics:
-    def test_reports_prevalence_percentages(
-        self, auth_client, health_officer, patient
-    ):
-        Screening.objects.create(
-            patient=patient, systolic_bp=160, risk_level='High', risk_score=25
-        )
-        Screening.objects.create(
-            patient=patient, systolic_bp=110, risk_level='Low', risk_score=0
-        )
+    def test_reports_prevalence_percentages(self, auth_client, health_officer, patient):
+        Screening.objects.create(patient=patient, systolic_bp=160, risk_level='High', risk_score=25)
+        Screening.objects.create(patient=patient, systolic_bp=110, risk_level='Low', risk_score=0)
 
         response = auth_client(health_officer).get(reverse('system_analytics'))
 
         assert response.status_code == 200
         assert response.data['risk_factor_prevalence']['High Blood Pressure'] == 50.0
 
-    def test_prevalence_is_empty_when_there_are_no_screenings(
-        self, auth_client, health_officer
-    ):
+    def test_prevalence_is_empty_when_there_are_no_screenings(self, auth_client, health_officer):
         response = auth_client(health_officer).get(reverse('system_analytics'))
 
         assert response.data['risk_factor_prevalence'] == {}

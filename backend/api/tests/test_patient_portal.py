@@ -1,4 +1,5 @@
 """Tests for the patient-facing portal endpoints."""
+
 from datetime import timedelta
 
 import pytest
@@ -45,9 +46,7 @@ class TestPatientDashboard:
     def test_returns_the_patients_own_summary(
         self, auth_client, patient_user, patient_profile, health_worker
     ):
-        Screening.objects.create(
-            patient=patient_profile, risk_level='Medium', risk_score=35
-        )
+        Screening.objects.create(patient=patient_profile, risk_level='Medium', risk_score=35)
         Appointment.objects.create(
             patient=patient_profile,
             health_worker=health_worker,
@@ -70,9 +69,7 @@ class TestPatientDashboard:
         assert len(response.data['upcoming_appointments']) == 1
         assert len(response.data['active_recommendations']) == 1
 
-    def test_hides_completed_recommendations(
-        self, auth_client, patient_user, patient_profile
-    ):
+    def test_hides_completed_recommendations(self, auth_client, patient_user, patient_profile):
         Recommendation.objects.create(
             patient=patient_profile,
             category='diet',
@@ -110,17 +107,11 @@ class TestPatientDashboard:
 
 
 class TestPatientScreeningHistory:
-    def test_returns_the_patients_own_records(
-        self, auth_client, patient_user, patient_profile
-    ):
+    def test_returns_the_patients_own_records(self, auth_client, patient_user, patient_profile):
         Screening.objects.create(patient=patient_profile, risk_level='Low', risk_score=0)
-        Screening.objects.create(
-            patient=patient_profile, risk_level='High', risk_score=70
-        )
+        Screening.objects.create(patient=patient_profile, risk_level='High', risk_score=70)
 
-        response = auth_client(patient_user).get(
-            reverse('patient_screening_history')
-        )
+        response = auth_client(patient_user).get(reverse('patient_screening_history'))
 
         assert response.status_code == 200
         assert len(response.data['screenings']) == 2
@@ -152,9 +143,7 @@ class TestPatientProfileSetup:
         # left the patient permanently unable to reach their own dashboard.
         assert created.user == patient_user
 
-    def test_the_new_profile_is_immediately_readable(
-        self, auth_client, patient_user
-    ):
+    def test_the_new_profile_is_immediately_readable(self, auth_client, patient_user):
         client = auth_client(patient_user)
         client.post(
             reverse('patient_profile_setup'),
@@ -172,9 +161,7 @@ class TestPatientProfileSetup:
         assert response.status_code == 200
         assert response.data['patient']['full_name'] == 'New Patient'
 
-    def test_updates_an_existing_profile_in_place(
-        self, auth_client, patient_user, patient_profile
-    ):
+    def test_updates_an_existing_profile_in_place(self, auth_client, patient_user, patient_profile):
         response = auth_client(patient_user).post(
             reverse('patient_profile_setup'), {'village': 'Moved Town'}, format='json'
         )
@@ -187,25 +174,18 @@ class TestPatientProfileSetup:
     def test_validates_the_submitted_profile(self, auth_client, patient_user):
         response = auth_client(patient_user).post(
             reverse('patient_profile_setup'),
-            {'full_name': 'New Patient', 'age': 900, 'gender': 'Female',
-             'village': 'Newville'},
+            {'full_name': 'New Patient', 'age': 900, 'gender': 'Female', 'village': 'Newville'},
             format='json',
         )
 
         assert response.status_code == 400
         assert not Patient.objects.filter(user=patient_user).exists()
 
-    def test_get_returns_the_existing_profile(
-        self, auth_client, patient_user, patient_profile
-    ):
+    def test_get_returns_the_existing_profile(self, auth_client, patient_user, patient_profile):
         response = auth_client(patient_user).get(reverse('patient_profile_setup'))
 
         assert response.status_code == 200
         assert response.data['full_name'] == 'Self Screener'
 
-    def test_get_returns_404_before_the_profile_exists(
-        self, auth_client, patient_user
-    ):
-        assert auth_client(patient_user).get(
-            reverse('patient_profile_setup')
-        ).status_code == 404
+    def test_get_returns_404_before_the_profile_exists(self, auth_client, patient_user):
+        assert auth_client(patient_user).get(reverse('patient_profile_setup')).status_code == 404

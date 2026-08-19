@@ -1,4 +1,5 @@
 """Shared analytics helpers plus the health-worker dashboard endpoints."""
+
 from datetime import timedelta
 
 from django.db.models import Count
@@ -81,9 +82,7 @@ def weekly_screening_trend(screenings, days: int = 7) -> list:
                 'name': day.strftime('%a'),
                 'date': day.isoformat(),
                 'screenings': screenings.filter(created_at__date=day).count(),
-                'highRisk': screenings.filter(
-                    created_at__date=day, risk_level='High'
-                ).count(),
+                'highRisk': screenings.filter(created_at__date=day, risk_level='High').count(),
             }
         )
     return trend
@@ -119,9 +118,7 @@ class DashboardStatsView(APIView):
             status='scheduled', scheduled_date__gte=timezone.now()
         ).count()
 
-        recent_screenings = screenings.select_related('patient').order_by(
-            '-created_at'
-        )[:10]
+        recent_screenings = screenings.select_related('patient').order_by('-created_at')[:10]
 
         return Response(
             {
@@ -134,9 +131,7 @@ class DashboardStatsView(APIView):
                 'pending_appointments': pending_appointments,
                 'risk_distribution': risk_distribution(screenings),
                 'weekly_screenings': weekly_screening_trend(screenings),
-                'recent_screenings': ScreeningSerializer(
-                    recent_screenings, many=True
-                ).data,
+                'recent_screenings': ScreeningSerializer(recent_screenings, many=True).data,
             }
         )
 
@@ -159,16 +154,12 @@ class AnalyticsView(APIView):
             {
                 'village_stats': list(village_stats),
                 'age_distribution': age_distribution(patients),
-                'gender_distribution': list(
-                    patients.values('gender').annotate(count=Count('id'))
-                ),
+                'gender_distribution': list(patients.values('gender').annotate(count=Count('id'))),
                 'monthly_trend': monthly_screening_trend(screenings),
                 'risk_factor_counts': {
                     'High BP': screenings.filter(systolic_bp__gt=140).count(),
                     'High Glucose': screenings.filter(glucose_level__gt=140).count(),
-                    'High Cholesterol': screenings.filter(
-                        cholesterol_level__gt=200
-                    ).count(),
+                    'High Cholesterol': screenings.filter(cholesterol_level__gt=200).count(),
                     'Smoking': screenings.filter(smoking_status='Current').count(),
                 },
             }

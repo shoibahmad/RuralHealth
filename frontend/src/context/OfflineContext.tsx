@@ -2,20 +2,20 @@
  * Offline Context for managing online/offline state across the app
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { syncService } from '../services/syncService';
-import type { SyncStatus } from '../services/syncService';
-import { useAuth } from './useAuth';
-import { createLogger } from '../lib/logger';
-import { OfflineContext } from './contexts';
+import React, { useState, useEffect, useCallback } from "react";
+import { syncService } from "../services/syncService";
+import type { SyncStatus } from "../services/syncService";
+import { useAuth } from "./useAuth";
+import { createLogger } from "../lib/logger";
+import { OfflineContext } from "./contexts";
 
-const log = createLogger('OfflineContext');
+const log = createLogger("OfflineContext");
 
 export function OfflineProvider({ children }: { children: React.ReactNode }) {
     const { user } = useAuth();
     const [isOnline, setIsOnline] = useState(navigator.onLine);
     const [pendingSyncCount, setPendingSyncCount] = useState(0);
-    const [syncStatus, setSyncStatus] = useState<SyncStatus>('idle');
+    const [syncStatus, setSyncStatus] = useState<SyncStatus>("idle");
 
     // Declared before the effects that depend on them, so the dependency
     // arrays below can name them without reading a binding that is not
@@ -25,7 +25,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
             const count = await syncService.getPendingCount();
             setPendingSyncCount(count);
         } catch (error) {
-            log.error('Failed to get pending sync count', error);
+            log.error("Failed to get pending sync count", error);
         }
     }, []);
 
@@ -35,14 +35,14 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
         try {
             await syncService.syncAll();
         } catch (error) {
-            log.error('Sync failed', error);
+            log.error("Sync failed", error);
         }
     }, [isOnline, user]);
 
     // Track connectivity, and drain the queue as soon as the device returns.
     useEffect(() => {
         const handleOnline = () => {
-            log.info('Device is online');
+            log.info("Device is online");
             setIsOnline(true);
             if (user) {
                 void syncNow();
@@ -50,16 +50,16 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
         };
 
         const handleOffline = () => {
-            log.info('Device is offline');
+            log.info("Device is offline");
             setIsOnline(false);
         };
 
-        window.addEventListener('online', handleOnline);
-        window.addEventListener('offline', handleOffline);
+        window.addEventListener("online", handleOnline);
+        window.addEventListener("offline", handleOffline);
 
         return () => {
-            window.removeEventListener('online', handleOnline);
-            window.removeEventListener('offline', handleOffline);
+            window.removeEventListener("online", handleOnline);
+            window.removeEventListener("offline", handleOffline);
         };
     }, [user, syncNow]);
 
@@ -67,7 +67,7 @@ export function OfflineProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         return syncService.subscribe((status) => {
             setSyncStatus(status);
-            if (status === 'success' || status === 'error') {
+            if (status === "success" || status === "error") {
                 void refreshPendingCount();
             }
         });

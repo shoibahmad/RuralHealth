@@ -38,9 +38,7 @@ describe("NameVerificationBanner", () => {
 
         expect(screen.getByText("Report Mismatch Detected")).toBeInTheDocument();
         expect(screen.getByText(/Sunita Devi/)).toBeInTheDocument();
-        expect(
-            screen.getByRole("button", { name: /proceed anyway/i }),
-        ).toBeInTheDocument();
+        expect(screen.getByRole("button", { name: /proceed anyway/i })).toBeInTheDocument();
     });
 
     it("dismisses via the close control", async () => {

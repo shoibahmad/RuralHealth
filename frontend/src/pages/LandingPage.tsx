@@ -67,7 +67,7 @@ export function LandingPage() {
                     />
                 </motion.div>
             </div>
-        )
+        );
     }
 
     return (
@@ -94,7 +94,10 @@ export function LandingPage() {
                         transition={{ duration: 0.8, delay: 0.2 }}
                         className="text-4xl md:text-6xl font-bold tracking-tight text-white mb-6 max-w-4xl"
                     >
-                        Smart Health Screening for <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">Rural Communities</span>
+                        Smart Health Screening for{" "}
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 to-blue-500">
+                            Rural Communities
+                        </span>
                     </motion.h1>
 
                     <motion.p
@@ -103,7 +106,8 @@ export function LandingPage() {
                         transition={{ duration: 0.8, delay: 0.4 }}
                         className="text-lg md:text-xl text-slate-400 mb-8 max-w-2xl mx-auto"
                     >
-                        Empowering health workers with offline-first AI tools for early detection of Diabetes, Hypertension, and CVD risks.
+                        Empowering health workers with offline-first AI tools for early detection of
+                        Diabetes, Hypertension, and CVD risks.
                     </motion.p>
 
                     <motion.div
@@ -114,7 +118,10 @@ export function LandingPage() {
                     >
                         {isAuthenticated ? (
                             <Link to={getDashboardPath()}>
-                                <Button size="lg" className="h-14 px-10 text-lg bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-xl shadow-teal-500/30 rounded-full transition-all hover:scale-105 flex items-center gap-3">
+                                <Button
+                                    size="lg"
+                                    className="h-14 px-10 text-lg bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-xl shadow-teal-500/30 rounded-full transition-all hover:scale-105 flex items-center gap-3"
+                                >
                                     <LayoutDashboard className="h-5 w-5" />
                                     Go to Dashboard
                                     <ArrowRight className="h-5 w-5" />
@@ -123,13 +130,20 @@ export function LandingPage() {
                         ) : (
                             <>
                                 <Link to="/register">
-                                    <Button size="lg" className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-lg shadow-teal-500/25 rounded-full transition-all hover:scale-105">
+                                    <Button
+                                        size="lg"
+                                        className="h-14 px-8 text-base bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 border-0 shadow-lg shadow-teal-500/25 rounded-full transition-all hover:scale-105"
+                                    >
                                         Start Your Survey
                                         <ArrowRight className="ml-2 h-4 w-4" />
                                     </Button>
                                 </Link>
                                 <Link to="/about">
-                                    <Button variant="ghost" size="lg" className="h-14 px-8 text-base text-slate-300 hover:text-white hover:bg-white/5 rounded-full border border-white/10 hover:border-white/20">
+                                    <Button
+                                        variant="ghost"
+                                        size="lg"
+                                        className="h-14 px-8 text-base text-slate-300 hover:text-white hover:bg-white/5 rounded-full border border-white/10 hover:border-white/20"
+                                    >
                                         Explore Modules
                                     </Button>
                                 </Link>
@@ -149,14 +163,28 @@ export function LandingPage() {
                     className="text-center mb-12"
                 >
                     <h2 className="text-3xl font-bold text-white mb-4">How it Works</h2>
-                    <p className="text-slate-400 max-w-xl mx-auto">A seamless workflow designed for low-connectivity environments.</p>
+                    <p className="text-slate-400 max-w-xl mx-auto">
+                        A seamless workflow designed for low-connectivity environments.
+                    </p>
                 </motion.div>
 
                 <div className="grid md:grid-cols-3 gap-8">
                     {[
-                        { title: "Screen", icon: Stethoscope, desc: "Collect vitals and demographics. Use Voice AI for hands-free entry." },
-                        { title: "Analyze", icon: Activity, desc: "Instant WHO-based risk scoring. Upload lab reports via OCR." },
-                        { title: "Intervene", icon: ShieldCheck, desc: "Get actionable advice and referral pathways immediately." }
+                        {
+                            title: "Screen",
+                            icon: Stethoscope,
+                            desc: "Collect vitals and demographics. Use Voice AI for hands-free entry.",
+                        },
+                        {
+                            title: "Analyze",
+                            icon: Activity,
+                            desc: "Instant WHO-based risk scoring. Upload lab reports via OCR.",
+                        },
+                        {
+                            title: "Intervene",
+                            icon: ShieldCheck,
+                            desc: "Get actionable advice and referral pathways immediately.",
+                        },
                     ].map((item, i) => (
                         <motion.div
                             key={i}
@@ -170,7 +198,9 @@ export function LandingPage() {
                                     <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-teal-500/20 to-blue-500/20 flex items-center justify-center text-teal-400 mb-6 group-hover:scale-110 transition-transform duration-300 border border-white/5">
                                         <item.icon className="h-8 w-8" />
                                     </div>
-                                    <h3 className="text-xl font-semibold mb-3 text-white">{item.title}</h3>
+                                    <h3 className="text-xl font-semibold mb-3 text-white">
+                                        {item.title}
+                                    </h3>
                                     <p className="text-slate-400 leading-relaxed">{item.desc}</p>
                                 </CardContent>
                             </Card>
@@ -189,13 +219,15 @@ export function LandingPage() {
                             viewport={{ once: true }}
                             transition={{ duration: 0.8 }}
                         >
-                            <h2 className="text-3xl font-bold text-white mb-6">Offline-First & AI-Powered</h2>
+                            <h2 className="text-3xl font-bold text-white mb-6">
+                                Offline-First & AI-Powered
+                            </h2>
                             <ul className="space-y-4">
                                 {[
                                     "Works without internet (PWA)",
                                     "Voice-to-Text Vitals Entry",
                                     "Lab Report OCR Scanner",
-                                    "Population Risk Clustering"
+                                    "Population Risk Clustering",
                                 ].map((feat, i) => (
                                     <motion.li
                                         key={i}
@@ -223,12 +255,14 @@ export function LandingPage() {
                             <div className="bg-slate-900/50 aspect-video rounded-xl flex items-center justify-center text-slate-500 border border-white/5 relative overflow-hidden group">
                                 <div className="absolute inset-0 bg-gradient-to-tr from-teal-500/10 to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                                 <Activity className="h-16 w-16 text-slate-700 group-hover:text-teal-500/50 transition-colors duration-500" />
-                                <span className="font-semibold relative z-10 ml-4 group-hover:text-teal-200 transition-colors">App Screenshot Preview</span>
+                                <span className="font-semibold relative z-10 ml-4 group-hover:text-teal-200 transition-colors">
+                                    App Screenshot Preview
+                                </span>
                             </div>
                         </motion.div>
                     </div>
                 </div>
             </section>
         </div>
-    )
+    );
 }

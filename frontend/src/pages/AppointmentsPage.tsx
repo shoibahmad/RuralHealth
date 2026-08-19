@@ -1,16 +1,7 @@
 import { formatDateTime, toEpoch } from "../lib/dates";
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import {
-    Calendar,
-    Plus,
-    Clock,
-    CheckCircle,
-    XCircle,
-    AlertCircle,
-    User,
-    X
-} from "lucide-react";
+import { Calendar, Plus, Clock, CheckCircle, XCircle, AlertCircle, User, X } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
 import { useAuth } from "../context/useAuth";
@@ -34,7 +25,7 @@ export function AppointmentsPage() {
         patient: "",
         scheduled_date: "",
         reason: "",
-        notes: ""
+        notes: "",
     });
 
     const fetchAppointments = useCallback(async () => {
@@ -42,13 +33,11 @@ export function AppointmentsPage() {
         try {
             const data = await firestoreService.getAppointments(
                 user.uid,
-                user.role || 'health_worker'
+                user.role || "health_worker",
             );
 
             // Client-side filtering for now
-            const filtered = statusFilter
-                ? data.filter(a => a.status === statusFilter)
-                : data;
+            const filtered = statusFilter ? data.filter((a) => a.status === statusFilter) : data;
 
             // Sort by date desc
             filtered.sort((a, b) => toEpoch(b.scheduled_date) - toEpoch(a.scheduled_date));
@@ -77,8 +66,6 @@ export function AppointmentsPage() {
         }
     }, [user, fetchAppointments, fetchPatients]);
 
-
-
     const createAppointment = async () => {
         if (!user) return;
         try {
@@ -88,7 +75,7 @@ export function AppointmentsPage() {
                 scheduled_date: newAppointment.scheduled_date,
                 reason: newAppointment.reason,
                 notes: newAppointment.notes || undefined,
-                status: 'scheduled'
+                status: "scheduled",
             });
 
             setShowCreateModal(false);
@@ -99,7 +86,7 @@ export function AppointmentsPage() {
         }
     };
 
-    const updateStatus = async (id: string, status: 'completed' | 'cancelled') => {
+    const updateStatus = async (id: string, status: "completed" | "cancelled") => {
         try {
             const docRef = doc(db, "appointments", id);
             await updateDoc(docRef, { status });
@@ -111,11 +98,16 @@ export function AppointmentsPage() {
 
     const getStatusIcon = (status: string) => {
         switch (status) {
-            case 'scheduled': return <Clock className="h-4 w-4 text-blue-400" />;
-            case 'completed': return <CheckCircle className="h-4 w-4 text-green-400" />;
-            case 'cancelled': return <XCircle className="h-4 w-4 text-red-400" />;
-            case 'missed': return <AlertCircle className="h-4 w-4 text-amber-400" />;
-            default: return null;
+            case "scheduled":
+                return <Clock className="h-4 w-4 text-blue-400" />;
+            case "completed":
+                return <CheckCircle className="h-4 w-4 text-green-400" />;
+            case "cancelled":
+                return <XCircle className="h-4 w-4 text-red-400" />;
+            case "missed":
+                return <AlertCircle className="h-4 w-4 text-amber-400" />;
+            default:
+                return null;
         }
     };
 
@@ -124,10 +116,12 @@ export function AppointmentsPage() {
             scheduled: "bg-blue-500/10 text-blue-400 border-blue-500/20",
             completed: "bg-green-500/10 text-green-400 border-green-500/20",
             cancelled: "bg-red-500/10 text-red-400 border-red-500/20",
-            missed: "bg-amber-500/10 text-amber-400 border-amber-500/20"
+            missed: "bg-amber-500/10 text-amber-400 border-amber-500/20",
         };
         return (
-            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || ""}`}>
+            <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border ${styles[status] || ""}`}
+            >
                 {getStatusIcon(status)}
                 {status.charAt(0).toUpperCase() + status.slice(1)}
             </span>
@@ -143,7 +137,9 @@ export function AppointmentsPage() {
                         <Calendar className="h-7 w-7 text-teal-400" />
                         Appointments
                     </h1>
-                    <p className="text-slate-400 mt-1">Manage follow-up appointments for patients</p>
+                    <p className="text-slate-400 mt-1">
+                        Manage follow-up appointments for patients
+                    </p>
                 </div>
                 <Button
                     onClick={() => setShowCreateModal(true)}
@@ -156,18 +152,19 @@ export function AppointmentsPage() {
 
             {/* Status Filter Tabs */}
             <div className="flex gap-2">
-                {['scheduled', 'completed', 'cancelled', 'missed', ''].map((status) => (
+                {["scheduled", "completed", "cancelled", "missed", ""].map((status) => (
                     <Button
                         key={status}
                         variant={statusFilter === status ? "default" : "outline"}
                         size="sm"
                         onClick={() => setStatusFilter(status)}
-                        className={statusFilter === status
-                            ? "bg-teal-500 text-white"
-                            : "border-white/10 text-slate-300 hover:bg-white/5 bg-transparent"
+                        className={
+                            statusFilter === status
+                                ? "bg-teal-500 text-white"
+                                : "border-white/10 text-slate-300 hover:bg-white/5 bg-transparent"
                         }
                     >
-                        {status ? status.charAt(0).toUpperCase() + status.slice(1) : 'All'}
+                        {status ? status.charAt(0).toUpperCase() + status.slice(1) : "All"}
                     </Button>
                 ))}
             </div>
@@ -209,9 +206,13 @@ export function AppointmentsPage() {
                                         <div>
                                             <h3 className="text-white font-medium">
                                                 {/* In a real app we'd join, but for now we look up in patients list or expect denormalized name */}
-                                                {patients.find(p => p.id === appointment.patient_id)?.full_name || 'Unknown Patient'}
+                                                {patients.find(
+                                                    (p) => p.id === appointment.patient_id,
+                                                )?.full_name || "Unknown Patient"}
                                             </h3>
-                                            <p className="text-slate-400 text-sm mt-1">{appointment.reason}</p>
+                                            <p className="text-slate-400 text-sm mt-1">
+                                                {appointment.reason}
+                                            </p>
                                             <div className="flex items-center gap-4 mt-3">
                                                 <span className="text-xs text-slate-500 flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
@@ -227,12 +228,14 @@ export function AppointmentsPage() {
                                         </div>
                                     </div>
 
-                                    {appointment.status === 'scheduled' && (
+                                    {appointment.status === "scheduled" && (
                                         <div className="flex gap-2">
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => updateStatus(appointment.id!, 'completed')}
+                                                onClick={() =>
+                                                    updateStatus(appointment.id!, "completed")
+                                                }
                                                 className="border-green-500/30 text-green-400 hover:bg-green-500/10"
                                             >
                                                 <CheckCircle className="h-4 w-4 mr-1" />
@@ -241,7 +244,9 @@ export function AppointmentsPage() {
                                             <Button
                                                 size="sm"
                                                 variant="outline"
-                                                onClick={() => updateStatus(appointment.id!, 'cancelled')}
+                                                onClick={() =>
+                                                    updateStatus(appointment.id!, "cancelled")
+                                                }
                                                 className="border-red-500/30 text-red-400 hover:bg-red-500/10"
                                             >
                                                 <XCircle className="h-4 w-4 mr-1" />
@@ -281,22 +286,36 @@ export function AppointmentsPage() {
                                 <label className="block text-sm text-slate-400 mb-2">Patient</label>
                                 <select
                                     value={newAppointment.patient}
-                                    onChange={(e) => setNewAppointment(prev => ({ ...prev, patient: e.target.value }))}
+                                    onChange={(e) =>
+                                        setNewAppointment((prev) => ({
+                                            ...prev,
+                                            patient: e.target.value,
+                                        }))
+                                    }
                                     className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white"
                                 >
                                     <option value="">Select a patient</option>
                                     {patients.map((p) => (
-                                        <option key={p.id} value={p.id}>{p.full_name}</option>
+                                        <option key={p.id} value={p.id}>
+                                            {p.full_name}
+                                        </option>
                                     ))}
                                 </select>
                             </div>
 
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Date & Time</label>
+                                <label className="block text-sm text-slate-400 mb-2">
+                                    Date & Time
+                                </label>
                                 <Input
                                     type="datetime-local"
                                     value={newAppointment.scheduled_date}
-                                    onChange={(e) => setNewAppointment(prev => ({ ...prev, scheduled_date: e.target.value }))}
+                                    onChange={(e) =>
+                                        setNewAppointment((prev) => ({
+                                            ...prev,
+                                            scheduled_date: e.target.value,
+                                        }))
+                                    }
                                     className="bg-slate-900/50 border-white/10 text-white"
                                 />
                             </div>
@@ -305,17 +324,29 @@ export function AppointmentsPage() {
                                 <label className="block text-sm text-slate-400 mb-2">Reason</label>
                                 <Input
                                     value={newAppointment.reason}
-                                    onChange={(e) => setNewAppointment(prev => ({ ...prev, reason: e.target.value }))}
+                                    onChange={(e) =>
+                                        setNewAppointment((prev) => ({
+                                            ...prev,
+                                            reason: e.target.value,
+                                        }))
+                                    }
                                     placeholder="e.g., Follow-up for high blood pressure"
                                     className="bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600"
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm text-slate-400 mb-2">Notes (optional)</label>
+                                <label className="block text-sm text-slate-400 mb-2">
+                                    Notes (optional)
+                                </label>
                                 <textarea
                                     value={newAppointment.notes}
-                                    onChange={(e) => setNewAppointment(prev => ({ ...prev, notes: e.target.value }))}
+                                    onChange={(e) =>
+                                        setNewAppointment((prev) => ({
+                                            ...prev,
+                                            notes: e.target.value,
+                                        }))
+                                    }
                                     placeholder="Additional notes..."
                                     rows={3}
                                     className="w-full bg-slate-900/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder:text-slate-600 resize-none"
@@ -324,12 +355,20 @@ export function AppointmentsPage() {
                         </div>
 
                         <div className="p-6 border-t border-white/5 flex justify-end gap-3">
-                            <Button variant="outline" onClick={() => setShowCreateModal(false)} className="border-white/20 text-white hover:bg-white/10 bg-transparent">
+                            <Button
+                                variant="outline"
+                                onClick={() => setShowCreateModal(false)}
+                                className="border-white/20 text-white hover:bg-white/10 bg-transparent"
+                            >
                                 Cancel
                             </Button>
                             <Button
                                 onClick={createAppointment}
-                                disabled={!newAppointment.patient || !newAppointment.scheduled_date || !newAppointment.reason}
+                                disabled={
+                                    !newAppointment.patient ||
+                                    !newAppointment.scheduled_date ||
+                                    !newAppointment.reason
+                                }
                                 className="bg-gradient-to-r from-teal-500 to-cyan-500"
                             >
                                 Schedule

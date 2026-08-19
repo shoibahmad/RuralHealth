@@ -1,4 +1,5 @@
 """Health-officer oversight endpoints: worker management and system analytics."""
+
 from datetime import timedelta
 
 from django.contrib.auth import get_user_model
@@ -56,10 +57,7 @@ class HealthWorkerListView(APIView):
         workers = User.objects.filter(role='health_worker').order_by('-date_joined')
 
         return Response(
-            [
-                {**serialize_worker(worker), 'stats': worker_stats(worker)}
-                for worker in workers
-            ]
+            [{**serialize_worker(worker), 'stats': worker_stats(worker)} for worker in workers]
         )
 
 
@@ -90,9 +88,7 @@ class HealthWorkerDetailView(APIView):
                     'total_patients': patients.count(),
                     'total_screenings': screenings.count(),
                     'risk_distribution': risk_distribution(screenings),
-                    'recent_screenings_7d': screenings.filter(
-                        created_at__gte=week_ago
-                    ).count(),
+                    'recent_screenings_7d': screenings.filter(created_at__gte=week_ago).count(),
                     'average_risk_score': round(average_risk, 2),
                 },
                 'patients': PatientSerializer(patients[:10], many=True).data,
@@ -145,9 +141,7 @@ class OfficerDashboardStatsView(APIView):
                         worker,
                         Screening.objects.filter(patient__health_worker=worker).count(),
                     )
-                    for worker in User.objects.filter(
-                        role='health_worker', is_active=True
-                    )
+                    for worker in User.objects.filter(role='health_worker', is_active=True)
                 )
                 if count > 0
             ),
@@ -183,9 +177,7 @@ class OfficerDashboardStatsView(APIView):
                 'monthly_trend': monthly_trend,
                 'village_stats': list(village_stats),
                 'top_workers': top_workers,
-                'recent_high_risk': ScreeningSerializer(
-                    high_risk_cases, many=True
-                ).data,
+                'recent_high_risk': ScreeningSerializer(high_risk_cases, many=True).data,
             }
         )
 
@@ -217,9 +209,7 @@ class AllPatientsView(APIView):
                 'total': patients.count(),
                 'page': page,
                 'page_size': page_size,
-                'results': PatientSerializer(
-                    patients[start:start + page_size], many=True
-                ).data,
+                'results': PatientSerializer(patients[start : start + page_size], many=True).data,
             }
         )
 
@@ -240,27 +230,27 @@ class SystemAnalyticsView(APIView):
             'Current Smoker': screenings.filter(smoking_status='Current').count(),
         }
 
-        risk_factor_percentages = {
-            factor: round((count / total_screenings) * 100, 1)
-            for factor, count in risk_factors.items()
-        } if total_screenings else {}
+        risk_factor_percentages = (
+            {
+                factor: round((count / total_screenings) * 100, 1)
+                for factor, count in risk_factors.items()
+            }
+            if total_screenings
+            else {}
+        )
 
         worker_completion = []
         for worker in User.objects.filter(role='health_worker'):
             patient_count = Patient.objects.filter(health_worker=worker).count()
             if not patient_count:
                 continue
-            screening_count = Screening.objects.filter(
-                patient__health_worker=worker
-            ).count()
+            screening_count = Screening.objects.filter(patient__health_worker=worker).count()
             worker_completion.append(
                 {
                     'worker_name': worker.full_name or worker.email,
                     'patients': patient_count,
                     'screenings': screening_count,
-                    'completion_rate': round(
-                        (screening_count / patient_count) * 100, 1
-                    ),
+                    'completion_rate': round((screening_count / patient_count) * 100, 1),
                 }
             )
 
@@ -300,9 +290,7 @@ class UpdateWorkerStatusView(APIView):
                 status=status.HTTP_404_NOT_FOUND,
             )
 
-        serializer = WorkerStatusUpdateSerializer(
-            worker, data=request.data, partial=True
-        )
+        serializer = WorkerStatusUpdateSerializer(worker, data=request.data, partial=True)
         if not serializer.is_valid():
             return Response(
                 {'detail': first_error_message(serializer.errors)},
@@ -330,9 +318,7 @@ class UpdatePatientView(APIView):
         try:
             patient = Patient.objects.get(id=pk)
         except Patient.DoesNotExist:
-            return Response(
-                {'detail': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND
-            )
+            return Response({'detail': 'Patient not found'}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = PatientUpdateSerializer(patient, data=request.data, partial=True)
         if not serializer.is_valid():

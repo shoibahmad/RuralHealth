@@ -20,7 +20,8 @@ export default function DataSecurityPage() {
                             Data Security & Privacy
                         </h1>
                         <p className="text-xl text-slate-400">
-                            Your health data is sensitive. We use state-of-the-art encryption to keep it safe.
+                            Your health data is sensitive. We use state-of-the-art encryption to
+                            keep it safe.
                         </p>
                     </div>
 
@@ -30,28 +31,32 @@ export default function DataSecurityPage() {
                             <Lock className="h-8 w-8 text-amber-400 mb-4" />
                             <h3 className="text-xl font-bold mb-2">End-to-End Encryption</h3>
                             <p className="text-slate-400">
-                                All data transmitted between your device and our servers is encrypted using industry-standard TLS 1.3 protocols.
+                                All data transmitted between your device and our servers is
+                                encrypted using industry-standard TLS 1.3 protocols.
                             </p>
                         </div>
                         <div className="glass-card p-6 rounded-2xl border border-white/5">
                             <FileKey className="h-8 w-8 text-purple-400 mb-4" />
                             <h3 className="text-xl font-bold mb-2">HIPAA Compliant Standard</h3>
                             <p className="text-slate-400">
-                                Our data handling practices align with HIPAA guidelines to ensure patient confidentiality and data integrity.
+                                Our data handling practices align with HIPAA guidelines to ensure
+                                patient confidentiality and data integrity.
                             </p>
                         </div>
                         <div className="glass-card p-6 rounded-2xl border border-white/5">
                             <Server className="h-8 w-8 text-blue-400 mb-4" />
                             <h3 className="text-xl font-bold mb-2">Secure Cloud Storage</h3>
                             <p className="text-slate-400">
-                                Patient records are stored in secured, isolated database instances with strict access controls and regular backups.
+                                Patient records are stored in secured, isolated database instances
+                                with strict access controls and regular backups.
                             </p>
                         </div>
                         <div className="glass-card p-6 rounded-2xl border border-white/5">
                             <Shield className="h-8 w-8 text-emerald-400 mb-4" />
                             <h3 className="text-xl font-bold mb-2">Role-Based Access</h3>
                             <p className="text-slate-400">
-                                Strictly enforced access controls ensure that only authorized health workers can view patient data.
+                                Strictly enforced access controls ensure that only authorized health
+                                workers can view patient data.
                             </p>
                         </div>
                     </div>
@@ -61,12 +66,19 @@ export default function DataSecurityPage() {
                         <h2 className="text-2xl font-bold">Our Commitment</h2>
                         <div className="space-y-4 text-slate-300 leading-relaxed">
                             <p>
-                                At RuralHealthAI, we understand that trust is the foundation of healthcare. We are committed to transparency in how we handle your data.
+                                At RuralHealthAI, we understand that trust is the foundation of
+                                healthcare. We are committed to transparency in how we handle your
+                                data.
                             </p>
                             <ul className="list-disc pl-5 space-y-2">
                                 <li>We never sell your personal health data to third parties.</li>
-                                <li>We use data solely for the purpose of providing health screenings and connecting you with care.</li>
-                                <li>You have the right to request deletion of your data at any time.</li>
+                                <li>
+                                    We use data solely for the purpose of providing health
+                                    screenings and connecting you with care.
+                                </li>
+                                <li>
+                                    You have the right to request deletion of your data at any time.
+                                </li>
                                 <li>We regularly audit our systems for vulnerabilities.</li>
                             </ul>
                         </div>

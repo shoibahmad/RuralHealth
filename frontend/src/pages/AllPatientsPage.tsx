@@ -38,10 +38,11 @@ export function AllPatientsPage() {
             let filtered = allPatients;
             if (searchTerm) {
                 const lower = searchTerm.toLowerCase();
-                filtered = filtered.filter(p =>
-                    p.full_name.toLowerCase().includes(lower) ||
-                    p.village.toLowerCase().includes(lower) ||
-                    (p.phone && p.phone.includes(lower))
+                filtered = filtered.filter(
+                    (p) =>
+                        p.full_name.toLowerCase().includes(lower) ||
+                        p.village.toLowerCase().includes(lower) ||
+                        (p.phone && p.phone.includes(lower)),
                 );
             }
 
@@ -57,7 +58,7 @@ export function AllPatientsPage() {
 
             setPatients(paginated);
         } catch (error) {
-            log.error('Failed to fetch patients', error);
+            log.error("Failed to fetch patients", error);
         } finally {
             setLoading(false);
         }
@@ -88,13 +89,13 @@ export function AllPatientsPage() {
                 age: editingPatient.age,
                 gender: editingPatient.gender,
                 village: editingPatient.village,
-                phone: editingPatient.phone
+                phone: editingPatient.phone,
             });
 
             setShowEditModal(false);
             fetchPatients();
         } catch (error) {
-            log.error('Failed to update patient', error);
+            log.error("Failed to update patient", error);
         }
     };
 
@@ -133,7 +134,7 @@ export function AllPatientsPage() {
                             placeholder="Search by name, village, or phone..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                             className="pl-10 bg-slate-900/50 border-white/10 text-white placeholder:text-slate-600 focus:border-teal-500/50"
                         />
                     </div>
@@ -168,7 +169,7 @@ export function AllPatientsPage() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        onClick={() => setPage((p) => Math.max(1, p - 1))}
                         disabled={page === 1}
                         className="text-slate-400 hover:text-white"
                     >
@@ -180,7 +181,7 @@ export function AllPatientsPage() {
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                         disabled={page === totalPages}
                         className="text-slate-400 hover:text-white"
                     >
@@ -217,7 +218,10 @@ export function AllPatientsPage() {
                             </thead>
                             <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                                 {patients.map((patient) => (
-                                    <tr key={patient.id} className="hover:bg-white/5 transition-colors">
+                                    <tr
+                                        key={patient.id}
+                                        className="hover:bg-white/5 transition-colors"
+                                    >
                                         <td className="p-6 font-medium text-white flex items-center gap-3">
                                             <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm border border-white/10">
                                                 {patient.full_name.charAt(0)}
@@ -227,7 +231,9 @@ export function AllPatientsPage() {
                                         <td className="p-6">{patient.age}</td>
                                         <td className="p-6">{patient.gender}</td>
                                         <td className="p-6">{patient.village}</td>
-                                        <td className="p-6 text-slate-400">{patient.phone || 'N/A'}</td>
+                                        <td className="p-6 text-slate-400">
+                                            {patient.phone || "N/A"}
+                                        </td>
                                         <td className="p-6">
                                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-teal-500/10 text-teal-400 border border-teal-500/20">
                                                 {patient.screening_count || 0}
@@ -235,14 +241,21 @@ export function AllPatientsPage() {
                                         </td>
                                         <td className="p-6">
                                             {patient.latest_risk_level ? (
-                                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${patient.latest_risk_level === 'High' ? 'bg-red-500/10 text-red-400 border border-red-500/20' :
-                                                    patient.latest_risk_level === 'Medium' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' :
-                                                        'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                                    }`}>
+                                                <span
+                                                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                        patient.latest_risk_level === "High"
+                                                            ? "bg-red-500/10 text-red-400 border border-red-500/20"
+                                                            : patient.latest_risk_level === "Medium"
+                                                              ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                                                              : "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                    }`}
+                                                >
                                                     {patient.latest_risk_level}
                                                 </span>
                                             ) : (
-                                                <span className="text-slate-500 text-xs">No screening</span>
+                                                <span className="text-slate-500 text-xs">
+                                                    No screening
+                                                </span>
                                             )}
                                         </td>
                                         <td className="p-6 text-slate-500 text-xs">
@@ -253,7 +266,11 @@ export function AllPatientsPage() {
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => navigate(`/officer/patients/${patient.id}/history`)}
+                                                    onClick={() =>
+                                                        navigate(
+                                                            `/officer/patients/${patient.id}/history`,
+                                                        )
+                                                    }
                                                     className="text-teal-400 hover:text-white hover:bg-teal-500/10"
                                                 >
                                                     <Activity className="h-4 w-4 mr-1" />
@@ -313,7 +330,12 @@ export function AllPatientsPage() {
                                 <Label className="text-slate-300">Full Name</Label>
                                 <Input
                                     value={editingPatient.full_name}
-                                    onChange={(e) => setEditingPatient({ ...editingPatient, full_name: e.target.value })}
+                                    onChange={(e) =>
+                                        setEditingPatient({
+                                            ...editingPatient,
+                                            full_name: e.target.value,
+                                        })
+                                    }
                                     className="bg-slate-900/50 border-white/10 text-white"
                                 />
                             </div>
@@ -324,7 +346,12 @@ export function AllPatientsPage() {
                                     <Input
                                         type="number"
                                         value={editingPatient.age}
-                                        onChange={(e) => setEditingPatient({ ...editingPatient, age: parseInt(e.target.value) })}
+                                        onChange={(e) =>
+                                            setEditingPatient({
+                                                ...editingPatient,
+                                                age: parseInt(e.target.value),
+                                            })
+                                        }
                                         className="bg-slate-900/50 border-white/10 text-white"
                                     />
                                 </div>
@@ -333,7 +360,12 @@ export function AllPatientsPage() {
                                     <Label className="text-slate-300">Gender</Label>
                                     <select
                                         value={editingPatient.gender}
-                                        onChange={(e) => setEditingPatient({ ...editingPatient, gender: e.target.value })}
+                                        onChange={(e) =>
+                                            setEditingPatient({
+                                                ...editingPatient,
+                                                gender: e.target.value,
+                                            })
+                                        }
                                         className="w-full px-3 py-2 rounded-lg bg-slate-900/50 border border-white/10 text-white focus:border-teal-500/50 focus:outline-none"
                                     >
                                         <option value="Male">Male</option>
@@ -347,7 +379,12 @@ export function AllPatientsPage() {
                                 <Label className="text-slate-300">Village</Label>
                                 <Input
                                     value={editingPatient.village}
-                                    onChange={(e) => setEditingPatient({ ...editingPatient, village: e.target.value })}
+                                    onChange={(e) =>
+                                        setEditingPatient({
+                                            ...editingPatient,
+                                            village: e.target.value,
+                                        })
+                                    }
                                     className="bg-slate-900/50 border-white/10 text-white"
                                 />
                             </div>
@@ -355,8 +392,13 @@ export function AllPatientsPage() {
                             <div className="space-y-2">
                                 <Label className="text-slate-300">Phone</Label>
                                 <Input
-                                    value={editingPatient.phone || ''}
-                                    onChange={(e) => setEditingPatient({ ...editingPatient, phone: e.target.value })}
+                                    value={editingPatient.phone || ""}
+                                    onChange={(e) =>
+                                        setEditingPatient({
+                                            ...editingPatient,
+                                            phone: e.target.value,
+                                        })
+                                    }
                                     className="bg-slate-900/50 border-white/10 text-white"
                                 />
                             </div>

@@ -1,4 +1,5 @@
 """Tests for registration, login and account management endpoints."""
+
 import pytest
 from django.contrib.auth import get_user_model
 from django.urls import reverse
@@ -70,9 +71,7 @@ class TestRegister:
         assert response.status_code == 400
         assert response.data['detail'] == 'Email already registered'
 
-    def test_rejects_a_duplicate_email_differing_only_in_case(
-        self, api_client, health_worker
-    ):
+    def test_rejects_a_duplicate_email_differing_only_in_case(self, api_client, health_worker):
         response = api_client.post(
             reverse('register'),
             {'email': health_worker.email.upper(), 'password': 'sup3rsecret'},
@@ -103,9 +102,7 @@ class TestRegister:
 
 
 class TestLogin:
-    def test_returns_a_bearer_token_for_valid_credentials(
-        self, api_client, health_worker
-    ):
+    def test_returns_a_bearer_token_for_valid_credentials(self, api_client, health_worker):
         response = api_client.post(
             reverse('login'),
             {'email': health_worker.email, 'password': TEST_PASSWORD},
@@ -116,9 +113,7 @@ class TestLogin:
         assert response.data['token_type'] == 'bearer'
         assert response.data['access_token']
 
-    def test_accepts_the_email_under_the_oauth_username_field(
-        self, api_client, health_worker
-    ):
+    def test_accepts_the_email_under_the_oauth_username_field(self, api_client, health_worker):
         response = api_client.post(
             reverse('login'),
             {'username': health_worker.email, 'password': TEST_PASSWORD},
@@ -173,9 +168,7 @@ class TestLogin:
         assert response.status_code == 401
 
     def test_requires_both_fields(self, api_client, health_worker):
-        response = api_client.post(
-            reverse('login'), {'email': health_worker.email}, format='json'
-        )
+        response = api_client.post(reverse('login'), {'email': health_worker.email}, format='json')
 
         assert response.status_code == 400
         assert response.data['detail'] == 'Email and password are required'
@@ -230,9 +223,7 @@ class TestUpdateProfile:
         assert response.data['detail'] == 'Email already in use'
 
     def test_requires_authentication(self, api_client):
-        response = api_client.patch(
-            reverse('update_profile'), {'full_name': 'x'}, format='json'
-        )
+        response = api_client.patch(reverse('update_profile'), {'full_name': 'x'}, format='json')
         assert response.status_code == 401
 
 

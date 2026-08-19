@@ -1,4 +1,5 @@
 """Tests for the deterministic screening risk scorer."""
+
 import pytest
 
 from api.risk import (
@@ -102,8 +103,8 @@ class TestCalculateRisk:
     def test_factors_accumulate_into_a_high_risk_assessment(self):
         assessment = calculate_risk(
             {
-                'systolic_bp': 185,     # +40
-                'glucose_level': 210,   # +40
+                'systolic_bp': 185,  # +40
+                'glucose_level': 210,  # +40
                 'smoking_status': 'Current',  # +15
             }
         )
@@ -113,13 +114,9 @@ class TestCalculateRisk:
         assert len(assessment.notes) == 3
 
     def test_notes_text_joins_every_contributing_factor(self):
-        assessment = calculate_risk(
-            {'systolic_bp': 150, 'smoking_status': 'Former'}
-        )
+        assessment = calculate_risk({'systolic_bp': 150, 'smoking_status': 'Former'})
 
-        assert assessment.notes_text == (
-            'High blood pressure (>140 systolic); Former smoker'
-        )
+        assert assessment.notes_text == ('High blood pressure (>140 systolic); Former smoker')
 
     def test_moderate_combination_lands_in_the_medium_band(self):
         assessment = calculate_risk(
@@ -135,9 +132,7 @@ class TestBuildRecommendations:
         assert build_recommendations([], 'Low') == []
 
     def test_blood_pressure_note_yields_a_lifestyle_recommendation(self):
-        recommendations = build_recommendations(
-            ['High blood pressure (>140 systolic)'], 'Medium'
-        )
+        recommendations = build_recommendations(['High blood pressure (>140 systolic)'], 'Medium')
 
         assert len(recommendations) == 1
         assert recommendations[0]['title'] == 'Blood Pressure Management'

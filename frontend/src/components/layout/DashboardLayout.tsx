@@ -10,7 +10,7 @@ import {
     Calendar,
     X,
     Mail,
-    Shield
+    Shield,
 } from "lucide-react";
 import { Button } from "../ui/button";
 import { ConfirmationModal } from "../ui/confirmation-modal";
@@ -61,15 +61,18 @@ export function DashboardLayout() {
 
                             <div className="hidden lg:flex items-center gap-1">
                                 {NAV_ITEMS.map((item) => {
-                                    const isActive = location.pathname === item.href || location.pathname.startsWith(item.href + '/');
+                                    const isActive =
+                                        location.pathname === item.href ||
+                                        location.pathname.startsWith(item.href + "/");
                                     return (
                                         <Link
                                             key={item.href}
                                             to={item.href}
-                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${isActive
-                                                ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
-                                                : "text-slate-400 hover:text-white hover:bg-white/5"
-                                                }`}
+                                            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                                                isActive
+                                                    ? "bg-teal-500/10 text-teal-400 border border-teal-500/20"
+                                                    : "text-slate-400 hover:text-white hover:bg-white/5"
+                                            }`}
                                         >
                                             <item.icon className="h-4 w-4" />
                                             {item.label}
@@ -85,7 +88,7 @@ export function DashboardLayout() {
                                     {user?.full_name || "Health Worker"}
                                 </span>
                                 <span className="text-xs text-teal-400 font-medium tracking-wide uppercase">
-                                    {user?.role ? user.role.replace('_', ' ') : "Medical Officer"}
+                                    {user?.role ? user.role.replace("_", " ") : "Medical Officer"}
                                 </span>
                             </div>
                             <button
@@ -94,7 +97,9 @@ export function DashboardLayout() {
                             >
                                 <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center">
                                     <span className="font-bold text-white text-sm">
-                                        {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || "U"}
+                                        {user?.full_name
+                                            ? user.full_name.charAt(0).toUpperCase()
+                                            : user?.email?.charAt(0).toUpperCase() || "U"}
                                     </span>
                                 </div>
                             </button>
@@ -142,7 +147,12 @@ export function DashboardLayout() {
                         >
                             <div className="p-6 border-b border-white/5 flex items-center justify-between">
                                 <h2 className="text-lg font-bold text-white">Profile</h2>
-                                <Button variant="ghost" size="icon" onClick={() => setProfileDrawerOpen(false)} className="text-slate-400 hover:text-white">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setProfileDrawerOpen(false)}
+                                    className="text-slate-400 hover:text-white"
+                                >
                                     <X className="h-5 w-5" />
                                 </Button>
                             </div>
@@ -152,13 +162,17 @@ export function DashboardLayout() {
                                     <div className="h-20 w-20 rounded-full bg-gradient-to-br from-teal-400 to-blue-600 p-[3px] shadow-lg shadow-teal-500/30 mb-4">
                                         <div className="h-full w-full rounded-full bg-slate-900 flex items-center justify-center">
                                             <span className="font-bold text-white text-2xl">
-                                                {user?.full_name ? user.full_name.charAt(0).toUpperCase() : user?.email?.charAt(0).toUpperCase() || "U"}
+                                                {user?.full_name
+                                                    ? user.full_name.charAt(0).toUpperCase()
+                                                    : user?.email?.charAt(0).toUpperCase() || "U"}
                                             </span>
                                         </div>
                                     </div>
-                                    <h3 className="text-xl font-bold text-white mb-1">{user?.full_name || "User"}</h3>
+                                    <h3 className="text-xl font-bold text-white mb-1">
+                                        {user?.full_name || "User"}
+                                    </h3>
                                     <p className="text-sm text-teal-400 font-medium uppercase tracking-wide">
-                                        {user?.role ? user.role.replace('_', ' ') : "Health Worker"}
+                                        {user?.role ? user.role.replace("_", " ") : "Health Worker"}
                                     </p>
                                 </div>
 
@@ -170,7 +184,9 @@ export function DashboardLayout() {
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-xs text-slate-400 mb-1">Email</p>
-                                                <p className="text-sm text-white font-medium truncate">{user?.email || "N/A"}</p>
+                                                <p className="text-sm text-white font-medium truncate">
+                                                    {user?.email || "N/A"}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -181,19 +197,32 @@ export function DashboardLayout() {
                                             </div>
                                             <div className="flex-1">
                                                 <p className="text-xs text-slate-400 mb-1">Role</p>
-                                                <p className="text-sm text-white font-medium capitalize">{user?.role ? user.role.replace('_', ' ') : "Health Worker"}</p>
+                                                <p className="text-sm text-white font-medium capitalize">
+                                                    {user?.role
+                                                        ? user.role.replace("_", " ")
+                                                        : "Health Worker"}
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
-                                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider px-2 mb-2">Navigation</p>
+                                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider px-2 mb-2">
+                                        Navigation
+                                    </p>
                                     {NAV_ITEMS.map((item) => {
                                         const isActive = location.pathname === item.href;
                                         return (
-                                            <Link key={item.href} to={item.href} onClick={() => setProfileDrawerOpen(false)}>
-                                                <Button variant="ghost" className={`w-full justify-start ${isActive ? "bg-teal-500/10 text-teal-400 border border-teal-500/20" : "text-slate-300 hover:text-white hover:bg-white/5"}`}>
+                                            <Link
+                                                key={item.href}
+                                                to={item.href}
+                                                onClick={() => setProfileDrawerOpen(false)}
+                                            >
+                                                <Button
+                                                    variant="ghost"
+                                                    className={`w-full justify-start ${isActive ? "bg-teal-500/10 text-teal-400 border border-teal-500/20" : "text-slate-300 hover:text-white hover:bg-white/5"}`}
+                                                >
                                                     <item.icon className="mr-3 h-4 w-4" />
                                                     {item.label}
                                                 </Button>
@@ -203,14 +232,26 @@ export function DashboardLayout() {
                                 </div>
 
                                 <div className="space-y-2 pt-4 border-t border-white/5">
-                                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider px-2 mb-2">Account</p>
-                                    <Link to="/dashboard/settings" onClick={() => setProfileDrawerOpen(false)}>
-                                        <Button variant="ghost" className="w-full justify-start text-slate-300 hover:text-white hover:bg-white/5">
+                                    <p className="text-xs text-slate-400 font-semibold uppercase tracking-wider px-2 mb-2">
+                                        Account
+                                    </p>
+                                    <Link
+                                        to="/dashboard/settings"
+                                        onClick={() => setProfileDrawerOpen(false)}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            className="w-full justify-start text-slate-300 hover:text-white hover:bg-white/5"
+                                        >
                                             <Settings className="mr-3 h-4 w-4" />
                                             Settings
                                         </Button>
                                     </Link>
-                                    <Button variant="ghost" onClick={handleLogoutClick} className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                    <Button
+                                        variant="ghost"
+                                        onClick={handleLogoutClick}
+                                        className="w-full justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
+                                    >
                                         <LogOut className="mr-3 h-4 w-4" />
                                         Logout
                                     </Button>

@@ -45,7 +45,7 @@ export function PatientDashboard() {
             const [patientProfile, screenings, appointments] = await Promise.all([
                 firestoreService.getPatient(user.uid),
                 firestoreService.getScreenings(user.uid),
-                firestoreService.getAppointmentsForPatient(user.uid)
+                firestoreService.getAppointmentsForPatient(user.uid),
             ]);
 
             // If getPatient(user.uid) returns null (because user is in 'users' not 'patients'), uses AuthContext
@@ -53,37 +53,39 @@ export function PatientDashboard() {
             // `patients`, so fall back to the signed-in profile.
             const patientData: Patient = patientProfile ?? {
                 id: user.uid,
-                full_name: user.displayName || user.full_name || 'Patient',
+                full_name: user.displayName || user.full_name || "Patient",
                 age: 0, // 0 indicates not set
-                gender: 'Not Set',
-                village: 'Not Set',
-                phone: user.phone || '',
+                gender: "Not Set",
+                village: "Not Set",
+                phone: user.phone || "",
                 created_at: new Date().toISOString(),
             };
 
-            const upcoming = appointments.filter(a => a.status === 'scheduled');
+            const upcoming = appointments.filter((a) => a.status === "scheduled");
 
             // Derive active recommendations
             const latest = screenings[0] || null;
             const recommendations: AdviceCard[] = [];
 
             if (latest) {
-                if (latest.risk_level === 'High') {
+                if (latest.risk_level === "High") {
                     recommendations.push({
                         id: 1,
-                        title: 'Consult Health Officer',
-                        description: 'Your screening indicates high risk. Please visit a health center immediately.',
-                        category: 'Medical',
-                        priority: 'high'
+                        title: "Consult Health Officer",
+                        description:
+                            "Your screening indicates high risk. Please visit a health center immediately.",
+                        category: "Medical",
+                        priority: "high",
                     });
                 }
-                if (latest.risk_level === 'Medium' || latest.risk_level === 'High') {
+                if (latest.risk_level === "Medium" || latest.risk_level === "High") {
                     recommendations.push({
                         id: 2,
-                        title: 'Lifestyle Modification',
-                        description: 'Consider reducing salt intake and increasing physical activity.',
-                        category: 'Lifestyle',
-                        priority: 'medium'
+                        title: "Lifestyle Modification",
+                        description:
+                            "Consider reducing salt intake and increasing physical activity.",
+                        category: "Lifestyle",
+                        priority: "medium",
                     });
                 }
             }
@@ -92,10 +94,10 @@ export function PatientDashboard() {
             if (recommendations.length === 0) {
                 recommendations.push({
                     id: 3,
-                    title: 'Regular Screening',
-                    description: 'Schedule your next health screening in 3 months.',
-                    category: 'Prevention',
-                    priority: 'low'
+                    title: "Regular Screening",
+                    description: "Schedule your next health screening in 3 months.",
+                    category: "Prevention",
+                    priority: "low",
                 });
             }
 
@@ -106,7 +108,6 @@ export function PatientDashboard() {
                 upcoming_appointments: upcoming,
                 active_recommendations: recommendations,
             });
-
         } catch (err) {
             console.error(err);
             if (err instanceof Error) {
@@ -181,7 +182,8 @@ export function PatientDashboard() {
                             Welcome, {data.patient.full_name}!
                         </h1>
                         <p className="text-slate-400">
-                            {data.patient.age} years • {data.patient.gender} • {data.patient.village}
+                            {data.patient.age} years • {data.patient.gender} •{" "}
+                            {data.patient.village}
                         </p>
                     </div>
                     <Link to="/patient/screening">
@@ -214,7 +216,9 @@ export function PatientDashboard() {
                         <div>
                             <p className="text-slate-400 text-sm mb-1">Current Risk Level</p>
                             {data.latest_screening ? (
-                                <p className={`text-2xl font-bold ${getRiskColor(data.latest_screening.risk_level).split(' ')[0]}`}>
+                                <p
+                                    className={`text-2xl font-bold ${getRiskColor(data.latest_screening.risk_level).split(" ")[0]}`}
+                                >
                                     {data.latest_screening.risk_level}
                                 </p>
                             ) : (
@@ -232,7 +236,9 @@ export function PatientDashboard() {
                     <div className="flex items-center justify-between">
                         <div>
                             <p className="text-slate-400 text-sm mb-1">Upcoming Appointments</p>
-                            <p className="text-3xl font-bold text-white">{data.upcoming_appointments.length}</p>
+                            <p className="text-3xl font-bold text-white">
+                                {data.upcoming_appointments.length}
+                            </p>
                         </div>
                         <div className="h-12 w-12 rounded-lg bg-purple-500/10 flex items-center justify-center">
                             <Calendar className="h-6 w-6 text-purple-400" />
@@ -248,32 +254,42 @@ export function PatientDashboard() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         <div className="glass-card p-4 rounded-lg border border-white/5">
                             <p className="text-slate-400 text-sm mb-1">Risk Level</p>
-                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getRiskColor(data.latest_screening.risk_level)}`}>
+                            <span
+                                className={`inline-block px-3 py-1 rounded-full text-sm font-medium border ${getRiskColor(data.latest_screening.risk_level)}`}
+                            >
                                 {data.latest_screening.risk_level}
                             </span>
                         </div>
                         <div className="glass-card p-4 rounded-lg border border-white/5">
                             <p className="text-slate-400 text-sm mb-1">Risk Score</p>
-                            <p className="text-2xl font-bold text-white">{data.latest_screening.risk_score?.toFixed(1) || "N/A"}</p>
+                            <p className="text-2xl font-bold text-white">
+                                {data.latest_screening.risk_score?.toFixed(1) || "N/A"}
+                            </p>
                         </div>
                         {data.latest_screening.systolic_bp && (
                             <div className="glass-card p-4 rounded-lg border border-white/5">
                                 <p className="text-slate-400 text-sm mb-1">Blood Pressure</p>
                                 <p className="text-xl font-bold text-white">
-                                    {data.latest_screening.systolic_bp}/{data.latest_screening.diastolic_bp}
+                                    {data.latest_screening.systolic_bp}/
+                                    {data.latest_screening.diastolic_bp}
                                 </p>
                             </div>
                         )}
                         {data.latest_screening.heart_rate && (
                             <div className="glass-card p-4 rounded-lg border border-white/5">
                                 <p className="text-slate-400 text-sm mb-1">Heart Rate</p>
-                                <p className="text-xl font-bold text-white">{data.latest_screening.heart_rate} bpm</p>
+                                <p className="text-xl font-bold text-white">
+                                    {data.latest_screening.heart_rate} bpm
+                                </p>
                             </div>
                         )}
                     </div>
                     <div className="mt-4">
                         <Link to="/patient/history">
-                            <Button variant="ghost" className="text-pink-400 hover:text-pink-300 hover:bg-pink-500/10">
+                            <Button
+                                variant="ghost"
+                                className="text-pink-400 hover:text-pink-300 hover:bg-pink-500/10"
+                            >
                                 View Full History →
                             </Button>
                         </Link>
@@ -287,8 +303,13 @@ export function PatientDashboard() {
                     <h2 className="text-xl font-bold text-white mb-4">Active Recommendations</h2>
                     <div className="space-y-3">
                         {data.active_recommendations.map((rec) => (
-                            <div key={rec.id} className="glass-card p-4 rounded-lg border border-white/5 flex items-start gap-3">
-                                <CheckCircle className={`h-5 w-5 mt-0.5 ${getPriorityColor(rec.priority)}`} />
+                            <div
+                                key={rec.id}
+                                className="glass-card p-4 rounded-lg border border-white/5 flex items-start gap-3"
+                            >
+                                <CheckCircle
+                                    className={`h-5 w-5 mt-0.5 ${getPriorityColor(rec.priority)}`}
+                                />
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1">
                                         <h3 className="font-semibold text-white">{rec.title}</h3>
@@ -310,7 +331,10 @@ export function PatientDashboard() {
                     <h2 className="text-xl font-bold text-white mb-4">Upcoming Appointments</h2>
                     <div className="space-y-3">
                         {data.upcoming_appointments.map((apt) => (
-                            <div key={apt.id} className="glass-card p-4 rounded-lg border border-white/5 flex items-center justify-between">
+                            <div
+                                key={apt.id}
+                                className="glass-card p-4 rounded-lg border border-white/5 flex items-center justify-between"
+                            >
                                 <div className="flex items-center gap-3">
                                     <div className="h-10 w-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
                                         <Calendar className="h-5 w-5 text-purple-400" />
@@ -319,7 +343,10 @@ export function PatientDashboard() {
                                         <p className="font-semibold text-white">{apt.reason}</p>
                                         <p className="text-sm text-slate-400">
                                             {new Date(apt.scheduled_date).toLocaleDateString()} at{" "}
-                                            {new Date(apt.scheduled_date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            {new Date(apt.scheduled_date).toLocaleTimeString([], {
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                            })}
                                         </p>
                                     </div>
                                 </div>

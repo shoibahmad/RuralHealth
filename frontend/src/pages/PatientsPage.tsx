@@ -10,15 +10,11 @@ import {
     X,
     AlertTriangle,
     Activity,
-    Calendar
+    Calendar,
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import {
-    firestoreService,
-    type Patient,
-    type PatientDetail,
-} from "../services/firestoreService";
+import { firestoreService, type Patient, type PatientDetail } from "../services/firestoreService";
 import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
 import { createLogger } from "../lib/logger";
@@ -47,10 +43,11 @@ export function PatientsPage() {
             let filtered = allPatients;
             if (searchTerm) {
                 const lower = searchTerm.toLowerCase();
-                filtered = filtered.filter(p =>
-                    p.full_name.toLowerCase().includes(lower) ||
-                    p.village.toLowerCase().includes(lower) ||
-                    (p.phone && p.phone.includes(lower))
+                filtered = filtered.filter(
+                    (p) =>
+                        p.full_name.toLowerCase().includes(lower) ||
+                        p.village.toLowerCase().includes(lower) ||
+                        (p.phone && p.phone.includes(lower)),
                 );
             }
 
@@ -70,7 +67,6 @@ export function PatientsPage() {
         fetchPatients();
     }, [fetchPatients]);
 
-
     const fetchPatientDetail = async (id: string) => {
         try {
             const patient = await firestoreService.getPatient(id);
@@ -84,7 +80,7 @@ export function PatientsPage() {
                     appointments,
                     recommendations: [],
                     latest_risk_level: patient.latest_risk_level,
-                    screening_count: patient.screening_count
+                    screening_count: patient.screening_count,
                 });
                 setShowDetailModal(true);
             }
@@ -121,7 +117,9 @@ export function PatientsPage() {
             Low: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
         };
         return (
-            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[risk] || ""}`}>
+            <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${colors[risk] || ""}`}
+            >
                 {risk}
             </span>
         );
@@ -139,7 +137,7 @@ export function PatientsPage() {
                     <p className="text-slate-400 mt-1">Manage and view all registered patients</p>
                 </div>
                 <Button
-                    onClick={() => window.location.href = '/dashboard/screen'}
+                    onClick={() => (window.location.href = "/dashboard/screen")}
                     className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
                 >
                     <Plus className="h-4 w-4 mr-2" />
@@ -177,9 +175,21 @@ export function PatientsPage() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                 {[
                     { label: "Total Patients", value: patients.length, color: "text-blue-400" },
-                    { label: "High Risk", value: patients.filter(p => p.latest_risk_level === "High").length, color: "text-red-400" },
-                    { label: "Medium Risk", value: patients.filter(p => p.latest_risk_level === "Medium").length, color: "text-amber-400" },
-                    { label: "Low Risk", value: patients.filter(p => p.latest_risk_level === "Low").length, color: "text-emerald-400" },
+                    {
+                        label: "High Risk",
+                        value: patients.filter((p) => p.latest_risk_level === "High").length,
+                        color: "text-red-400",
+                    },
+                    {
+                        label: "Medium Risk",
+                        value: patients.filter((p) => p.latest_risk_level === "Medium").length,
+                        color: "text-amber-400",
+                    },
+                    {
+                        label: "Low Risk",
+                        value: patients.filter((p) => p.latest_risk_level === "Low").length,
+                        color: "text-emerald-400",
+                    },
                 ].map((stat, i) => (
                     <motion.div
                         key={i}
@@ -207,7 +217,7 @@ export function PatientsPage() {
                         <Users className="h-12 w-12 text-slate-600 mx-auto mb-3" />
                         <p className="text-slate-400">No patients found</p>
                         <Button
-                            onClick={() => window.location.href = '/dashboard/screen'}
+                            onClick={() => (window.location.href = "/dashboard/screen")}
                             className="mt-4"
                             variant="outline"
                         >
@@ -230,7 +240,10 @@ export function PatientsPage() {
                             </thead>
                             <tbody className="text-sm text-slate-300 divide-y divide-white/5">
                                 {patients.map((patient) => (
-                                    <tr key={patient.id} className="hover:bg-white/5 transition-colors">
+                                    <tr
+                                        key={patient.id}
+                                        className="hover:bg-white/5 transition-colors"
+                                    >
                                         <td className="p-4 font-medium text-white">
                                             <div className="flex items-center gap-3">
                                                 <div className="h-9 w-9 rounded-full bg-gradient-to-br from-teal-500/20 to-cyan-500/20 flex items-center justify-center text-sm text-teal-400 border border-teal-500/20">
@@ -239,21 +252,29 @@ export function PatientsPage() {
                                                 {patient.full_name}
                                             </div>
                                         </td>
-                                        <td className="p-4">{patient.age} / {patient.gender}</td>
+                                        <td className="p-4">
+                                            {patient.age} / {patient.gender}
+                                        </td>
                                         <td className="p-4">{patient.village}</td>
-                                        <td className="p-4 text-slate-500">{patient.phone || "-"}</td>
+                                        <td className="p-4 text-slate-500">
+                                            {patient.phone || "-"}
+                                        </td>
                                         <td className="p-4">
                                             <span className="px-2 py-1 bg-slate-800 rounded text-xs">
                                                 {patient.screening_count || 0}
                                             </span>
                                         </td>
-                                        <td className="p-4">{getRiskBadge(patient.latest_risk_level)}</td>
+                                        <td className="p-4">
+                                            {getRiskBadge(patient.latest_risk_level)}
+                                        </td>
                                         <td className="p-4 text-right">
                                             <div className="flex items-center justify-end gap-2">
                                                 <Button
                                                     variant="ghost"
                                                     size="sm"
-                                                    onClick={() => window.location.href = `/dashboard/patients/${patient.id}/history`}
+                                                    onClick={() =>
+                                                        (window.location.href = `/dashboard/patients/${patient.id}/history`)
+                                                    }
                                                     className="text-blue-400 hover:text-white hover:bg-blue-500/10"
                                                 >
                                                     <Activity className="h-4 w-4 mr-1" />
@@ -306,8 +327,13 @@ export function PatientsPage() {
                     >
                         <div className="p-6 border-b border-white/5 flex items-center justify-between">
                             <div>
-                                <h2 className="text-xl font-bold text-white">{selectedPatient.full_name}</h2>
-                                <p className="text-slate-400 text-sm">{selectedPatient.age} years, {selectedPatient.gender} • {selectedPatient.village}</p>
+                                <h2 className="text-xl font-bold text-white">
+                                    {selectedPatient.full_name}
+                                </h2>
+                                <p className="text-slate-400 text-sm">
+                                    {selectedPatient.age} years, {selectedPatient.gender} •{" "}
+                                    {selectedPatient.village}
+                                </p>
                             </div>
                             <Button
                                 variant="ghost"
@@ -331,7 +357,10 @@ export function PatientsPage() {
                                 ) : (
                                     <div className="space-y-3">
                                         {selectedPatient.screenings.map((s) => (
-                                            <div key={s.id} className="bg-slate-800/50 rounded-lg p-4 border border-white/5">
+                                            <div
+                                                key={s.id}
+                                                className="bg-slate-800/50 rounded-lg p-4 border border-white/5"
+                                            >
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="text-sm text-slate-400">
                                                         {formatDate(s.created_at)}
@@ -339,12 +368,15 @@ export function PatientsPage() {
                                                     {getRiskBadge(s.risk_level)}
                                                 </div>
                                                 <p className="text-white text-sm">
-                                                    BP: {s.systolic_bp || '-'}/{s.diastolic_bp || '-'} mmHg |
-                                                    Glucose: {s.glucose_level || '-'} mg/dL |
-                                                    Score: {s.risk_score}
+                                                    BP: {s.systolic_bp || "-"}/
+                                                    {s.diastolic_bp || "-"} mmHg | Glucose:{" "}
+                                                    {s.glucose_level || "-"} mg/dL | Score:{" "}
+                                                    {s.risk_score}
                                                 </p>
                                                 {s.risk_notes && (
-                                                    <p className="text-slate-400 text-xs mt-2">{s.risk_notes}</p>
+                                                    <p className="text-slate-400 text-xs mt-2">
+                                                        {s.risk_notes}
+                                                    </p>
                                                 )}
                                             </div>
                                         ))}
@@ -363,14 +395,22 @@ export function PatientsPage() {
                                 ) : (
                                     <div className="space-y-2">
                                         {selectedPatient.recommendations.map((r) => (
-                                            <div key={r.id} className={`p-3 rounded-lg border ${r.priority === 'high'
-                                                ? 'bg-red-500/10 border-red-500/20'
-                                                : r.priority === 'medium'
-                                                    ? 'bg-amber-500/10 border-amber-500/20'
-                                                    : 'bg-slate-800/50 border-white/5'
-                                                }`}>
-                                                <p className="text-white text-sm font-medium">{r.title}</p>
-                                                <p className="text-slate-400 text-xs mt-1">{r.description}</p>
+                                            <div
+                                                key={r.id}
+                                                className={`p-3 rounded-lg border ${
+                                                    r.priority === "high"
+                                                        ? "bg-red-500/10 border-red-500/20"
+                                                        : r.priority === "medium"
+                                                          ? "bg-amber-500/10 border-amber-500/20"
+                                                          : "bg-slate-800/50 border-white/5"
+                                                }`}
+                                            >
+                                                <p className="text-white text-sm font-medium">
+                                                    {r.title}
+                                                </p>
+                                                <p className="text-slate-400 text-xs mt-1">
+                                                    {r.description}
+                                                </p>
                                             </div>
                                         ))}
                                     </div>
@@ -384,21 +424,31 @@ export function PatientsPage() {
                                     Appointments
                                 </h3>
                                 {selectedPatient.appointments.length === 0 ? (
-                                    <p className="text-slate-400 text-sm">No appointments scheduled</p>
+                                    <p className="text-slate-400 text-sm">
+                                        No appointments scheduled
+                                    </p>
                                 ) : (
                                     <div className="space-y-2">
                                         {selectedPatient.appointments.map((a) => (
-                                            <div key={a.id} className="bg-slate-800/50 rounded-lg p-3 border border-white/5 flex items-center justify-between">
+                                            <div
+                                                key={a.id}
+                                                className="bg-slate-800/50 rounded-lg p-3 border border-white/5 flex items-center justify-between"
+                                            >
                                                 <div>
                                                     <p className="text-white text-sm">{a.reason}</p>
                                                     <p className="text-slate-400 text-xs">
                                                         {formatDateTime(a.scheduled_date)}
                                                     </p>
                                                 </div>
-                                                <span className={`text-xs px-2 py-1 rounded ${a.status === 'scheduled' ? 'bg-blue-500/20 text-blue-400' :
-                                                    a.status === 'completed' ? 'bg-green-500/20 text-green-400' :
-                                                        'bg-slate-700 text-slate-400'
-                                                    }`}>
+                                                <span
+                                                    className={`text-xs px-2 py-1 rounded ${
+                                                        a.status === "scheduled"
+                                                            ? "bg-blue-500/20 text-blue-400"
+                                                            : a.status === "completed"
+                                                              ? "bg-green-500/20 text-green-400"
+                                                              : "bg-slate-700 text-slate-400"
+                                                    }`}
+                                                >
                                                     {a.status}
                                                 </span>
                                             </div>

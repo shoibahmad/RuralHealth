@@ -1,4 +1,5 @@
 """Shared fixtures for the API test suite."""
+
 import uuid
 
 import pytest

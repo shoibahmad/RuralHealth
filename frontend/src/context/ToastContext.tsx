@@ -1,10 +1,8 @@
-
-import React, { useState, useCallback } from 'react';
-import { AnimatePresence, motion } from 'framer-motion';
-import { X, CheckCircle, AlertCircle, Info } from 'lucide-react';
-import { ToastContext } from './contexts';
-import type { ToastType } from './contexts';
-
+import React, { useState, useCallback } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import { X, CheckCircle, AlertCircle, Info } from "lucide-react";
+import { ToastContext } from "./contexts";
+import type { ToastType } from "./contexts";
 
 interface Toast {
     id: string;
@@ -12,11 +10,10 @@ interface Toast {
     type: ToastType;
 }
 
-
 export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [toasts, setToasts] = useState<Toast[]>([]);
 
-    const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    const showToast = useCallback((message: string, type: ToastType = "info") => {
         const id = Math.random().toString(36).substr(2, 9);
         setToasts((prev) => [...prev, { id, message, type }]);
 
@@ -42,21 +39,31 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 20, scale: 0.9 }}
                             layout
-                            className={`pointer-events-auto min-w-[300px] max-w-md p-4 rounded-xl shadow-lg border backdrop-blur-md flex items-start gap-3 ${toast.type === 'success' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-100' :
-                                    toast.type === 'error' ? 'bg-red-500/10 border-red-500/20 text-red-100' :
-                                        toast.type === 'warning' ? 'bg-amber-500/10 border-amber-500/20 text-amber-100' :
-                                            'bg-slate-800/90 border-slate-700 text-slate-100'
-                                }`}
+                            className={`pointer-events-auto min-w-[300px] max-w-md p-4 rounded-xl shadow-lg border backdrop-blur-md flex items-start gap-3 ${
+                                toast.type === "success"
+                                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-100"
+                                    : toast.type === "error"
+                                      ? "bg-red-500/10 border-red-500/20 text-red-100"
+                                      : toast.type === "warning"
+                                        ? "bg-amber-500/10 border-amber-500/20 text-amber-100"
+                                        : "bg-slate-800/90 border-slate-700 text-slate-100"
+                            }`}
                         >
-                            <div className={`mt-0.5 ${toast.type === 'success' ? 'text-emerald-400' :
-                                    toast.type === 'error' ? 'text-red-400' :
-                                        toast.type === 'warning' ? 'text-amber-400' :
-                                            'text-blue-400'
-                                }`}>
-                                {toast.type === 'success' && <CheckCircle size={18} />}
-                                {toast.type === 'error' && <AlertCircle size={18} />}
-                                {toast.type === 'warning' && <AlertCircle size={18} />}
-                                {toast.type === 'info' && <Info size={18} />}
+                            <div
+                                className={`mt-0.5 ${
+                                    toast.type === "success"
+                                        ? "text-emerald-400"
+                                        : toast.type === "error"
+                                          ? "text-red-400"
+                                          : toast.type === "warning"
+                                            ? "text-amber-400"
+                                            : "text-blue-400"
+                                }`}
+                            >
+                                {toast.type === "success" && <CheckCircle size={18} />}
+                                {toast.type === "error" && <AlertCircle size={18} />}
+                                {toast.type === "warning" && <AlertCircle size={18} />}
+                                {toast.type === "info" && <Info size={18} />}
                             </div>
                             <div className="flex-1 text-sm font-medium">{toast.message}</div>
                             <button

@@ -19,7 +19,7 @@ export function RegisterPage() {
         email: "",
         password: "",
         full_name: "",
-        role: "health_worker"
+        role: "health_worker",
     });
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
@@ -33,7 +33,11 @@ export function RegisterPage() {
 
         try {
             // 1. Create user in Firebase Auth
-            const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            const userCredential = await createUserWithEmailAndPassword(
+                auth,
+                formData.email,
+                formData.password,
+            );
             const user = userCredential.user;
 
             // 2. Create user document in Firestore
@@ -42,23 +46,22 @@ export function RegisterPage() {
                 full_name: formData.full_name,
                 role: formData.role,
                 created_at: new Date().toISOString(),
-                is_active: true
+                is_active: true,
             });
 
             // 3. Redirect based on role
-            if (formData.role === 'health_officer') {
+            if (formData.role === "health_officer") {
                 navigate("/officer/dashboard");
-            } else if (formData.role === 'patient') {
+            } else if (formData.role === "patient") {
                 navigate("/patient/dashboard");
             } else {
                 navigate("/dashboard");
             }
-
         } catch (err: unknown) {
-            log.error('Account creation failed', err);
-            if (errorCode(err) === 'auth/email-already-in-use') {
+            log.error("Account creation failed", err);
+            if (errorCode(err) === "auth/email-already-in-use") {
                 setError("Email is already registered.");
-            } else if (errorCode(err) === 'auth/weak-password') {
+            } else if (errorCode(err) === "auth/weak-password") {
                 setError("Password should be at least 6 characters.");
             } else {
                 setError("Failed to create account. Please try again.");
@@ -69,7 +72,7 @@ export function RegisterPage() {
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        setFormData(prev => ({ ...prev, [e.target.id]: e.target.value }));
+        setFormData((prev) => ({ ...prev, [e.target.id]: e.target.value }));
     };
 
     return (
@@ -93,7 +96,9 @@ export function RegisterPage() {
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="full_name" className="text-slate-300">Full Name</Label>
+                            <Label htmlFor="full_name" className="text-slate-300">
+                                Full Name
+                            </Label>
                             <Input
                                 id="full_name"
                                 value={formData.full_name}
@@ -103,7 +108,9 @@ export function RegisterPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                            <Label htmlFor="email" className="text-slate-300">
+                                Email Address
+                            </Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -114,7 +121,9 @@ export function RegisterPage() {
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="password" className="text-slate-300">Password</Label>
+                            <Label htmlFor="password" className="text-slate-300">
+                                Password
+                            </Label>
                             <div className="relative">
                                 <Input
                                     id="password"
@@ -129,12 +138,18 @@ export function RegisterPage() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                                 >
-                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                        <Eye className="h-4 w-4" />
+                                    )}
                                 </button>
                             </div>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="role" className="text-slate-300">Select Role</Label>
+                            <Label htmlFor="role" className="text-slate-300">
+                                Select Role
+                            </Label>
                             <select
                                 id="role"
                                 value={formData.role}
@@ -158,15 +173,25 @@ export function RegisterPage() {
                             type="submit"
                             disabled={loading}
                         >
-                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Create Account"}
+                            {loading ? (
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            ) : (
+                                "Create Account"
+                            )}
                         </Button>
 
                         <div className="text-center text-sm text-slate-500 mt-6">
-                            Already have an account? <Link to="/login" className="text-teal-400 hover:text-teal-300 hover:underline transition-colors">Login here</Link>
+                            Already have an account?{" "}
+                            <Link
+                                to="/login"
+                                className="text-teal-400 hover:text-teal-300 hover:underline transition-colors"
+                            >
+                                Login here
+                            </Link>
                         </div>
                     </form>
                 </div>
             </motion.div>
         </div>
-    )
+    );
 }

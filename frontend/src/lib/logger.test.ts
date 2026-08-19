@@ -43,16 +43,13 @@ describe("record shape", () => {
         expect(Number.isNaN(Date.parse(captured[0].timestamp))).toBe(false);
     });
 
-    it.each(["debug", "info", "warn", "error"] as const)(
-        "records the %s level",
-        (level) => {
-            const logger = createLogger("Test");
-            if (level === "error") logger.error("boom");
-            else logger[level]("message");
+    it.each(["debug", "info", "warn", "error"] as const)("records the %s level", (level) => {
+        const logger = createLogger("Test");
+        if (level === "error") logger.error("boom");
+        else logger[level]("message");
 
-            expect(captured[0].level).toBe(level);
-        },
-    );
+        expect(captured[0].level).toBe(level);
+    });
 
     it("attaches context when given", () => {
         createLogger("PatientsPage").warn("slow query", { durationMs: 1200 });

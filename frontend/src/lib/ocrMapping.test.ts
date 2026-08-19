@@ -67,26 +67,20 @@ describe("parseBloodPressure", () => {
         expect(parseBloodPressure(value)).toEqual({ systolic: "120", diastolic: "80" });
     });
 
-    it.each([null, undefined, "", "null", "120", "high", 120])(
-        "returns null for %s",
-        (value) => {
-            expect(parseBloodPressure(value)).toBeNull();
-        },
-    );
+    it.each([null, undefined, "", "null", "120", "high", 120])("returns null for %s", (value) => {
+        expect(parseBloodPressure(value)).toBeNull();
+    });
 });
 
 describe("extractPatientName", () => {
-    it.each(["full_name", "patient_name", "fullname", "name"])(
-        "reads the name from %s",
-        (key) => {
-            expect(extractPatientName({ [key]: "  Ramesh Kumar " })).toBe("Ramesh Kumar");
-        },
-    );
+    it.each(["full_name", "patient_name", "fullname", "name"])("reads the name from %s", (key) => {
+        expect(extractPatientName({ [key]: "  Ramesh Kumar " })).toBe("Ramesh Kumar");
+    });
 
     it("prefers full_name over the aliases", () => {
-        expect(
-            extractPatientName({ full_name: "Canonical", patient_name: "Alias" }),
-        ).toBe("Canonical");
+        expect(extractPatientName({ full_name: "Canonical", patient_name: "Alias" })).toBe(
+            "Canonical",
+        );
     });
 
     it.each(["", "null", "N/A"])("treats the placeholder %s as no name", (value) => {
@@ -168,24 +162,18 @@ describe("applyOcrData", () => {
         expect(data.diastolic_bp).toBe("88");
     });
 
-    it.each(["bp", "systolic_over_diastolic"])(
-        "reads a combined reading from %s",
-        (key) => {
-            const { data } = applyOcrData(emptyForm, { [key]: "138/88" });
+    it.each(["bp", "systolic_over_diastolic"])("reads a combined reading from %s", (key) => {
+        const { data } = applyOcrData(emptyForm, { [key]: "138/88" });
 
-            expect(data.systolic_bp).toBe("138");
-        },
-    );
+        expect(data.systolic_bp).toBe("138");
+    });
 
-    it.each(["", "null", "N/A", "none", "-"])(
-        "ignores the placeholder value %s",
-        (value) => {
-            const { data, applied } = applyOcrData(emptyForm, { full_name: value });
+    it.each(["", "null", "N/A", "none", "-"])("ignores the placeholder value %s", (value) => {
+        const { data, applied } = applyOcrData(emptyForm, { full_name: value });
 
-            expect(data.full_name).toBe("");
-            expect(applied).toBe(false);
-        },
-    );
+        expect(data.full_name).toBe("");
+        expect(applied).toBe(false);
+    });
 
     it("ignores keys the form does not define", () => {
         const { data, applied } = applyOcrData(emptyForm, {

@@ -40,175 +40,214 @@ import { SettingsPage } from "./pages/SettingsPage";
 
 // Protected Route Wrapper for Health Workers
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
+    const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-        <div className="h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+                <div className="h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isHealthWorker) {
-    if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
-    if (isPatient) return <Navigate to="/patient/dashboard" replace />;
-  }
-  return <>{children}</>;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (!isHealthWorker) {
+        if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
+        if (isPatient) return <Navigate to="/patient/dashboard" replace />;
+    }
+    return <>{children}</>;
 };
 
 // Protected Route Wrapper for Health Officers
 const OfficerRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isHealthOfficer, isHealthWorker, isPatient, loading } = useAuth();
+    const { isAuthenticated, isHealthOfficer, isHealthWorker, isPatient, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-        <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+                <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isHealthOfficer) {
-    if (isHealthWorker) return <Navigate to="/dashboard" replace />;
-    if (isPatient) return <Navigate to="/patient/dashboard" replace />;
-  }
-  return <>{children}</>;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (!isHealthOfficer) {
+        if (isHealthWorker) return <Navigate to="/dashboard" replace />;
+        if (isPatient) return <Navigate to="/patient/dashboard" replace />;
+    }
+    return <>{children}</>;
 };
 
 // Protected Route Wrapper for Patients
 const PatientRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isPatient, isHealthWorker, isHealthOfficer, loading } = useAuth();
+    const { isAuthenticated, isPatient, isHealthWorker, isHealthOfficer, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-        <div className="h-8 w-8 border-4 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+                <div className="h-8 w-8 border-4 border-pink-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
-  if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isPatient) {
-    if (isHealthWorker) return <Navigate to="/dashboard" replace />;
-    if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
-  }
-  return <>{children}</>;
+    if (!isAuthenticated) return <Navigate to="/login" replace />;
+    if (!isPatient) {
+        if (isHealthWorker) return <Navigate to="/dashboard" replace />;
+        if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
+    }
+    return <>{children}</>;
 };
 
 // Public Route Wrapper to redirect authenticated users
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-  const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
+    const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient, loading } = useAuth();
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
-        <div className="h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-[#0f172a]">
+                <div className="h-8 w-8 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
-  if (isAuthenticated) {
-    if (isHealthWorker) return <Navigate to="/dashboard" replace />;
-    if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
-    if (isPatient) return <Navigate to="/patient/dashboard" replace />;
-    return <Navigate to="/dashboard" replace />;
-  }
+    if (isAuthenticated) {
+        if (isHealthWorker) return <Navigate to="/dashboard" replace />;
+        if (isHealthOfficer) return <Navigate to="/officer/dashboard" replace />;
+        if (isPatient) return <Navigate to="/patient/dashboard" replace />;
+        return <Navigate to="/dashboard" replace />;
+    }
 
-  return <>{children}</>;
+    return <>{children}</>;
 };
 
 import { ToastProvider } from "./context/ToastContext";
 
 function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <ToastProvider>
-        <AuthProvider>
-          <OfflineProvider>
-            <BrowserRouter>
-              <OfflineIndicator />
-              <Routes>
-                {/* Public Routes */}
-                <Route element={<PublicLayout />}>
-                  <Route path="/" element={<LandingPage />} />
-                  <Route path="/how-it-works" element={<HowItWorksPage />} />
-                  <Route path="/features" element={<FeaturesPage />} />
-                  <Route path="/about" element={<AboutPage />} />
-                  <Route path="/api-docs" element={<APIDocsPage />} />
-                  <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
-                  <Route path="/terms-conditions" element={<TermsConditionsPage />} />
-                  <Route path="/login" element={
-                    <PublicRoute>
-                      <LoginPage />
-                    </PublicRoute>
-                  } />
-                  <Route path="/register" element={
-                    <PublicRoute>
-                      <RegisterPage />
-                    </PublicRoute>
-                  } />
-                  <Route path="/data-security" element={<DataSecurityPage />} />
-                </Route>
+    return (
+        <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+                <AuthProvider>
+                    <OfflineProvider>
+                        <BrowserRouter>
+                            <OfflineIndicator />
+                            <Routes>
+                                {/* Public Routes */}
+                                <Route element={<PublicLayout />}>
+                                    <Route path="/" element={<LandingPage />} />
+                                    <Route path="/how-it-works" element={<HowItWorksPage />} />
+                                    <Route path="/features" element={<FeaturesPage />} />
+                                    <Route path="/about" element={<AboutPage />} />
+                                    <Route path="/api-docs" element={<APIDocsPage />} />
+                                    <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+                                    <Route
+                                        path="/terms-conditions"
+                                        element={<TermsConditionsPage />}
+                                    />
+                                    <Route
+                                        path="/login"
+                                        element={
+                                            <PublicRoute>
+                                                <LoginPage />
+                                            </PublicRoute>
+                                        }
+                                    />
+                                    <Route
+                                        path="/register"
+                                        element={
+                                            <PublicRoute>
+                                                <RegisterPage />
+                                            </PublicRoute>
+                                        }
+                                    />
+                                    <Route path="/data-security" element={<DataSecurityPage />} />
+                                </Route>
 
-                {/* Health Worker Routes */}
-                <Route path="/dashboard" element={
-                  <ProtectedRoute>
-                    <DashboardLayout />
-                  </ProtectedRoute>
-                }>
-                  <Route index element={<DashboardHome />} />
-                  <Route path="patients" element={<PatientsPage />} />
-                  <Route path="patients/:id/history" element={<PatientHistoryPage />} />
-                  <Route path="screenings/:id" element={<ScreeningDetailPage />} />
-                  <Route path="screen" element={<ScreeningWizard />} />
-                  <Route path="analytics" element={<AnalyticsPage />} />
-                  <Route path="appointments" element={<AppointmentsPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
+                                {/* Health Worker Routes */}
+                                <Route
+                                    path="/dashboard"
+                                    element={
+                                        <ProtectedRoute>
+                                            <DashboardLayout />
+                                        </ProtectedRoute>
+                                    }
+                                >
+                                    <Route index element={<DashboardHome />} />
+                                    <Route path="patients" element={<PatientsPage />} />
+                                    <Route
+                                        path="patients/:id/history"
+                                        element={<PatientHistoryPage />}
+                                    />
+                                    <Route
+                                        path="screenings/:id"
+                                        element={<ScreeningDetailPage />}
+                                    />
+                                    <Route path="screen" element={<ScreeningWizard />} />
+                                    <Route path="analytics" element={<AnalyticsPage />} />
+                                    <Route path="appointments" element={<AppointmentsPage />} />
+                                    <Route path="settings" element={<SettingsPage />} />
+                                </Route>
 
-                {/* Health Officer Routes */}
-                <Route path="/officer" element={
-                  <OfficerRoute>
-                    <OfficerLayout />
-                  </OfficerRoute>
-                }>
-                  <Route index element={<Navigate to="/officer/dashboard" replace />} />
-                  <Route path="dashboard" element={<OfficerDashboard />} />
-                  <Route path="workers" element={<HealthWorkersPage />} />
-                  <Route path="workers/:id" element={<WorkerDetailPage />} />
-                  <Route path="patients" element={<AllPatientsPage />} />
-                  <Route path="patients/:id/history" element={<PatientHistoryPage />} />
-                  <Route path="screenings/:id" element={<ScreeningDetailPage />} />
-                  <Route path="analytics" element={<SystemAnalyticsPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
+                                {/* Health Officer Routes */}
+                                <Route
+                                    path="/officer"
+                                    element={
+                                        <OfficerRoute>
+                                            <OfficerLayout />
+                                        </OfficerRoute>
+                                    }
+                                >
+                                    <Route
+                                        index
+                                        element={<Navigate to="/officer/dashboard" replace />}
+                                    />
+                                    <Route path="dashboard" element={<OfficerDashboard />} />
+                                    <Route path="workers" element={<HealthWorkersPage />} />
+                                    <Route path="workers/:id" element={<WorkerDetailPage />} />
+                                    <Route path="patients" element={<AllPatientsPage />} />
+                                    <Route
+                                        path="patients/:id/history"
+                                        element={<PatientHistoryPage />}
+                                    />
+                                    <Route
+                                        path="screenings/:id"
+                                        element={<ScreeningDetailPage />}
+                                    />
+                                    <Route path="analytics" element={<SystemAnalyticsPage />} />
+                                    <Route path="settings" element={<SettingsPage />} />
+                                </Route>
 
-                {/* Patient Portal Routes */}
-                <Route path="/patient" element={
-                  <PatientRoute>
-                    <PatientLayout />
-                  </PatientRoute>
-                }>
-                  <Route index element={<Navigate to="/patient/dashboard" replace />} />
-                  <Route path="dashboard" element={<PatientDashboard />} />
-                  <Route path="screening" element={<ScreeningWizard />} />
-                  <Route path="history" element={<PatientScreeningHistory />} />
-                  <Route path="screenings/:id" element={<ScreeningDetailPage />} />
-                  <Route path="settings" element={<SettingsPage />} />
-                </Route>
+                                {/* Patient Portal Routes */}
+                                <Route
+                                    path="/patient"
+                                    element={
+                                        <PatientRoute>
+                                            <PatientLayout />
+                                        </PatientRoute>
+                                    }
+                                >
+                                    <Route
+                                        index
+                                        element={<Navigate to="/patient/dashboard" replace />}
+                                    />
+                                    <Route path="dashboard" element={<PatientDashboard />} />
+                                    <Route path="screening" element={<ScreeningWizard />} />
+                                    <Route path="history" element={<PatientScreeningHistory />} />
+                                    <Route
+                                        path="screenings/:id"
+                                        element={<ScreeningDetailPage />}
+                                    />
+                                    <Route path="settings" element={<SettingsPage />} />
+                                </Route>
 
-                {/* Fallback */}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
-          </OfflineProvider>
-        </AuthProvider>
-      </ToastProvider>
-    </QueryClientProvider>
-  )
+                                {/* Fallback */}
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </BrowserRouter>
+                    </OfflineProvider>
+                </AuthProvider>
+            </ToastProvider>
+        </QueryClientProvider>
+    );
 }
 
-export default App
+export default App;

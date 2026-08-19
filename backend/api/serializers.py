@@ -125,9 +125,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     """Serializer validating a password change for the signed-in user."""
 
     current_password = serializers.CharField(write_only=True)
-    new_password = serializers.CharField(
-        write_only=True, min_length=MIN_PASSWORD_LENGTH
-    )
+    new_password = serializers.CharField(write_only=True, min_length=MIN_PASSWORD_LENGTH)
 
     def validate_current_password(self, value):
         user = self.context['request'].user
@@ -195,18 +193,23 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class PatientSerializer(serializers.ModelSerializer):
     """Serializer for patient details."""
 
-    health_worker_id = serializers.IntegerField(
-        source='health_worker.id', read_only=True
-    )
+    health_worker_id = serializers.IntegerField(source='health_worker.id', read_only=True)
     screening_count = serializers.SerializerMethodField()
     latest_risk_level = serializers.SerializerMethodField()
 
     class Meta:
         model = Patient
         fields = [
-            'id', 'health_worker_id', 'full_name', 'age',
-            'gender', 'village', 'phone', 'created_at',
-            'screening_count', 'latest_risk_level'
+            'id',
+            'health_worker_id',
+            'full_name',
+            'age',
+            'gender',
+            'village',
+            'phone',
+            'created_at',
+            'screening_count',
+            'latest_risk_level',
         ]
         read_only_fields = ['id', 'health_worker_id', 'created_at']
 
@@ -222,9 +225,7 @@ class PatientCreateSerializer(serializers.ModelSerializer):
     """Serializer for creating patients."""
 
     full_name = serializers.CharField(max_length=255, trim_whitespace=True)
-    age = serializers.IntegerField(
-        validators=[MinValueValidator(0), MaxValueValidator(130)]
-    )
+    age = serializers.IntegerField(validators=[MinValueValidator(0), MaxValueValidator(130)])
     gender = serializers.ChoiceField(choices=Patient.GENDER_CHOICES)
     village = serializers.CharField(max_length=255, trim_whitespace=True)
     phone = serializers.CharField(
@@ -274,19 +275,46 @@ class ScreeningSerializer(serializers.ModelSerializer):
     class Meta:
         model = Screening
         fields = [
-            'id', 'patient_id', 'patient_name', 'height_cm', 'weight_kg',
-            'systolic_bp', 'diastolic_bp', 'heart_rate',
-            'smoking_status', 'alcohol_usage', 'physical_activity',
-            'glucose_level', 'cholesterol_level',
-            'hemoglobin', 'rbc_count', 'wbc_count', 'platelet_count',
-            'blood_urea_nitrogen', 'creatinine', 'sodium', 'potassium',
-            'chloride', 'calcium', 'alt_sgpt', 'ast_sgot',
-            'albumin', 'total_bilirubin',
-            'risk_score', 'risk_level', 'risk_notes', 'ai_insights', 'created_at'
+            'id',
+            'patient_id',
+            'patient_name',
+            'height_cm',
+            'weight_kg',
+            'systolic_bp',
+            'diastolic_bp',
+            'heart_rate',
+            'smoking_status',
+            'alcohol_usage',
+            'physical_activity',
+            'glucose_level',
+            'cholesterol_level',
+            'hemoglobin',
+            'rbc_count',
+            'wbc_count',
+            'platelet_count',
+            'blood_urea_nitrogen',
+            'creatinine',
+            'sodium',
+            'potassium',
+            'chloride',
+            'calcium',
+            'alt_sgpt',
+            'ast_sgot',
+            'albumin',
+            'total_bilirubin',
+            'risk_score',
+            'risk_level',
+            'risk_notes',
+            'ai_insights',
+            'created_at',
         ]
         read_only_fields = [
-            'id', 'risk_score', 'risk_level', 'risk_notes', 'ai_insights',
-            'created_at'
+            'id',
+            'risk_score',
+            'risk_level',
+            'risk_notes',
+            'ai_insights',
+            'created_at',
         ]
 
 
@@ -303,9 +331,7 @@ class ScreeningCreateSerializer(serializers.ModelSerializer):
     height_cm = bounded_field(serializers.FloatField, VITALS_BOUNDS['height_cm'])
     weight_kg = bounded_field(serializers.FloatField, VITALS_BOUNDS['weight_kg'])
     systolic_bp = bounded_field(serializers.IntegerField, VITALS_BOUNDS['systolic_bp'])
-    diastolic_bp = bounded_field(
-        serializers.IntegerField, VITALS_BOUNDS['diastolic_bp']
-    )
+    diastolic_bp = bounded_field(serializers.IntegerField, VITALS_BOUNDS['diastolic_bp'])
     heart_rate = bounded_field(serializers.IntegerField, VITALS_BOUNDS['heart_rate'])
 
     smoking_status = serializers.ChoiceField(
@@ -321,14 +347,31 @@ class ScreeningCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Screening
         fields = [
-            'patient_id', 'height_cm', 'weight_kg',
-            'systolic_bp', 'diastolic_bp', 'heart_rate',
-            'smoking_status', 'alcohol_usage', 'physical_activity',
-            'glucose_level', 'cholesterol_level',
-            'hemoglobin', 'rbc_count', 'wbc_count', 'platelet_count',
-            'blood_urea_nitrogen', 'creatinine', 'sodium', 'potassium',
-            'chloride', 'calcium', 'alt_sgpt', 'ast_sgot',
-            'albumin', 'total_bilirubin'
+            'patient_id',
+            'height_cm',
+            'weight_kg',
+            'systolic_bp',
+            'diastolic_bp',
+            'heart_rate',
+            'smoking_status',
+            'alcohol_usage',
+            'physical_activity',
+            'glucose_level',
+            'cholesterol_level',
+            'hemoglobin',
+            'rbc_count',
+            'wbc_count',
+            'platelet_count',
+            'blood_urea_nitrogen',
+            'creatinine',
+            'sodium',
+            'potassium',
+            'chloride',
+            'calcium',
+            'alt_sgpt',
+            'ast_sgot',
+            'albumin',
+            'total_bilirubin',
         ]
 
     def __init__(self, *args, **kwargs):
@@ -357,16 +400,22 @@ class AppointmentSerializer(serializers.ModelSerializer):
     """Serializer for appointment details."""
 
     patient_name = serializers.CharField(source='patient.full_name', read_only=True)
-    health_worker_name = serializers.CharField(
-        source='health_worker.full_name', read_only=True
-    )
+    health_worker_name = serializers.CharField(source='health_worker.full_name', read_only=True)
 
     class Meta:
         model = Appointment
         fields = [
-            'id', 'patient', 'patient_name', 'health_worker', 'health_worker_name',
-            'scheduled_date', 'reason', 'notes', 'status',
-            'created_at', 'updated_at'
+            'id',
+            'patient',
+            'patient_name',
+            'health_worker',
+            'health_worker_name',
+            'scheduled_date',
+            'reason',
+            'notes',
+            'status',
+            'created_at',
+            'updated_at',
         ]
         read_only_fields = ['id', 'health_worker', 'created_at', 'updated_at']
 
@@ -394,8 +443,16 @@ class RecommendationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recommendation
         fields = [
-            'id', 'patient', 'patient_name', 'screening', 'category',
-            'title', 'description', 'priority', 'is_completed', 'created_at'
+            'id',
+            'patient',
+            'patient_name',
+            'screening',
+            'category',
+            'title',
+            'description',
+            'priority',
+            'is_completed',
+            'created_at',
         ]
         read_only_fields = ['id', 'created_at']
 
@@ -403,12 +460,8 @@ class RecommendationSerializer(serializers.ModelSerializer):
 class PatientDetailSerializer(serializers.ModelSerializer):
     """Detailed patient serializer with screenings and appointments."""
 
-    health_worker_id = serializers.IntegerField(
-        source='health_worker.id', read_only=True
-    )
-    health_worker_name = serializers.CharField(
-        source='health_worker.full_name', read_only=True
-    )
+    health_worker_id = serializers.IntegerField(source='health_worker.id', read_only=True)
+    health_worker_name = serializers.CharField(source='health_worker.full_name', read_only=True)
     screenings = ScreeningSerializer(many=True, read_only=True)
     appointments = AppointmentSerializer(many=True, read_only=True)
     recommendations = RecommendationSerializer(many=True, read_only=True)
@@ -416,9 +469,18 @@ class PatientDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Patient
         fields = [
-            'id', 'health_worker_id', 'health_worker_name', 'full_name', 'age',
-            'gender', 'village', 'phone', 'created_at',
-            'screenings', 'appointments', 'recommendations'
+            'id',
+            'health_worker_id',
+            'health_worker_name',
+            'full_name',
+            'age',
+            'gender',
+            'village',
+            'phone',
+            'created_at',
+            'screenings',
+            'appointments',
+            'recommendations',
         ]
 
 

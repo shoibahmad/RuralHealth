@@ -1,8 +1,7 @@
-
-import React from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Button } from './button'; // Adjust path if needed (it's in . currently)
-import { AlertTriangle } from 'lucide-react';
+import React from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Button } from "./button"; // Adjust path if needed (it's in . currently)
+import { AlertTriangle } from "lucide-react";
 
 interface ConfirmationModalProps {
     isOpen: boolean;
@@ -12,7 +11,7 @@ interface ConfirmationModalProps {
     message: string;
     confirmText?: string;
     cancelText?: string;
-    variant?: 'danger' | 'warning' | 'info';
+    variant?: "danger" | "warning" | "info";
     isLoading?: boolean;
 }
 
@@ -22,32 +21,32 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
     onConfirm,
     title,
     message,
-    confirmText = 'Confirm',
-    cancelText = 'Cancel',
-    variant = 'danger',
-    isLoading = false
+    confirmText = "Confirm",
+    cancelText = "Cancel",
+    variant = "danger",
+    isLoading = false,
 }) => {
     if (!isOpen) return null;
 
     const colors = {
         danger: {
-            icon: 'text-red-400',
-            bg: 'bg-red-500/10',
-            border: 'border-red-500/20',
-            button: 'bg-red-500 hover:bg-red-600 text-white'
+            icon: "text-red-400",
+            bg: "bg-red-500/10",
+            border: "border-red-500/20",
+            button: "bg-red-500 hover:bg-red-600 text-white",
         },
         warning: {
-            icon: 'text-amber-400',
-            bg: 'bg-amber-500/10',
-            border: 'border-amber-500/20',
-            button: 'bg-amber-500 hover:bg-amber-600 text-white'
+            icon: "text-amber-400",
+            bg: "bg-amber-500/10",
+            border: "border-amber-500/20",
+            button: "bg-amber-500 hover:bg-amber-600 text-white",
         },
         info: {
-            icon: 'text-blue-400',
-            bg: 'bg-blue-500/10',
-            border: 'border-blue-500/20',
-            button: 'bg-blue-500 hover:bg-blue-600 text-white'
-        }
+            icon: "text-blue-400",
+            bg: "bg-blue-500/10",
+            border: "border-blue-500/20",
+            button: "bg-blue-500 hover:bg-blue-600 text-white",
+        },
     };
 
     const theme = colors[variant];
@@ -90,12 +89,8 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
                         >
                             {cancelText}
                         </Button>
-                        <Button
-                            onClick={onConfirm}
-                            className={theme.button}
-                            disabled={isLoading}
-                        >
-                            {isLoading ? 'Processing...' : confirmText}
+                        <Button onClick={onConfirm} className={theme.button} disabled={isLoading}>
+                            {isLoading ? "Processing..." : confirmText}
                         </Button>
                     </div>
                 </motion.div>

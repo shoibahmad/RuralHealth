@@ -13,15 +13,19 @@ interface LifestyleSurveyFormProps {
 
 export function LifestyleSurveyForm({ data, updateData, language }: LifestyleSurveyFormProps) {
     const t = translations[language];
-    
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <VoiceEntryBanner
                 data={data}
                 updateData={updateData}
                 language={language}
-                title={language === 'en' ? "Lifestyle AI Assistant" : "जीवनशैली AI सहायक"}
-                description={language === 'en' ? "Speak habits (e.g., 'I am a smoker, I exercise regularly')." : "आदतें बोलें (जैसे, 'मैं धूम्रपान करता हूँ, मैं नियमित रूप से व्यायाम करता हूँ')।"}
+                title={language === "en" ? "Lifestyle AI Assistant" : "जीवनशैली AI सहायक"}
+                description={
+                    language === "en"
+                        ? "Speak habits (e.g., 'I am a smoker, I exercise regularly')."
+                        : "आदतें बोलें (जैसे, 'मैं धूम्रपान करता हूँ, मैं नियमित रूप से व्यायाम करता हूँ')।"
+                }
             />
             <div className="grid md:grid-cols-2 gap-8">
                 {/* Smoking */}
@@ -43,9 +47,24 @@ export function LifestyleSurveyForm({ data, updateData, language }: LifestyleSur
                                 <SelectValue placeholder={t.select_status} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="Never" className="focus:bg-teal-500/20 focus:text-white">{t.never}</SelectItem>
-                                <SelectItem value="Former" className="focus:bg-teal-500/20 focus:text-white">{t.former}</SelectItem>
-                                <SelectItem value="Current" className="focus:bg-teal-500/20 focus:text-white">{t.current}</SelectItem>
+                                <SelectItem
+                                    value="Never"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.never}
+                                </SelectItem>
+                                <SelectItem
+                                    value="Former"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.former}
+                                </SelectItem>
+                                <SelectItem
+                                    value="Current"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.current}
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -70,9 +89,24 @@ export function LifestyleSurveyForm({ data, updateData, language }: LifestyleSur
                                 <SelectValue placeholder={t.select_frequency} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="None" className="focus:bg-teal-500/20 focus:text-white">{t.none_rare}</SelectItem>
-                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">{t.moderate}</SelectItem>
-                                <SelectItem value="Heavy" className="focus:bg-teal-500/20 focus:text-white">{t.heavy}</SelectItem>
+                                <SelectItem
+                                    value="None"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.none_rare}
+                                </SelectItem>
+                                <SelectItem
+                                    value="Moderate"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.moderate}
+                                </SelectItem>
+                                <SelectItem
+                                    value="Heavy"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.heavy}
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
@@ -97,14 +131,29 @@ export function LifestyleSurveyForm({ data, updateData, language }: LifestyleSur
                                 <SelectValue placeholder={t.select_activity} />
                             </SelectTrigger>
                             <SelectContent className="bg-slate-900 border-white/10 text-white">
-                                <SelectItem value="Low" className="focus:bg-teal-500/20 focus:text-white">{t.low_activity}</SelectItem>
-                                <SelectItem value="Moderate" className="focus:bg-teal-500/20 focus:text-white">{t.moderate_activity}</SelectItem>
-                                <SelectItem value="High" className="focus:bg-teal-500/20 focus:text-white">{t.high_activity}</SelectItem>
+                                <SelectItem
+                                    value="Low"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.low_activity}
+                                </SelectItem>
+                                <SelectItem
+                                    value="Moderate"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.moderate_activity}
+                                </SelectItem>
+                                <SelectItem
+                                    value="High"
+                                    className="focus:bg-teal-500/20 focus:text-white"
+                                >
+                                    {t.high_activity}
+                                </SelectItem>
                             </SelectContent>
                         </Select>
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }

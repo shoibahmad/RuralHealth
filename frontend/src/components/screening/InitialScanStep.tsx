@@ -61,9 +61,11 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
             onDataExtracted(result);
         } catch (err: unknown) {
             console.error("Scanning error:", err);
-            setError(language === 'en' 
-                ? "Could not extract data. Tesseract engine encountered an error. Please enter manually." 
-                : "डेटा नहीं निकाला जा सका। टेसेरैक्ट इंजन में त्रुटि हुई। कृपया मैन्युअल रूप से दर्ज करें।");
+            setError(
+                language === "en"
+                    ? "Could not extract data. Tesseract engine encountered an error. Please enter manually."
+                    : "डेटा नहीं निकाला जा सका। टेसेरैक्ट इंजन में त्रुटि हुई। कृपया मैन्युअल रूप से दर्ज करें।",
+            );
             setIsScanning(false);
         }
     };
@@ -71,15 +73,15 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="text-center space-y-2 mb-8">
-                <h2 className="text-2xl font-bold text-white tracking-tight">{t.initial_scan_title}</h2>
-                <p className="text-slate-400 max-w-lg mx-auto">
-                    {t.initial_scan_subtitle}
-                </p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                    {t.initial_scan_title}
+                </h2>
+                <p className="text-slate-400 max-w-lg mx-auto">{t.initial_scan_subtitle}</p>
             </div>
 
             <div className="flex flex-col items-center">
                 {!file ? (
-                    <div 
+                    <div
                         onClick={() => fileInputRef.current?.click()}
                         className="w-full max-w-xl aspect-[16/10] glass-card border-2 border-dashed border-white/10 rounded-2xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-teal-500/50 hover:bg-teal-500/5 transition-all group"
                     >
@@ -88,12 +90,12 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
                         </div>
                         <p className="text-lg font-semibold text-white mb-1">{t.click_to_upload}</p>
                         <p className="text-sm text-slate-500">{t.supports_formats}</p>
-                        <input 
-                            type="file" 
-                            ref={fileInputRef} 
-                            onChange={handleFileChange} 
-                            accept="image/*,application/pdf" 
-                            className="hidden" 
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                            accept="image/*,application/pdf"
+                            className="hidden"
                         />
                     </div>
                 ) : (
@@ -106,7 +108,11 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
                                     <span className="text-xs opacity-50">PDF Document</span>
                                 </div>
                             ) : (
-                                <img src={preview!} alt="Preview" className="w-full h-full object-contain opacity-50" />
+                                <img
+                                    src={preview!}
+                                    alt="Preview"
+                                    className="w-full h-full object-contain opacity-50"
+                                />
                             )}
 
                             {isScanning && (
@@ -114,10 +120,34 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
                                     <div className="scan-line" />
                                     <div className="absolute inset-0 bg-teal-950/20 pointer-events-none" />
                                     {/* Simulated OCR Boxes */}
-                                    <div className="ocr-box" style={{ top: '20%', left: '15%', width: '30%', height: '5%' }} />
-                                    <div className="ocr-box" style={{ top: '40%', left: '10%', width: '20%', height: '8%' }} />
-                                    <div className="ocr-box" style={{ top: '65%', left: '40%', width: '40%', height: '6%' }} />
-                                    
+                                    <div
+                                        className="ocr-box"
+                                        style={{
+                                            top: "20%",
+                                            left: "15%",
+                                            width: "30%",
+                                            height: "5%",
+                                        }}
+                                    />
+                                    <div
+                                        className="ocr-box"
+                                        style={{
+                                            top: "40%",
+                                            left: "10%",
+                                            width: "20%",
+                                            height: "8%",
+                                        }}
+                                    />
+                                    <div
+                                        className="ocr-box"
+                                        style={{
+                                            top: "65%",
+                                            left: "40%",
+                                            width: "40%",
+                                            height: "6%",
+                                        }}
+                                    />
+
                                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-[2px]">
                                         <div className="relative">
                                             <Loader2 className="h-12 w-12 animate-spin text-teal-400" />
@@ -133,15 +163,15 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
 
                         {!isScanning && (
                             <div className="flex gap-3">
-                                <Button 
-                                    onClick={() => setFile(null)} 
-                                    variant="outline" 
+                                <Button
+                                    onClick={() => setFile(null)}
+                                    variant="outline"
                                     className="flex-1 border-white/10 text-slate-400 hover:text-white"
                                 >
                                     {t.reselect}
                                 </Button>
-                                <Button 
-                                    onClick={startScan} 
+                                <Button
+                                    onClick={startScan}
                                     className="flex-[2] bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white border-0 shadow-lg shadow-teal-500/25"
                                 >
                                     {t.start_extraction}
@@ -160,8 +190,8 @@ export function InitialScanStep({ onDataExtracted, onSkip, language }: InitialSc
             )}
 
             <div className="pt-8 border-t border-white/5 flex justify-center">
-                <Button 
-                    variant="outline" 
+                <Button
+                    variant="outline"
                     onClick={onSkip}
                     disabled={isScanning}
                     className="h-14 px-8 border-2 border-teal-500/50 bg-teal-500/5 text-teal-400 hover:bg-teal-500/10 hover:border-teal-400 transition-all group rounded-xl shadow-lg shadow-teal-500/10"

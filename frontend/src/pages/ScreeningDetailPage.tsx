@@ -1,13 +1,9 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Activity, FileText, Share2, Printer, Sparkles } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
-import {
-    firestoreService,
-    type Screening,
-} from "../services/firestoreService";
+import { firestoreService, type Screening } from "../services/firestoreService";
 import { formatDate } from "../lib/dates";
 import { riskUtils } from "../lib/riskUtils";
 
@@ -34,7 +30,8 @@ export function ScreeningDetailPage() {
         fetchScreening();
     }, [id]);
 
-    if (loading) return <div className="p-8 text-center text-slate-400">Loading screening details...</div>;
+    if (loading)
+        return <div className="p-8 text-center text-slate-400">Loading screening details...</div>;
     if (!screening) return <div className="p-8 text-center text-red-400">Screening not found.</div>;
 
     // ai_insights arrives as a markdown string from the Django endpoint but as
@@ -47,9 +44,12 @@ export function ScreeningDetailPage() {
 
     const getRiskColor = (level: string) => {
         switch (level) {
-            case "High": return "text-red-400 border-red-500/50 bg-red-500/10";
-            case "Medium": return "text-amber-400 border-amber-500/50 bg-amber-500/10";
-            default: return "text-emerald-400 border-emerald-500/50 bg-emerald-500/10";
+            case "High":
+                return "text-red-400 border-red-500/50 bg-red-500/10";
+            case "Medium":
+                return "text-amber-400 border-amber-500/50 bg-amber-500/10";
+            default:
+                return "text-emerald-400 border-emerald-500/50 bg-emerald-500/10";
         }
     };
 
@@ -58,7 +58,12 @@ export function ScreeningDetailPage() {
             {/* Header */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="text-slate-300">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate(-1)}
+                        className="text-slate-300"
+                    >
                         <ArrowLeft className="h-5 w-5" />
                     </Button>
                     <div>
@@ -88,22 +93,34 @@ export function ScreeningDetailPage() {
                     {insightsText ? (
                         <div className="prose prose-invert max-w-none">
                             <div className="whitespace-pre-wrap text-slate-200 leading-relaxed font-light">
-                                {insightsText.split('**').map((part: string, i: number) =>
-                                    i % 2 === 1 ? <span key={i} className="font-bold text-white">{part}</span> : part
+                                {insightsText.split("**").map((part: string, i: number) =>
+                                    i % 2 === 1 ? (
+                                        <span key={i} className="font-bold text-white">
+                                            {part}
+                                        </span>
+                                    ) : (
+                                        part
+                                    ),
                                 )}
                             </div>
                         </div>
                     ) : (
-                        <p className="text-slate-400 italic">No AI insights generated for this screening.</p>
+                        <p className="text-slate-400 italic">
+                            No AI insights generated for this screening.
+                        </p>
                     )}
                 </div>
             </Card>
 
             {/* Key Metrics Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className={`glass-card p-6 border-l-4 ${screening.risk_level === 'High' ? 'border-l-red-500' : screening.risk_level === 'Medium' ? 'border-l-amber-500' : 'border-l-emerald-500'}`}>
+                <Card
+                    className={`glass-card p-6 border-l-4 ${screening.risk_level === "High" ? "border-l-red-500" : screening.risk_level === "Medium" ? "border-l-amber-500" : "border-l-emerald-500"}`}
+                >
                     <p className="text-slate-400 text-sm">Overall Risk Level</p>
-                    <p className={`text-3xl font-bold mt-2 ${getRiskColor(screening.risk_level).split(' ')[0]}`}>
+                    <p
+                        className={`text-3xl font-bold mt-2 ${getRiskColor(screening.risk_level).split(" ")[0]}`}
+                    >
                         {screening.risk_level}
                     </p>
                     <p className="text-slate-500 text-xs mt-1">Score: {screening.risk_score}</p>
@@ -113,7 +130,8 @@ export function ScreeningDetailPage() {
                     <Activity className="h-5 w-5 text-pink-400 mb-2" />
                     <p className="text-slate-400 text-sm">Blood Pressure</p>
                     <p className="text-2xl font-semibold text-white mt-1">
-                        {screening.systolic_bp || '--'}/{screening.diastolic_bp || '--'} <span className="text-sm text-slate-500">mmHg</span>
+                        {screening.systolic_bp || "--"}/{screening.diastolic_bp || "--"}{" "}
+                        <span className="text-sm text-slate-500">mmHg</span>
                     </p>
                 </Card>
 
@@ -121,7 +139,10 @@ export function ScreeningDetailPage() {
                     <FileText className="h-5 w-5 text-blue-400 mb-2" />
                     <p className="text-slate-400 text-sm">BMI Score</p>
                     <p className="text-2xl font-semibold text-white mt-1">
-                        {riskUtils.calculateBMI(screening.height_cm ?? 0, screening.weight_kg ?? 0) || '--'}
+                        {riskUtils.calculateBMI(
+                            screening.height_cm ?? 0,
+                            screening.weight_kg ?? 0,
+                        ) || "--"}
                     </p>
                 </Card>
             </div>
@@ -129,41 +150,53 @@ export function ScreeningDetailPage() {
             {/* Detailed Data */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <Card className="glass-card p-6 border-white/5">
-                    <h3 className="font-semibold text-white mb-4 border-b border-white/10 pb-2">Vitals & Measurements</h3>
+                    <h3 className="font-semibold text-white mb-4 border-b border-white/10 pb-2">
+                        Vitals & Measurements
+                    </h3>
                     <dl className="grid grid-cols-2 gap-4 text-sm">
                         <div>
                             <dt className="text-slate-500">Height</dt>
-                            <dd className="text-slate-200">{screening.height_cm || 'N/A'} cm</dd>
+                            <dd className="text-slate-200">{screening.height_cm || "N/A"} cm</dd>
                         </div>
                         <div>
                             <dt className="text-slate-500">Weight</dt>
-                            <dd className="text-slate-200">{screening.weight_kg || 'N/A'} kg</dd>
+                            <dd className="text-slate-200">{screening.weight_kg || "N/A"} kg</dd>
                         </div>
                         <div>
                             <dt className="text-slate-500">Heart Rate</dt>
-                            <dd className="text-slate-200">{screening.heart_rate || 'N/A'} bpm</dd>
+                            <dd className="text-slate-200">{screening.heart_rate || "N/A"} bpm</dd>
                         </div>
                         <div>
                             <dt className="text-slate-500">Glucose</dt>
-                            <dd className="text-slate-200">{screening.glucose_level || 'N/A'} mg/dL</dd>
+                            <dd className="text-slate-200">
+                                {screening.glucose_level || "N/A"} mg/dL
+                            </dd>
                         </div>
                     </dl>
                 </Card>
 
                 <Card className="glass-card p-6 border-white/5">
-                    <h3 className="font-semibold text-white mb-4 border-b border-white/10 pb-2">Lifestyle & History</h3>
+                    <h3 className="font-semibold text-white mb-4 border-b border-white/10 pb-2">
+                        Lifestyle & History
+                    </h3>
                     <dl className="grid grid-cols-1 gap-4 text-sm">
                         <div className="flex justify-between">
                             <dt className="text-slate-500">Smoking Status</dt>
-                            <dd className="text-slate-200 capitalize">{screening.smoking_status || 'N/A'}</dd>
+                            <dd className="text-slate-200 capitalize">
+                                {screening.smoking_status || "N/A"}
+                            </dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-slate-500">Alcohol Consumption</dt>
-                            <dd className="text-slate-200 capitalize">{screening.alcohol_usage || 'N/A'}</dd>
+                            <dd className="text-slate-200 capitalize">
+                                {screening.alcohol_usage || "N/A"}
+                            </dd>
                         </div>
                         <div className="flex justify-between">
                             <dt className="text-slate-500">Physical Activity</dt>
-                            <dd className="text-slate-200 capitalize">{screening.physical_activity || 'N/A'}</dd>
+                            <dd className="text-slate-200 capitalize">
+                                {screening.physical_activity || "N/A"}
+                            </dd>
                         </div>
                     </dl>
                 </Card>

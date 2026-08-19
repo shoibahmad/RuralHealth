@@ -7,7 +7,12 @@ import { Label } from "../components/ui/label";
 import { useAuth } from "../context/useAuth";
 import { useToast } from "../context/useToast";
 
-import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from "firebase/auth";
+import {
+    updateProfile,
+    updatePassword,
+    reauthenticateWithCredential,
+    EmailAuthProvider,
+} from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { auth, db } from "../lib/firebase";
 import { firestoreService } from "../services/firestoreService";
@@ -21,7 +26,9 @@ export function SettingsPage() {
     const { user } = useAuth(); // User from context
     const { showToast } = useToast();
     const [loading, setLoading] = useState(false);
-    const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+    const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(
+        null,
+    );
 
     const [profileData, setProfileData] = useState({
         full_name: "",
@@ -29,13 +36,13 @@ export function SettingsPage() {
         age: "",
         gender: "",
         village: "",
-        phone: ""
+        phone: "",
     });
 
     const [passwordData, setPasswordData] = useState({
         current_password: "",
         new_password: "",
-        confirm_password: ""
+        confirm_password: "",
     });
 
     useEffect(() => {
@@ -48,7 +55,7 @@ export function SettingsPage() {
                     age: "",
                     gender: "",
                     village: "",
-                    phone: ""
+                    phone: "",
                 };
 
                 // Load Clinical Data from 'patients' collection
@@ -81,13 +88,13 @@ export function SettingsPage() {
             // Update Auth Profile
             if (profileData.full_name !== auth.currentUser.displayName) {
                 await updateProfile(auth.currentUser, {
-                    displayName: profileData.full_name
+                    displayName: profileData.full_name,
                 });
             }
 
             // Update Firestore Doc (users collection)
             await updateDoc(doc(db, "users", auth.currentUser.uid), {
-                full_name: profileData.full_name
+                full_name: profileData.full_name,
             });
 
             // Update Clinical Profile (patients collection)
@@ -102,12 +109,12 @@ export function SettingsPage() {
             });
 
             showToast("Profile updated successfully!", "success");
-            setMessage({ type: 'success', text: 'Profile updated successfully!' });
+            setMessage({ type: "success", text: "Profile updated successfully!" });
         } catch (error: unknown) {
-            const message = errorMessage(error, 'Failed to update profile');
-            log.error('Profile update failed', error);
+            const message = errorMessage(error, "Failed to update profile");
+            log.error("Profile update failed", error);
             showToast(message, "error");
-            setMessage({ type: 'error', text: message });
+            setMessage({ type: "error", text: message });
         } finally {
             setLoading(false);
         }
@@ -119,13 +126,13 @@ export function SettingsPage() {
         setMessage(null);
 
         if (passwordData.new_password !== passwordData.confirm_password) {
-            setMessage({ type: 'error', text: 'New passwords do not match!' });
+            setMessage({ type: "error", text: "New passwords do not match!" });
             setLoading(false);
             return;
         }
 
         if (passwordData.new_password.length < 6) {
-            setMessage({ type: 'error', text: 'Password must be at least 6 characters long!' });
+            setMessage({ type: "error", text: "Password must be at least 6 characters long!" });
             setLoading(false);
             return;
         }
@@ -134,25 +141,28 @@ export function SettingsPage() {
             if (!auth.currentUser || !auth.currentUser.email) throw new Error("No user logged in");
 
             // Re-authenticate first
-            const credential = EmailAuthProvider.credential(auth.currentUser.email, passwordData.current_password);
+            const credential = EmailAuthProvider.credential(
+                auth.currentUser.email,
+                passwordData.current_password,
+            );
             await reauthenticateWithCredential(auth.currentUser, credential);
 
             // Update Password
             await updatePassword(auth.currentUser, passwordData.new_password);
 
             showToast("Password changed successfully!", "success");
-            setMessage({ type: 'success', text: 'Password changed successfully!' });
+            setMessage({ type: "success", text: "Password changed successfully!" });
             setPasswordData({
                 current_password: "",
                 new_password: "",
-                confirm_password: ""
+                confirm_password: "",
             });
         } catch (error: unknown) {
-            log.error('Password change failed', error);
-            showToast(errorMessage(error, 'Failed to change password'), "error");
+            log.error("Password change failed", error);
+            showToast(errorMessage(error, "Failed to change password"), "error");
             setMessage({
-                type: 'error',
-                text: errorMessage(error, 'Failed to change password. Check current password.'),
+                type: "error",
+                text: errorMessage(error, "Failed to change password. Check current password."),
             });
         } finally {
             setLoading(false);
@@ -171,12 +181,13 @@ export function SettingsPage() {
                 <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className={`p-4 rounded-xl border flex items-center gap-3 ${message.type === 'success'
-                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
-                        : 'bg-red-500/10 border-red-500/20 text-red-400'
-                        }`}
+                    className={`p-4 rounded-xl border flex items-center gap-3 ${
+                        message.type === "success"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                            : "bg-red-500/10 border-red-500/20 text-red-400"
+                    }`}
                 >
-                    {message.type === 'success' ? (
+                    {message.type === "success" ? (
                         <CheckCircle2 className="h-5 w-5" />
                     ) : (
                         <AlertCircle className="h-5 w-5" />
@@ -203,13 +214,17 @@ export function SettingsPage() {
 
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="full_name" className="text-slate-300">Full Name</Label>
+                        <Label htmlFor="full_name" className="text-slate-300">
+                            Full Name
+                        </Label>
                         <div className="relative">
                             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                             <Input
                                 id="full_name"
                                 value={profileData.full_name}
-                                onChange={(e) => setProfileData({ ...profileData, full_name: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, full_name: e.target.value })
+                                }
                                 className="pl-10 bg-slate-900/50 border-white/10 text-white"
                                 placeholder="Enter your full name"
                             />
@@ -217,19 +232,25 @@ export function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                        <Label htmlFor="email" className="text-slate-300">
+                            Email Address
+                        </Label>
                         <div className="relative">
                             <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                             <Input
                                 id="email"
                                 type="email"
                                 value={profileData.email}
-                                onChange={(e) => setProfileData({ ...profileData, email: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, email: e.target.value })
+                                }
                                 className="pl-10 bg-slate-900/50 border-white/10 text-white"
                                 placeholder="Enter your email"
                             />
                         </div>
-                        <p className="text-xs text-slate-500">Changing your email will require you to log in again</p>
+                        <p className="text-xs text-slate-500">
+                            Changing your email will require you to log in again
+                        </p>
                     </div>
 
                     <div className="flex items-center gap-3 pt-2">
@@ -261,7 +282,7 @@ export function SettingsPage() {
                                         age: "",
                                         gender: "",
                                         village: "",
-                                        phone: ""
+                                        phone: "",
                                     });
                                 }
                             }}
@@ -286,20 +307,29 @@ export function SettingsPage() {
                     </div>
                     <div>
                         <h2 className="text-lg font-bold text-white">Change Password</h2>
-                        <p className="text-sm text-slate-400">Update your password to keep your account secure</p>
+                        <p className="text-sm text-slate-400">
+                            Update your password to keep your account secure
+                        </p>
                     </div>
                 </div>
 
                 <form onSubmit={handlePasswordUpdate} className="space-y-4">
                     <div className="space-y-2">
-                        <Label htmlFor="current_password" className="text-slate-300">Current Password</Label>
+                        <Label htmlFor="current_password" className="text-slate-300">
+                            Current Password
+                        </Label>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                             <Input
                                 id="current_password"
                                 type="password"
                                 value={passwordData.current_password}
-                                onChange={(e) => setPasswordData({ ...passwordData, current_password: e.target.value })}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        current_password: e.target.value,
+                                    })
+                                }
                                 className="pl-10 bg-slate-900/50 border-white/10 text-white"
                                 placeholder="Enter current password"
                             />
@@ -307,14 +337,21 @@ export function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="new_password" className="text-slate-300">New Password</Label>
+                        <Label htmlFor="new_password" className="text-slate-300">
+                            New Password
+                        </Label>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                             <Input
                                 id="new_password"
                                 type="password"
                                 value={passwordData.new_password}
-                                onChange={(e) => setPasswordData({ ...passwordData, new_password: e.target.value })}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        new_password: e.target.value,
+                                    })
+                                }
                                 className="pl-10 bg-slate-900/50 border-white/10 text-white"
                                 placeholder="Enter new password"
                             />
@@ -322,14 +359,21 @@ export function SettingsPage() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label htmlFor="confirm_password" className="text-slate-300">Confirm New Password</Label>
+                        <Label htmlFor="confirm_password" className="text-slate-300">
+                            Confirm New Password
+                        </Label>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-500" />
                             <Input
                                 id="confirm_password"
                                 type="password"
                                 value={passwordData.confirm_password}
-                                onChange={(e) => setPasswordData({ ...passwordData, confirm_password: e.target.value })}
+                                onChange={(e) =>
+                                    setPasswordData({
+                                        ...passwordData,
+                                        confirm_password: e.target.value,
+                                    })
+                                }
                                 className="pl-10 bg-slate-900/50 border-white/10 text-white"
                                 placeholder="Confirm new password"
                             />
@@ -363,11 +407,13 @@ export function SettingsPage() {
                         <Button
                             type="button"
                             variant="ghost"
-                            onClick={() => setPasswordData({
-                                current_password: "",
-                                new_password: "",
-                                confirm_password: ""
-                            })}
+                            onClick={() =>
+                                setPasswordData({
+                                    current_password: "",
+                                    new_password: "",
+                                    confirm_password: "",
+                                })
+                            }
                             className="text-slate-400 hover:text-white"
                         >
                             Clear
@@ -395,46 +441,64 @@ export function SettingsPage() {
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-2">
-                            <Label htmlFor="age" className="text-slate-300">Age</Label>
+                            <Label htmlFor="age" className="text-slate-300">
+                                Age
+                            </Label>
                             <Input
                                 id="age"
                                 type="number"
                                 value={profileData.age}
-                                onChange={(e) => setProfileData({ ...profileData, age: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, age: e.target.value })
+                                }
                                 className="bg-slate-900/50 border-white/10 text-white"
                                 placeholder="e.g. 30"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="gender" className="text-slate-300">Gender</Label>
+                            <Label htmlFor="gender" className="text-slate-300">
+                                Gender
+                            </Label>
                             <select
                                 id="gender"
                                 value={profileData.gender}
-                                onChange={(e) => setProfileData({ ...profileData, gender: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, gender: e.target.value })
+                                }
                                 className="w-full h-10 px-3 rounded-md border border-white/10 bg-slate-900/50 text-white text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
                             >
-                                <option value="" disabled>Select Gender</option>
+                                <option value="" disabled>
+                                    Select Gender
+                                </option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
                                 <option value="Other">Other</option>
                             </select>
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="village" className="text-slate-300">Village/City</Label>
+                            <Label htmlFor="village" className="text-slate-300">
+                                Village/City
+                            </Label>
                             <Input
                                 id="village"
                                 value={profileData.village}
-                                onChange={(e) => setProfileData({ ...profileData, village: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, village: e.target.value })
+                                }
                                 className="bg-slate-900/50 border-white/10 text-white"
                                 placeholder="e.g. New York"
                             />
                         </div>
                         <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-slate-300">Phone</Label>
+                            <Label htmlFor="phone" className="text-slate-300">
+                                Phone
+                            </Label>
                             <Input
                                 id="phone"
                                 value={profileData.phone}
-                                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                                onChange={(e) =>
+                                    setProfileData({ ...profileData, phone: e.target.value })
+                                }
                                 className="bg-slate-900/50 border-white/10 text-white"
                                 placeholder="e.g. +1234567890"
                             />
@@ -474,7 +538,7 @@ export function SettingsPage() {
                     <div className="flex items-center justify-between py-2 border-b border-white/5">
                         <span className="text-slate-400 text-sm">Account Role</span>
                         <span className="text-white font-medium capitalize">
-                            {user?.role?.replace('_', ' ') || 'Health Worker'}
+                            {user?.role?.replace("_", " ") || "Health Worker"}
                         </span>
                     </div>
                     <div className="flex items-center justify-between py-2 border-b border-white/5">
@@ -485,7 +549,9 @@ export function SettingsPage() {
                     </div>
                     <div className="flex items-center justify-between py-2">
                         <span className="text-slate-400 text-sm">User ID</span>
-                        <span className="text-slate-300 text-sm font-mono">{user?.uid || 'N/A'}</span>
+                        <span className="text-slate-300 text-sm font-mono">
+                            {user?.uid || "N/A"}
+                        </span>
                     </div>
                 </div>
             </motion.div>

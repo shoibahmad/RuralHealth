@@ -3,10 +3,7 @@ import { motion } from "framer-motion";
 import { Users, Activity, AlertTriangle, Search, Eye } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import {
-    firestoreService,
-    type HealthWorkerWithStats,
-} from "../services/firestoreService";
+import { firestoreService, type HealthWorkerWithStats } from "../services/firestoreService";
 import { useNavigate } from "react-router-dom";
 
 export function HealthWorkersPage() {
@@ -24,15 +21,16 @@ export function HealthWorkersPage() {
             const data = await firestoreService.getHealthWorkers();
             setWorkers(data);
         } catch (error) {
-            console.error('Failed to fetch workers:', error);
+            console.error("Failed to fetch workers:", error);
         } finally {
             setLoading(false);
         }
     };
 
-    const filteredWorkers = workers.filter(worker =>
-        worker.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        worker.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredWorkers = workers.filter(
+        (worker) =>
+            worker.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            worker.email?.toLowerCase().includes(searchTerm.toLowerCase()),
     );
 
     if (loading) {
@@ -82,7 +80,10 @@ export function HealthWorkersPage() {
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-white">
-                                {workers.reduce((sum, w) => sum + (w.stats?.total_screenings || 0), 0)}
+                                {workers.reduce(
+                                    (sum, w) => sum + (w.stats?.total_screenings || 0),
+                                    0,
+                                )}
                             </h3>
                             <p className="text-sm text-slate-400">Total Screenings</p>
                         </div>
@@ -101,7 +102,10 @@ export function HealthWorkersPage() {
                         </div>
                         <div>
                             <h3 className="text-2xl font-bold text-white">
-                                {workers.reduce((sum, w) => sum + (w.stats?.high_risk_patients || 0), 0)}
+                                {workers.reduce(
+                                    (sum, w) => sum + (w.stats?.high_risk_patients || 0),
+                                    0,
+                                )}
                             </h3>
                             <p className="text-sm text-slate-400">High Risk Cases</p>
                         </div>
@@ -149,9 +153,10 @@ export function HealthWorkersPage() {
                                 <tr key={worker.id} className="hover:bg-white/5 transition-colors">
                                     <td className="p-6 font-medium text-white flex items-center gap-3">
                                         <div className="h-10 w-10 rounded-full bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-sm border border-white/10">
-                                            {worker.full_name?.charAt(0) || worker.email.charAt(0).toUpperCase()}
+                                            {worker.full_name?.charAt(0) ||
+                                                worker.email.charAt(0).toUpperCase()}
                                         </div>
-                                        {worker.full_name || 'N/A'}
+                                        {worker.full_name || "N/A"}
                                     </td>
                                     <td className="p-6 text-slate-400">{worker.email}</td>
                                     <td className="p-6">
@@ -170,11 +175,14 @@ export function HealthWorkersPage() {
                                         </span>
                                     </td>
                                     <td className="p-6">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${worker.is_active
-                                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                                : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'
-                                            }`}>
-                                            {worker.is_active ? 'Active' : 'Inactive'}
+                                        <span
+                                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                worker.is_active
+                                                    ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                                                    : "bg-slate-500/10 text-slate-400 border border-slate-500/20"
+                                            }`}
+                                        >
+                                            {worker.is_active ? "Active" : "Inactive"}
                                         </span>
                                     </td>
                                     <td className="p-6 text-right">
@@ -182,7 +190,9 @@ export function HealthWorkersPage() {
                                             variant="ghost"
                                             size="sm"
                                             className="text-teal-400 hover:text-white hover:bg-teal-500/10"
-                                            onClick={() => navigate(`/officer/workers/${worker.id}`)}
+                                            onClick={() =>
+                                                navigate(`/officer/workers/${worker.id}`)
+                                            }
                                         >
                                             <Eye className="h-4 w-4 mr-2" />
                                             View Details

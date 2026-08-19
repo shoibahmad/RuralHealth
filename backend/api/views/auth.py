@@ -1,4 +1,5 @@
 """Registration, login and account-management endpoints."""
+
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -52,9 +53,7 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        serializer = CustomTokenObtainPairSerializer(
-            data={'email': email, 'password': password}
-        )
+        serializer = CustomTokenObtainPairSerializer(data={'email': email, 'password': password})
 
         if not serializer.is_valid():
             return Response(
@@ -122,9 +121,7 @@ class ChangePasswordView(APIView):
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
-        serializer = ChangePasswordSerializer(
-            data=request.data, context={'request': request}
-        )
+        serializer = ChangePasswordSerializer(data=request.data, context={'request': request})
         if not serializer.is_valid():
             return Response(
                 {'detail': first_error_message(serializer.errors)},

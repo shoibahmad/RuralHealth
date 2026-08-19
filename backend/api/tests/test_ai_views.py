@@ -1,4 +1,5 @@
 """Tests for the AI endpoints' request validation and upload handling."""
+
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.urls import reverse
@@ -131,9 +132,7 @@ class TestLabExtractionEndpoint:
 
 class TestVoiceVitalsEndpoint:
     def test_requires_an_audio_file(self, api_client, health_worker, auth_client):
-        response = auth_client(health_worker).post(
-            reverse('voice_vitals'), {}, format='multipart'
-        )
+        response = auth_client(health_worker).post(reverse('voice_vitals'), {}, format='multipart')
 
         assert response.status_code == 400
         assert response.data['detail'] == 'No audio file provided'

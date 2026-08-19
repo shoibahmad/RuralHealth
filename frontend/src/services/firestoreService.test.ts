@@ -19,14 +19,7 @@ vi.mock("firebase/firestore", () => ({
 
 vi.mock("../lib/firebase", () => ({ db: { __db: true } }));
 
-import {
-    addDoc,
-    deleteDoc,
-    getDoc,
-    getDocs,
-    setDoc,
-    updateDoc,
-} from "firebase/firestore";
+import { addDoc, deleteDoc, getDoc, getDocs, setDoc, updateDoc } from "firebase/firestore";
 
 import { firestoreService } from "./firestoreService";
 
@@ -114,9 +107,7 @@ describe("getPatients", () => {
 
     it("merges self-registered patient users into the officer-wide list", async () => {
         mockCollections({
-            patients: [
-                { id: "p1", full_name: "Registered", created_at: "2026-01-01T00:00:00Z" },
-            ],
+            patients: [{ id: "p1", full_name: "Registered", created_at: "2026-01-01T00:00:00Z" }],
             users: [
                 {
                     id: "u9",
@@ -166,9 +157,7 @@ describe("getPatients", () => {
 
     it("still returns registered patients when the users read is denied", async () => {
         mockCollections({
-            patients: [
-                { id: "p1", full_name: "Registered", created_at: "2026-01-01T00:00:00Z" },
-            ],
+            patients: [{ id: "p1", full_name: "Registered", created_at: "2026-01-01T00:00:00Z" }],
             users: new Error("permission-denied"),
         });
 
@@ -382,12 +371,41 @@ describe("getDashboardStats", () => {
     const seedDashboard = () =>
         mockCollections({
             patients: [
-                { id: "p1", full_name: "A", age: 52, gender: "Male", village: "Chandpur", health_worker_id: "w1", created_at: "2026-01-01T00:00:00Z" },
-                { id: "p2", full_name: "B", age: 25, gender: "Female", village: "Rampur", health_worker_id: "w1", created_at: "2026-02-01T00:00:00Z" },
+                {
+                    id: "p1",
+                    full_name: "A",
+                    age: 52,
+                    gender: "Male",
+                    village: "Chandpur",
+                    health_worker_id: "w1",
+                    created_at: "2026-01-01T00:00:00Z",
+                },
+                {
+                    id: "p2",
+                    full_name: "B",
+                    age: 25,
+                    gender: "Female",
+                    village: "Rampur",
+                    health_worker_id: "w1",
+                    created_at: "2026-02-01T00:00:00Z",
+                },
             ],
             screenings: [
-                { id: "s1", patient_id: "p1", risk_level: "High", systolic_bp: 160, smoking_status: "Current", created_at: "2026-03-01T00:00:00Z" },
-                { id: "s2", patient_id: "p2", risk_level: "Low", systolic_bp: 110, created_at: "2026-04-01T00:00:00Z" },
+                {
+                    id: "s1",
+                    patient_id: "p1",
+                    risk_level: "High",
+                    systolic_bp: 160,
+                    smoking_status: "Current",
+                    created_at: "2026-03-01T00:00:00Z",
+                },
+                {
+                    id: "s2",
+                    patient_id: "p2",
+                    risk_level: "Low",
+                    systolic_bp: 110,
+                    created_at: "2026-04-01T00:00:00Z",
+                },
             ],
             appointments: [
                 { id: "a1", status: "scheduled" },

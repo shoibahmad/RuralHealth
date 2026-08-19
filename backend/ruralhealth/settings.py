@@ -81,8 +81,7 @@ WSGI_APPLICATION = 'ruralhealth.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default='sqlite:///' + str(BASE_DIR.parent / 'ruralhealth_django.db'),
-        conn_max_age=600
+        default='sqlite:///' + str(BASE_DIR.parent / 'ruralhealth_django.db'), conn_max_age=600
     )
 }
 

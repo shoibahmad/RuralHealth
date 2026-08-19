@@ -1,11 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import {
-    buildNameNotice,
-    filesOnBehalfOfOthers,
-    namesMatch,
-    normalizeName,
-} from "./nameMatching";
+import { buildNameNotice, filesOnBehalfOfOthers, namesMatch, normalizeName } from "./nameMatching";
 
 describe("normalizeName", () => {
     it("lowercases and collapses whitespace", () => {
@@ -33,15 +28,11 @@ describe("namesMatch", () => {
 
 describe("buildNameNotice", () => {
     it("returns null when no name was extracted", () => {
-        expect(
-            buildNameNotice({ extracted: "", expected: "Ramesh Kumar" }),
-        ).toBeNull();
+        expect(buildNameNotice({ extracted: "", expected: "Ramesh Kumar" })).toBeNull();
     });
 
     it("returns null when the names agree for a self-screening patient", () => {
-        expect(
-            buildNameNotice({ extracted: "Ramesh Kumar", expected: "ramesh kumar" }),
-        ).toBeNull();
+        expect(buildNameNotice({ extracted: "Ramesh Kumar", expected: "ramesh kumar" })).toBeNull();
     });
 
     it("warns when the extracted name differs from the record", () => {

@@ -4,6 +4,7 @@ API views, split by domain.
 Re-exported here so ``from api.views import RegisterView`` keeps working after
 the split out of the original single views module.
 """
+
 from .ai import (
     AIAnalysisView,
     AILabExtractionView,

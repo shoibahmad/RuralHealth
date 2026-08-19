@@ -1,4 +1,5 @@
 """Tests for dashboard statistics, analytics helpers and appointments."""
+
 from datetime import timedelta
 
 import pytest
@@ -75,9 +76,7 @@ class TestDashboardStats:
 
         assert response.data['risk_distribution'] == {'Low': 1, 'Medium': 0, 'High': 0}
 
-    def test_weekly_trend_covers_seven_days(
-        self, auth_client, health_worker, patient
-    ):
+    def test_weekly_trend_covers_seven_days(self, auth_client, health_worker, patient):
         Screening.objects.create(patient=patient, risk_level='High', risk_score=70)
 
         response = auth_client(health_worker).get(reverse('dashboard_stats'))
@@ -153,9 +152,7 @@ class TestAnalytics:
 
 
 class TestAppointments:
-    def test_creates_an_appointment_owned_by_the_caller(
-        self, auth_client, health_worker, patient
-    ):
+    def test_creates_an_appointment_owned_by_the_caller(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
             reverse('appointments'),
             {
@@ -168,9 +165,7 @@ class TestAppointments:
 
         assert response.status_code == 201
         assert response.data['patient_name'] == patient.full_name
-        assert Appointment.objects.get(id=response.data['id']).health_worker == (
-            health_worker
-        )
+        assert Appointment.objects.get(id=response.data['id']).health_worker == (health_worker)
 
     def test_rejects_a_blank_reason(self, auth_client, health_worker, patient):
         response = auth_client(health_worker).post(
@@ -206,9 +201,7 @@ class TestAppointments:
 
         assert [a['reason'] for a in response.data] == ['Mine']
 
-    def test_upcoming_filter_excludes_past_appointments(
-        self, auth_client, health_worker, patient
-    ):
+    def test_upcoming_filter_excludes_past_appointments(self, auth_client, health_worker, patient):
         now = timezone.now()
         Appointment.objects.create(
             patient=patient,
@@ -223,9 +216,7 @@ class TestAppointments:
             reason='Past',
         )
 
-        response = auth_client(health_worker).get(
-            reverse('appointments'), {'upcoming': 'true'}
-        )
+        response = auth_client(health_worker).get(reverse('appointments'), {'upcoming': 'true'})
 
         assert [a['reason'] for a in response.data] == ['Future']
 

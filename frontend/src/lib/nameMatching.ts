@@ -13,10 +13,7 @@ export function normalizeName(value: string | null | undefined): string {
 }
 
 /** True when two names refer to the same person, ignoring case and spacing. */
-export function namesMatch(
-    a: string | null | undefined,
-    b: string | null | undefined,
-): boolean {
+export function namesMatch(a: string | null | undefined, b: string | null | undefined): boolean {
     return normalizeName(a) === normalizeName(b);
 }
 
@@ -64,9 +61,7 @@ export function buildNameNotice({
     if (!expectedName) return null;
 
     if (namesMatch(extractedName, expectedName)) {
-        return requireExplicitConfirmation
-            ? { extracted: extractedName, expected: "" }
-            : null;
+        return requireExplicitConfirmation ? { extracted: extractedName, expected: "" } : null;
     }
 
     return { extracted: extractedName, expected: expectedName };

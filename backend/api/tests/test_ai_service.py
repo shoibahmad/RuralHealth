@@ -1,4 +1,5 @@
 """Tests for the Gemini service wrapper's parsing and degradation behaviour."""
+
 import pytest
 
 from api import ai_service
@@ -88,9 +89,7 @@ class TestAnalyzeHealthData:
         assert result['success'] is True
         assert result['analysis']['summary'] == 'Stable'
 
-    def test_synthesises_formatted_insights_when_the_model_omits_them(
-        self, monkeypatch
-    ):
+    def test_synthesises_formatted_insights_when_the_model_omits_them(self, monkeypatch):
         monkeypatch.setattr(
             ai_service,
             'try_generate_content',
@@ -153,13 +152,9 @@ class TestGenerateHealthRecommendations:
         assert recommendations[0]['title'] == 'Regular Health Monitoring'
 
     def test_falls_back_when_the_response_is_unparseable(self, monkeypatch):
-        monkeypatch.setattr(
-            ai_service, 'try_generate_content', lambda prompt: FakeResponse('nope')
-        )
+        monkeypatch.setattr(ai_service, 'try_generate_content', lambda prompt: FakeResponse('nope'))
 
-        assert generate_health_recommendations({}, {})[0]['title'] == (
-            'Regular Health Monitoring'
-        )
+        assert generate_health_recommendations({}, {})[0]['title'] == ('Regular Health Monitoring')
 
 
 class TestExtractors:

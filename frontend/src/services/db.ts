@@ -3,7 +3,7 @@
  * Handles local storage of patients, screenings, and sync queue
  */
 
-const DB_NAME = 'RuralHealthDB';
+const DB_NAME = "RuralHealthDB";
 const DB_VERSION = 1;
 
 export interface LocalPatient {
@@ -42,17 +42,17 @@ export interface LocalScreening {
 }
 
 /** Fields a queued screening carries in addition to its measurements. */
-export type QueuedScreeningData = LocalScreening['data'] & {
+export type QueuedScreeningData = LocalScreening["data"] & {
     patientLocalId: string;
 };
 
 /** A queued write is either a patient record or a screening record. */
-export type SyncQueuePayload = LocalPatient['data'] | QueuedScreeningData;
+export type SyncQueuePayload = LocalPatient["data"] | QueuedScreeningData;
 
 export interface SyncQueueItem {
     id: string;
-    type: 'patient' | 'screening';
-    action: 'create' | 'update' | 'delete';
+    type: "patient" | "screening";
+    action: "create" | "update" | "delete";
     localId: string;
     data: SyncQueuePayload;
     attempts: number;
@@ -73,13 +73,13 @@ class DatabaseService {
             const request = indexedDB.open(DB_NAME, DB_VERSION);
 
             request.onerror = () => {
-                console.error('Failed to open IndexedDB:', request.error);
+                console.error("Failed to open IndexedDB:", request.error);
                 reject(request.error);
             };
 
             request.onsuccess = () => {
                 this.db = request.result;
-                console.log('IndexedDB initialized successfully');
+                console.log("IndexedDB initialized successfully");
                 resolve(this.db);
             };
 
@@ -87,33 +87,37 @@ class DatabaseService {
                 const db = (event.target as IDBOpenDBRequest).result;
 
                 // Patients store
-                if (!db.objectStoreNames.contains('patients')) {
-                    const patientsStore = db.createObjectStore('patients', { keyPath: 'localId' });
-                    patientsStore.createIndex('synced', 'synced', { unique: false });
-                    patientsStore.createIndex('serverId', 'serverId', { unique: false });
+                if (!db.objectStoreNames.contains("patients")) {
+                    const patientsStore = db.createObjectStore("patients", { keyPath: "localId" });
+                    patientsStore.createIndex("synced", "synced", { unique: false });
+                    patientsStore.createIndex("serverId", "serverId", { unique: false });
                 }
 
                 // Screenings store
-                if (!db.objectStoreNames.contains('screenings')) {
-                    const screeningsStore = db.createObjectStore('screenings', { keyPath: 'localId' });
-                    screeningsStore.createIndex('synced', 'synced', { unique: false });
-                    screeningsStore.createIndex('patientLocalId', 'patientLocalId', { unique: false });
-                    screeningsStore.createIndex('serverId', 'serverId', { unique: false });
+                if (!db.objectStoreNames.contains("screenings")) {
+                    const screeningsStore = db.createObjectStore("screenings", {
+                        keyPath: "localId",
+                    });
+                    screeningsStore.createIndex("synced", "synced", { unique: false });
+                    screeningsStore.createIndex("patientLocalId", "patientLocalId", {
+                        unique: false,
+                    });
+                    screeningsStore.createIndex("serverId", "serverId", { unique: false });
                 }
 
                 // Sync queue store
-                if (!db.objectStoreNames.contains('syncQueue')) {
-                    const syncQueueStore = db.createObjectStore('syncQueue', { keyPath: 'id' });
-                    syncQueueStore.createIndex('type', 'type', { unique: false });
-                    syncQueueStore.createIndex('attempts', 'attempts', { unique: false });
+                if (!db.objectStoreNames.contains("syncQueue")) {
+                    const syncQueueStore = db.createObjectStore("syncQueue", { keyPath: "id" });
+                    syncQueueStore.createIndex("type", "type", { unique: false });
+                    syncQueueStore.createIndex("attempts", "attempts", { unique: false });
                 }
 
                 // Cache store for API responses
-                if (!db.objectStoreNames.contains('cache')) {
-                    db.createObjectStore('cache', { keyPath: 'key' });
+                if (!db.objectStoreNames.contains("cache")) {
+                    db.createObjectStore("cache", { keyPath: "key" });
                 }
 
-                console.log('IndexedDB schema created');
+                console.log("IndexedDB schema created");
             };
         });
     }
@@ -125,7 +129,7 @@ class DatabaseService {
 
     // Generate UUID for local records
     generateId(): string {
-        return 'local_' + crypto.randomUUID();
+        return "local_" + crypto.randomUUID();
     }
 
     // ==================== PATIENTS ====================
@@ -133,8 +137,8 @@ class DatabaseService {
     async savePatient(patient: LocalPatient): Promise<void> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['patients'], 'readwrite');
-            const store = transaction.objectStore('patients');
+            const transaction = db.transaction(["patients"], "readwrite");
+            const store = transaction.objectStore("patients");
             const request = store.put(patient);
 
             request.onsuccess = () => resolve();
@@ -145,8 +149,8 @@ class DatabaseService {
     async getPatient(localId: string): Promise<LocalPatient | undefined> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['patients'], 'readonly');
-            const store = transaction.objectStore('patients');
+            const transaction = db.transaction(["patients"], "readonly");
+            const store = transaction.objectStore("patients");
             const request = store.get(localId);
 
             request.onsuccess = () => resolve(request.result);
@@ -157,8 +161,8 @@ class DatabaseService {
     async getAllPatients(): Promise<LocalPatient[]> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['patients'], 'readonly');
-            const store = transaction.objectStore('patients');
+            const transaction = db.transaction(["patients"], "readonly");
+            const store = transaction.objectStore("patients");
             const request = store.getAll();
 
             request.onsuccess = () => resolve(request.result || []);
@@ -169,9 +173,9 @@ class DatabaseService {
     async getUnsyncedPatients(): Promise<LocalPatient[]> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['patients'], 'readonly');
-            const store = transaction.objectStore('patients');
-            const index = store.index('synced');
+            const transaction = db.transaction(["patients"], "readonly");
+            const store = transaction.objectStore("patients");
+            const index = store.index("synced");
             const request = index.getAll(IDBKeyRange.only(0));
 
             request.onsuccess = () => resolve(request.result || []);
@@ -193,8 +197,8 @@ class DatabaseService {
     async saveScreening(screening: LocalScreening): Promise<void> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['screenings'], 'readwrite');
-            const store = transaction.objectStore('screenings');
+            const transaction = db.transaction(["screenings"], "readwrite");
+            const store = transaction.objectStore("screenings");
             const request = store.put(screening);
 
             request.onsuccess = () => resolve();
@@ -205,8 +209,8 @@ class DatabaseService {
     async getScreening(localId: string): Promise<LocalScreening | undefined> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['screenings'], 'readonly');
-            const store = transaction.objectStore('screenings');
+            const transaction = db.transaction(["screenings"], "readonly");
+            const store = transaction.objectStore("screenings");
             const request = store.get(localId);
 
             request.onsuccess = () => resolve(request.result);
@@ -217,8 +221,8 @@ class DatabaseService {
     async getAllScreenings(): Promise<LocalScreening[]> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['screenings'], 'readonly');
-            const store = transaction.objectStore('screenings');
+            const transaction = db.transaction(["screenings"], "readonly");
+            const store = transaction.objectStore("screenings");
             const request = store.getAll();
 
             request.onsuccess = () => resolve(request.result || []);
@@ -229,9 +233,9 @@ class DatabaseService {
     async getUnsyncedScreenings(): Promise<LocalScreening[]> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['screenings'], 'readonly');
-            const store = transaction.objectStore('screenings');
-            const index = store.index('synced');
+            const transaction = db.transaction(["screenings"], "readonly");
+            const store = transaction.objectStore("screenings");
+            const index = store.index("synced");
             const request = index.getAll(IDBKeyRange.only(0));
 
             request.onsuccess = () => resolve(request.result || []);
@@ -239,7 +243,11 @@ class DatabaseService {
         });
     }
 
-    async updateScreeningServerId(localId: string, serverId: number, patientServerId: number): Promise<void> {
+    async updateScreeningServerId(
+        localId: string,
+        serverId: number,
+        patientServerId: number,
+    ): Promise<void> {
         const screening = await this.getScreening(localId);
         if (screening) {
             screening.serverId = serverId;
@@ -251,7 +259,7 @@ class DatabaseService {
 
     // ==================== SYNC QUEUE ====================
 
-    async addToSyncQueue(item: Omit<SyncQueueItem, 'id' | 'attempts'>): Promise<void> {
+    async addToSyncQueue(item: Omit<SyncQueueItem, "id" | "attempts">): Promise<void> {
         const db = await this.getDB();
         const queueItem: SyncQueueItem = {
             ...item,
@@ -260,8 +268,8 @@ class DatabaseService {
         };
 
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['syncQueue'], 'readwrite');
-            const store = transaction.objectStore('syncQueue');
+            const transaction = db.transaction(["syncQueue"], "readwrite");
+            const store = transaction.objectStore("syncQueue");
             const request = store.add(queueItem);
 
             request.onsuccess = () => resolve();
@@ -272,16 +280,16 @@ class DatabaseService {
     async getSyncQueue(): Promise<SyncQueueItem[]> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['syncQueue'], 'readonly');
-            const store = transaction.objectStore('syncQueue');
+            const transaction = db.transaction(["syncQueue"], "readonly");
+            const store = transaction.objectStore("syncQueue");
             const request = store.getAll();
 
             request.onsuccess = () => {
                 // Sort by type (patients first) then by attempts
                 const items = request.result || [];
                 items.sort((a, b) => {
-                    if (a.type === 'patient' && b.type !== 'patient') return -1;
-                    if (a.type !== 'patient' && b.type === 'patient') return 1;
+                    if (a.type === "patient" && b.type !== "patient") return -1;
+                    if (a.type !== "patient" && b.type === "patient") return 1;
                     return a.attempts - b.attempts;
                 });
                 resolve(items);
@@ -293,8 +301,8 @@ class DatabaseService {
     async updateSyncQueueItem(item: SyncQueueItem): Promise<void> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['syncQueue'], 'readwrite');
-            const store = transaction.objectStore('syncQueue');
+            const transaction = db.transaction(["syncQueue"], "readwrite");
+            const store = transaction.objectStore("syncQueue");
             const request = store.put(item);
 
             request.onsuccess = () => resolve();
@@ -305,8 +313,8 @@ class DatabaseService {
     async removeFromSyncQueue(id: string): Promise<void> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['syncQueue'], 'readwrite');
-            const store = transaction.objectStore('syncQueue');
+            const transaction = db.transaction(["syncQueue"], "readwrite");
+            const store = transaction.objectStore("syncQueue");
             const request = store.delete(id);
 
             request.onsuccess = () => resolve();
@@ -317,8 +325,8 @@ class DatabaseService {
     async getSyncQueueCount(): Promise<number> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['syncQueue'], 'readonly');
-            const store = transaction.objectStore('syncQueue');
+            const transaction = db.transaction(["syncQueue"], "readonly");
+            const store = transaction.objectStore("syncQueue");
             const request = store.count();
 
             request.onsuccess = () => resolve(request.result);
@@ -337,8 +345,8 @@ class DatabaseService {
         };
 
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['cache'], 'readwrite');
-            const store = transaction.objectStore('cache');
+            const transaction = db.transaction(["cache"], "readwrite");
+            const store = transaction.objectStore("cache");
             const request = store.put(cacheItem);
 
             request.onsuccess = () => resolve();
@@ -349,8 +357,8 @@ class DatabaseService {
     async getCache<T>(key: string): Promise<T | null> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['cache'], 'readonly');
-            const store = transaction.objectStore('cache');
+            const transaction = db.transaction(["cache"], "readonly");
+            const store = transaction.objectStore("cache");
             const request = store.get(key);
 
             request.onsuccess = () => {
@@ -368,8 +376,8 @@ class DatabaseService {
     async clearCache(): Promise<void> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
-            const transaction = db.transaction(['cache'], 'readwrite');
-            const store = transaction.objectStore('cache');
+            const transaction = db.transaction(["cache"], "readwrite");
+            const store = transaction.objectStore("cache");
             const request = store.clear();
 
             request.onsuccess = () => resolve();

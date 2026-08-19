@@ -4,6 +4,7 @@ Deterministic screening risk scoring.
 Kept free of Django request/response types so the algorithm can be exercised
 directly in tests and reused outside the screening endpoint.
 """
+
 from dataclasses import dataclass, field
 
 HIGH_RISK_THRESHOLD = 60
@@ -234,9 +235,7 @@ def build_recommendations(risk_notes, risk_level: str) -> list:
                 continue
             recommendation = dict(template)
             # Templates without a fixed priority escalate on "Very high" notes.
-            recommendation.setdefault(
-                'priority', 'high' if 'Very high' in note else 'medium'
-            )
+            recommendation.setdefault('priority', 'high' if 'Very high' in note else 'medium')
             recommendations.append(recommendation)
 
     if risk_level == 'High':

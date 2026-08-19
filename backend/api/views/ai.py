@@ -1,4 +1,5 @@
 """Gemini-backed extraction and analysis endpoints."""
+
 import contextlib
 import logging
 import os
@@ -100,9 +101,7 @@ class AIVoiceVitalsView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        suffix, error = validate_upload(
-            audio_file, ALLOWED_AUDIO_SUFFIXES, default_suffix='.webm'
-        )
+        suffix, error = validate_upload(audio_file, ALLOWED_AUDIO_SUFFIXES, default_suffix='.webm')
         if error:
             return Response({'detail': error}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -123,13 +122,9 @@ class AILabExtractionView(APIView):
         # The wizard posts under 'image'; the offline sync path uses 'file'.
         file_obj = request.FILES.get('image') or request.FILES.get('file')
         if not file_obj:
-            return Response(
-                {'detail': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({'detail': 'No file provided'}, status=status.HTTP_400_BAD_REQUEST)
 
-        suffix, error = validate_upload(
-            file_obj, ALLOWED_DOCUMENT_SUFFIXES, default_suffix='.jpg'
-        )
+        suffix, error = validate_upload(file_obj, ALLOWED_DOCUMENT_SUFFIXES, default_suffix='.jpg')
         if error:
             return Response({'detail': error}, status=status.HTTP_400_BAD_REQUEST)
 

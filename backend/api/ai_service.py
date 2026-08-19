@@ -6,6 +6,7 @@ and tested without a GEMINI_API_KEY present. Every public function degrades to a
 ``{'success': False, 'error': ...}`` result when the key is missing rather than
 raising at import time.
 """
+
 import json
 import logging
 import os

@@ -11,7 +11,7 @@ interface RiskAssessmentReviewProps {
 
 export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewProps) {
     const t = translations[language];
-    
+
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-right-4 duration-500">
             <div className="text-center mb-8">
@@ -30,15 +30,23 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400 text-xs">{t.full_name}</span>
-                            <span className="text-white font-medium text-xs">{data.full_name || "N/A"}</span>
+                            <span className="text-white font-medium text-xs">
+                                {data.full_name || "N/A"}
+                            </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
-                            <span className="text-slate-400 text-xs text-left">{t.age} / {t.gender}</span>
-                            <span className="text-white font-medium text-xs">{data.age} / {data.gender}</span>
+                            <span className="text-slate-400 text-xs text-left">
+                                {t.age} / {t.gender}
+                            </span>
+                            <span className="text-white font-medium text-xs">
+                                {data.age} / {data.gender}
+                            </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400 text-xs">{t.location}</span>
-                            <span className="text-white font-medium text-xs">{data.village || "N/A"}</span>
+                            <span className="text-white font-medium text-xs">
+                                {data.village || "N/A"}
+                            </span>
                         </div>
                     </CardContent>
                 </Card>
@@ -53,7 +61,9 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                     <CardContent className="space-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400 text-xs">{t.blood_pressure}</span>
-                            <span className="text-white font-medium text-xs">{data.systolic_bp}/{data.diastolic_bp} mmHg</span>
+                            <span className="text-white font-medium text-xs">
+                                {data.systolic_bp}/{data.diastolic_bp} mmHg
+                            </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">BMI</span>
@@ -66,7 +76,9 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400 text-xs">{t.pulse_hr}</span>
-                            <span className="text-white font-medium text-xs">{data.heart_rate || "N/A"} bpm</span>
+                            <span className="text-white font-medium text-xs">
+                                {data.heart_rate || "N/A"} bpm
+                            </span>
                         </div>
                     </CardContent>
                 </Card>
@@ -81,21 +93,33 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                     <CardContent className="grid sm:grid-cols-2 gap-x-8 gap-y-3">
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">{t.glucose}</span>
-                            <span className="text-white font-medium">{data.glucose_level ? `${data.glucose_level} mg/dL` : "Not Provided"}</span>
+                            <span className="text-white font-medium">
+                                {data.glucose_level
+                                    ? `${data.glucose_level} mg/dL`
+                                    : "Not Provided"}
+                            </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">{t.cholesterol}</span>
-                            <span className="text-white font-medium">{data.cholesterol_level ? `${data.cholesterol_level} mg/dL` : "Not Provided"}</span>
+                            <span className="text-white font-medium">
+                                {data.cholesterol_level
+                                    ? `${data.cholesterol_level} mg/dL`
+                                    : "Not Provided"}
+                            </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">{t.tobacco_status}</span>
-                            <span className={`font-medium ${data.smoking_status === 'Current' ? 'text-red-400' : 'text-slate-200'}`}>
+                            <span
+                                className={`font-medium ${data.smoking_status === "Current" ? "text-red-400" : "text-slate-200"}`}
+                            >
                                 {data.smoking_status || "N/A"}
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">{t.physical_activity}</span>
-                            <span className={`font-medium ${data.physical_activity === 'Low' ? 'text-amber-400' : 'text-slate-200'}`}>
+                            <span
+                                className={`font-medium ${data.physical_activity === "Low" ? "text-amber-400" : "text-slate-200"}`}
+                            >
                                 {data.physical_activity || "N/A"}
                             </span>
                         </div>
@@ -108,10 +132,11 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                 <div>
                     <h4 className="text-blue-200 font-semibold text-sm">AI Prediction Ready</h4>
                     <p className="text-blue-300/70 text-sm">
-                        Upon submission, Gemini 1.5 Pro will process these 12 parameters to generate a WHO CVD Risk Score and provide personalized intervention guidelines.
+                        Upon submission, Gemini 1.5 Pro will process these 12 parameters to generate
+                        a WHO CVD Risk Score and provide personalized intervention guidelines.
                     </p>
                 </div>
             </div>
         </div>
-    )
+    );
 }

@@ -1,4 +1,5 @@
 """Tests for patient listing, creation, scoping and history."""
+
 import pytest
 from django.urls import reverse
 
@@ -50,12 +51,8 @@ class TestListPatients:
         assert [r['full_name'] for r in by_village.data] == ['Sunita Devi']
         assert [r['full_name'] for r in by_phone.data] == ['Ramesh Kumar']
 
-    def test_village_filter_is_case_insensitive(
-        self, auth_client, health_officer, patient
-    ):
-        response = auth_client(health_officer).get(
-            reverse('patients'), {'village': 'chandpur'}
-        )
+    def test_village_filter_is_case_insensitive(self, auth_client, health_officer, patient):
+        response = auth_client(health_officer).get(reverse('patients'), {'village': 'chandpur'})
 
         assert [r['full_name'] for r in response.data] == ['Ramesh Kumar']
 
@@ -96,9 +93,7 @@ class TestCreatePatient:
         created = Patient.objects.get(full_name='Anita Sharma')
         assert created.health_worker == health_worker
 
-    def test_trims_surrounding_whitespace_from_the_name(
-        self, auth_client, health_worker
-    ):
+    def test_trims_surrounding_whitespace_from_the_name(self, auth_client, health_worker):
         response = auth_client(health_worker).post(
             reverse('patients'),
             valid_patient_payload(full_name='  Anita Sharma  '),
@@ -133,9 +128,7 @@ class TestCreatePatient:
         assert response.status_code == 400
 
     @pytest.mark.parametrize('phone', ['abc', '12', 'drop table patients'])
-    def test_rejects_a_malformed_phone_number(
-        self, auth_client, health_worker, phone
-    ):
+    def test_rejects_a_malformed_phone_number(self, auth_client, health_worker, phone):
         response = auth_client(health_worker).post(
             reverse('patients'), valid_patient_payload(phone=phone), format='json'
         )
@@ -156,22 +149,16 @@ class TestCreatePatient:
         payload = valid_patient_payload()
         del payload['phone']
 
-        response = auth_client(health_worker).post(
-            reverse('patients'), payload, format='json'
-        )
+        response = auth_client(health_worker).post(reverse('patients'), payload, format='json')
 
         assert response.status_code == 201
 
 
 class TestPatientDetail:
-    def test_returns_nested_screenings_and_appointments(
-        self, auth_client, health_worker, patient
-    ):
+    def test_returns_nested_screenings_and_appointments(self, auth_client, health_worker, patient):
         Screening.objects.create(patient=patient, risk_level='Low', risk_score=5)
 
-        response = auth_client(health_worker).get(
-            reverse('patient_detail', args=[patient.id])
-        )
+        response = auth_client(health_worker).get(reverse('patient_detail', args=[patient.id]))
 
         assert response.status_code == 200
         assert response.data['full_name'] == patient.full_name
@@ -181,9 +168,7 @@ class TestPatientDetail:
     def test_delete_removes_the_patient_and_confirms_by_name(
         self, auth_client, health_worker, patient
     ):
-        response = auth_client(health_worker).delete(
-            reverse('patient_detail', args=[patient.id])
-        )
+        response = auth_client(health_worker).delete(reverse('patient_detail', args=[patient.id]))
 
         assert response.status_code == 200
         assert patient.full_name in response.data['detail']
@@ -208,9 +193,7 @@ class TestPatientHistory:
             reason='Follow-up',
         )
 
-        response = auth_client(health_worker).get(
-            reverse('patient_history', args=[patient.id])
-        )
+        response = auth_client(health_worker).get(reverse('patient_history', args=[patient.id]))
 
         assert response.status_code == 200
         assert response.data['total_screenings'] == 2
@@ -220,9 +203,7 @@ class TestPatientHistory:
     def test_latest_screening_is_null_when_there_are_none(
         self, auth_client, health_worker, patient
     ):
-        response = auth_client(health_worker).get(
-            reverse('patient_history', args=[patient.id])
-        )
+        response = auth_client(health_worker).get(reverse('patient_history', args=[patient.id]))
 
         assert response.data['total_screenings'] == 0
         assert response.data['latest_screening'] is None
@@ -236,9 +217,7 @@ class TestPatientHistory:
 
         assert response.status_code == 403
 
-    def test_an_officer_can_read_any_patient(
-        self, auth_client, health_officer, other_patient
-    ):
+    def test_an_officer_can_read_any_patient(self, auth_client, health_officer, other_patient):
         response = auth_client(health_officer).get(
             reverse('patient_history', args=[other_patient.id])
         )
@@ -246,8 +225,6 @@ class TestPatientHistory:
         assert response.status_code == 200
 
     def test_missing_patient_returns_404(self, auth_client, health_worker):
-        response = auth_client(health_worker).get(
-            reverse('patient_history', args=[9999])
-        )
+        response = auth_client(health_worker).get(reverse('patient_history', args=[9999]))
 
         assert response.status_code == 404

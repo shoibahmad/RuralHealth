@@ -6,7 +6,6 @@ import { Footer } from "../Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/useAuth";
 
-
 export function PublicLayout() {
     const location = useLocation();
     const { isAuthenticated, isHealthWorker, isHealthOfficer, isPatient } = useAuth();
@@ -41,7 +40,7 @@ export function PublicLayout() {
                                 { name: "How it Works", href: "/how-it-works" },
                                 { name: "Features", href: "/features" },
                                 { name: "About", href: "/about" },
-                                { name: "API Docs", href: "/api-docs" }
+                                { name: "API Docs", href: "/api-docs" },
                             ].map((item) => (
                                 <Link
                                     key={item.name}
@@ -61,7 +60,11 @@ export function PublicLayout() {
                                 className="md:hidden p-2 text-slate-300 hover:text-white"
                                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                             >
-                                {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                                {mobileMenuOpen ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
                             </button>
                         )}
 
@@ -76,7 +79,10 @@ export function PublicLayout() {
                             <>
                                 {location.pathname !== "/login" && (
                                     <Link to="/login" className="hidden sm:block">
-                                        <Button variant="ghost" className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full">
+                                        <Button
+                                            variant="ghost"
+                                            className="text-slate-300 hover:text-white hover:bg-white/10 rounded-full"
+                                        >
                                             Sign In
                                         </Button>
                                     </Link>
@@ -116,7 +122,9 @@ export function PublicLayout() {
                             className="fixed top-0 right-0 h-full w-[300px] bg-[#020617] border-l border-white/10 z-[61] md:hidden shadow-2xl p-8 flex flex-col"
                         >
                             <div className="flex items-center justify-between mb-10">
-                                <span className="font-bold text-xl text-white">Menu Navigation</span>
+                                <span className="font-bold text-xl text-white">
+                                    Menu Navigation
+                                </span>
                                 <button
                                     onClick={() => setMobileMenuOpen(false)}
                                     className="p-2 text-slate-400 hover:text-white transition-colors"
@@ -130,7 +138,7 @@ export function PublicLayout() {
                                     { name: "How it Works", href: "/how-it-works" },
                                     { name: "Features", href: "/features" },
                                     { name: "About", href: "/about" },
-                                    { name: "API Docs", href: "/api-docs" }
+                                    { name: "API Docs", href: "/api-docs" },
                                 ].map((item) => (
                                     <Link
                                         key={item.name}
@@ -146,7 +154,10 @@ export function PublicLayout() {
 
                                 <div className="flex flex-col gap-4">
                                     {isAuthenticated ? (
-                                        <Link to={getDashboardPath()} onClick={() => setMobileMenuOpen(false)}>
+                                        <Link
+                                            to={getDashboardPath()}
+                                            onClick={() => setMobileMenuOpen(false)}
+                                        >
                                             <Button className="w-full bg-teal-500 hover:bg-teal-400 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold flex items-center justify-center gap-2">
                                                 <LayoutDashboard className="h-5 w-5" />
                                                 Go to Dashboard
@@ -155,14 +166,23 @@ export function PublicLayout() {
                                     ) : (
                                         <>
                                             {location.pathname !== "/login" && (
-                                                <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                                                    <Button variant="ghost" className="w-full justify-start text-lg h-14 text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl">
+                                                <Link
+                                                    to="/login"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                >
+                                                    <Button
+                                                        variant="ghost"
+                                                        className="w-full justify-start text-lg h-14 text-slate-300 hover:text-white hover:bg-white/5 rounded-2xl"
+                                                    >
                                                         Sign In
                                                     </Button>
                                                 </Link>
                                             )}
                                             {location.pathname !== "/register" && (
-                                                <Link to="/register" onClick={() => setMobileMenuOpen(false)}>
+                                                <Link
+                                                    to="/register"
+                                                    onClick={() => setMobileMenuOpen(false)}
+                                                >
                                                     <Button className="w-full bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-400 hover:to-blue-500 text-white rounded-2xl shadow-lg shadow-teal-500/20 border-0 h-14 text-lg font-bold">
                                                         Get Started
                                                     </Button>
@@ -179,8 +199,12 @@ export function PublicLayout() {
                                         <HeartPulse className="h-5 w-5 text-teal-400" />
                                     </div>
                                     <div>
-                                        <p className="text-sm font-semibold text-white">RuralHealthAI</p>
-                                        <p className="text-xs text-slate-500 leading-tight">Empowering Rural Care</p>
+                                        <p className="text-sm font-semibold text-white">
+                                            RuralHealthAI
+                                        </p>
+                                        <p className="text-xs text-slate-500 leading-tight">
+                                            Empowering Rural Care
+                                        </p>
                                     </div>
                                 </div>
                             </div>
@@ -197,5 +221,5 @@ export function PublicLayout() {
             {/* Footer */}
             <Footer />
         </div>
-    )
+    );
 }

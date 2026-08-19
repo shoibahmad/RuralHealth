@@ -58,10 +58,7 @@ describe("calculateRisk", () => {
         [4, "High"],
     ])("maps a score of %s to %s", (score, level) => {
         // Age alone contributes at most 1, so build the score from BP and smoking.
-        const factors = { age: 30, systolic_bp: 0, diastolic_bp: 0 } as Record<
-            string,
-            number
-        >;
+        const factors = { age: 30, systolic_bp: 0, diastolic_bp: 0 } as Record<string, number>;
         if (score >= 2) factors.systolic_bp = 150;
         if (score >= 3) factors.diastolic_bp = 95;
 

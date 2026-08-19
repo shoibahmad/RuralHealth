@@ -1,4 +1,5 @@
 """Appointment and recommendation endpoints."""
+
 from django.utils import timezone
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated
@@ -38,9 +39,7 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(patient_id=patient_id)
 
         if self.request.query_params.get('upcoming') == 'true':
-            queryset = queryset.filter(
-                scheduled_date__gte=timezone.now(), status='scheduled'
-            )
+            queryset = queryset.filter(scheduled_date__gte=timezone.now(), status='scheduled')
 
         return queryset
 
@@ -49,9 +48,7 @@ class AppointmentListCreateView(generics.ListCreateAPIView):
         serializer.is_valid(raise_exception=True)
         appointment = serializer.save(health_worker=request.user)
 
-        return Response(
-            AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED
-        )
+        return Response(AppointmentSerializer(appointment).data, status=status.HTTP_201_CREATED)
 
 
 class AppointmentDetailView(generics.RetrieveUpdateDestroyAPIView):
@@ -73,9 +70,9 @@ class RecommendationListView(generics.ListAPIView):
 
         # Health workers only see recommendations for their own patients.
         if self.request.user.role == 'health_worker':
-            patient_ids = Patient.objects.filter(
-                health_worker=self.request.user
-            ).values_list('id', flat=True)
+            patient_ids = Patient.objects.filter(health_worker=self.request.user).values_list(
+                'id', flat=True
+            )
             queryset = queryset.filter(patient_id__in=patient_ids)
 
         patient_id = self.request.query_params.get('patient_id')

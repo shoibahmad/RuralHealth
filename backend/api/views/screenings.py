@@ -1,4 +1,5 @@
 """Screening creation with risk scoring and AI enrichment."""
+
 import logging
 
 from rest_framework import generics, status
@@ -102,9 +103,7 @@ def record_screening(patient, data):
     )
 
     for recommendation in build_recommendations(assessment.notes, assessment.level):
-        Recommendation.objects.create(
-            patient=patient, screening=screening, **recommendation
-        )
+        Recommendation.objects.create(patient=patient, screening=screening, **recommendation)
 
     attach_ai_insights(screening, patient, data, assessment)
 
@@ -146,6 +145,4 @@ class ScreeningListCreateView(generics.ListCreateAPIView):
         patient = Patient.objects.get(id=data['patient_id'])
         screening = record_screening(patient, data)
 
-        return Response(
-            ScreeningSerializer(screening).data, status=status.HTTP_201_CREATED
-        )
+        return Response(ScreeningSerializer(screening).data, status=status.HTTP_201_CREATED)

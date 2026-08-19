@@ -144,10 +144,7 @@ describe("OCR handling", () => {
             extracted: "Ramesh Kumar",
             expected: "Sunita Devi",
         });
-        expect(showToast).toHaveBeenCalledWith(
-            expect.stringContaining("Report mismatch"),
-            "error",
-        );
+        expect(showToast).toHaveBeenCalledWith(expect.stringContaining("Report mismatch"), "error");
     });
 
     it("reports a failed extraction without touching the form", () => {
@@ -159,10 +156,7 @@ describe("OCR handling", () => {
 
         expect(result.current.formData.full_name).toBe("");
         expect(result.current.currentStep).toBe(0);
-        expect(showToast).toHaveBeenCalledWith(
-            expect.stringContaining("unreadable"),
-            "error",
-        );
+        expect(showToast).toHaveBeenCalledWith(expect.stringContaining("unreadable"), "error");
     });
 
     it("says so when nothing readable was found", () => {

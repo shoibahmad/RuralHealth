@@ -34,8 +34,8 @@ export function LoginPage() {
             await sendPasswordResetEmail(auth, email);
             showToast("Password reset email sent! Check your inbox.", "success");
         } catch (err: unknown) {
-            log.error('Password reset failed', err);
-            if (errorCode(err) === 'auth/user-not-found') {
+            log.error("Password reset failed", err);
+            if (errorCode(err) === "auth/user-not-found") {
                 showToast("No user found with this email.", "error");
             } else {
                 showToast("Failed to send reset email. Please try again.", "error");
@@ -47,9 +47,9 @@ export function LoginPage() {
 
     // Redirect if already logged in
     if (user) {
-        if (user.role === 'health_officer' || user.role === 'admin') {
+        if (user.role === "health_officer" || user.role === "admin") {
             navigate("/officer/dashboard");
-        } else if (user.role === 'patient') {
+        } else if (user.role === "patient") {
             navigate("/patient/dashboard");
         } else {
             navigate("/dashboard");
@@ -67,12 +67,12 @@ export function LoginPage() {
             // Navigation handled by AuthContext or the redirect check above/useEffect
             navigate("/dashboard");
         } catch (err: unknown) {
-            log.error('Sign in failed', err);
-            if (errorCode(err) === 'auth/invalid-credential') {
+            log.error("Sign in failed", err);
+            if (errorCode(err) === "auth/invalid-credential") {
                 setError("Invalid email or password.");
-            } else if (errorCode(err) === 'auth/user-not-found') {
+            } else if (errorCode(err) === "auth/user-not-found") {
                 setError("No user found with this email.");
-            } else if (errorCode(err) === 'auth/wrong-password') {
+            } else if (errorCode(err) === "auth/wrong-password") {
                 setError("Incorrect password.");
             } else {
                 setError("Failed to sign in. Please try again.");
@@ -99,12 +99,16 @@ export function LoginPage() {
                             </div>
                         </div>
                         <h2 className="text-2xl font-bold text-white mb-2">Welcome Back</h2>
-                        <p className="text-slate-400 text-sm">Sign in to access the RuralHealthAI platform</p>
+                        <p className="text-slate-400 text-sm">
+                            Sign in to access the RuralHealthAI platform
+                        </p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-5">
                         <div className="space-y-2">
-                            <Label htmlFor="email" className="text-slate-300">Email Address</Label>
+                            <Label htmlFor="email" className="text-slate-300">
+                                Email Address
+                            </Label>
                             <Input
                                 id="email"
                                 type="email"
@@ -117,7 +121,9 @@ export function LoginPage() {
                         </div>
                         <div className="space-y-2">
                             <div className="flex justify-between items-center">
-                                <Label htmlFor="password" className="text-slate-300">Password</Label>
+                                <Label htmlFor="password" className="text-slate-300">
+                                    Password
+                                </Label>
                                 <button
                                     type="button"
                                     onClick={handleForgotPassword}
@@ -140,7 +146,11 @@ export function LoginPage() {
                                     onClick={() => setShowPassword(!showPassword)}
                                     className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300"
                                 >
-                                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                    {showPassword ? (
+                                        <EyeOff className="h-4 w-4" />
+                                    ) : (
+                                        <Eye className="h-4 w-4" />
+                                    )}
                                 </button>
                             </div>
                         </div>
@@ -156,15 +166,25 @@ export function LoginPage() {
                             type="submit"
                             disabled={loading}
                         >
-                            {loading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : "Sign In"}
+                            {loading ? (
+                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                            ) : (
+                                "Sign In"
+                            )}
                         </Button>
 
                         <div className="text-center text-sm text-slate-500 mt-6">
-                            Don't have an account? <Link to="/register" className="text-teal-400 hover:text-teal-300 hover:underline transition-colors">Register now</Link>
+                            Don't have an account?{" "}
+                            <Link
+                                to="/register"
+                                className="text-teal-400 hover:text-teal-300 hover:underline transition-colors"
+                            >
+                                Register now
+                            </Link>
                         </div>
                     </form>
                 </div>
             </motion.div>
         </div>
-    )
+    );
 }

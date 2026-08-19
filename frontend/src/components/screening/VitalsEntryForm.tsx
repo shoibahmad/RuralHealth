@@ -13,20 +13,26 @@ interface VitalsEntryFormProps {
 
 export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormProps) {
     const t = translations[language];
-    
+
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
             <VoiceEntryBanner
                 data={data}
                 updateData={updateData}
                 language={language}
-                title={language === 'en' ? "AI Vitals Assistant" : "AI विटल्स सहायक"}
-                description={language === 'en' ? "Speak BP and Heart Rate (e.g., '120 over 80, pulse 72')." : "बीपी और हृदय गति बोलें (जैसे, '80 के ऊपर 120, पल्स 72')।"}
+                title={language === "en" ? "AI Vitals Assistant" : "AI विटल्स सहायक"}
+                description={
+                    language === "en"
+                        ? "Speak BP and Heart Rate (e.g., '120 over 80, pulse 72')."
+                        : "बीपी और हृदय गति बोलें (जैसे, '80 के ऊपर 120, पल्स 72')।"
+                }
             />
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="height_cm" className="text-slate-300">{t.height}</Label>
+                    <Label htmlFor="height_cm" className="text-slate-300">
+                        {t.height}
+                    </Label>
                     <div className="relative">
                         <Input
                             id="height_cm"
@@ -40,7 +46,9 @@ export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormP
                     </div>
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="weight_kg" className="text-slate-300">{t.weight}</Label>
+                    <Label htmlFor="weight_kg" className="text-slate-300">
+                        {t.weight}
+                    </Label>
                     <div className="relative">
                         <Input
                             id="weight_kg"
@@ -64,7 +72,9 @@ export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormP
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
                 <div className="space-y-2">
-                    <Label htmlFor="systolic_bp" className="text-slate-300">{t.systolic}</Label>
+                    <Label htmlFor="systolic_bp" className="text-slate-300">
+                        {t.systolic}
+                    </Label>
                     <Input
                         id="systolic_bp"
                         type="number"
@@ -75,7 +85,9 @@ export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormP
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="diastolic_bp" className="text-slate-300">{t.diastolic}</Label>
+                    <Label htmlFor="diastolic_bp" className="text-slate-300">
+                        {t.diastolic}
+                    </Label>
                     <Input
                         id="diastolic_bp"
                         type="number"
@@ -86,7 +98,9 @@ export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormP
                     />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="heart_rate" className="text-slate-300">{t.heart_rate}</Label>
+                    <Label htmlFor="heart_rate" className="text-slate-300">
+                        {t.heart_rate}
+                    </Label>
                     <div className="relative">
                         <Input
                             id="heart_rate"
@@ -100,6 +114,6 @@ export function VitalsEntryForm({ data, updateData, language }: VitalsEntryFormP
                     </div>
                 </div>
             </div>
-        </div >
-    )
+        </div>
+    );
 }

@@ -47,18 +47,10 @@ class Patient(models.Model):
     ]
 
     user = models.OneToOneField(
-        User,
-        on_delete=models.CASCADE,
-        related_name='patient_profile',
-        null=True,
-        blank=True
+        User, on_delete=models.CASCADE, related_name='patient_profile', null=True, blank=True
     )
     health_worker = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='patients'
+        User, on_delete=models.SET_NULL, null=True, blank=True, related_name='patients'
     )
     full_name = models.CharField(max_length=255, db_index=True)
     age = models.IntegerField()
@@ -89,11 +81,7 @@ class Screening(models.Model):
         ('Current', 'Current'),
     ]
 
-    patient = models.ForeignKey(
-        Patient,
-        on_delete=models.CASCADE,
-        related_name='screenings'
-    )
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='screenings')
 
     # Vitals
     height_cm = models.FloatField(blank=True, null=True)
@@ -133,11 +121,7 @@ class Screening(models.Model):
 
     # Result
     risk_score = models.FloatField(blank=True, null=True)
-    risk_level = models.CharField(
-        max_length=10,
-        choices=RISK_LEVEL_CHOICES,
-        default='Low'
-    )
+    risk_level = models.CharField(max_length=10, choices=RISK_LEVEL_CHOICES, default='Low')
     risk_notes = models.TextField(blank=True, null=True)
     ai_insights = models.TextField(blank=True, null=True)
 
@@ -160,24 +144,12 @@ class Appointment(models.Model):
         ('missed', 'Missed'),
     ]
 
-    patient = models.ForeignKey(
-        Patient,
-        on_delete=models.CASCADE,
-        related_name='appointments'
-    )
-    health_worker = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='appointments'
-    )
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='appointments')
+    health_worker = models.ForeignKey(User, on_delete=models.CASCADE, related_name='appointments')
     scheduled_date = models.DateTimeField()
     reason = models.CharField(max_length=255)
     notes = models.TextField(blank=True, null=True)
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='scheduled'
-    )
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='scheduled')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -206,26 +178,14 @@ class Recommendation(models.Model):
         ('high', 'High'),
     ]
 
-    patient = models.ForeignKey(
-        Patient,
-        on_delete=models.CASCADE,
-        related_name='recommendations'
-    )
+    patient = models.ForeignKey(Patient, on_delete=models.CASCADE, related_name='recommendations')
     screening = models.ForeignKey(
-        Screening,
-        on_delete=models.CASCADE,
-        related_name='recommendations',
-        null=True,
-        blank=True
+        Screening, on_delete=models.CASCADE, related_name='recommendations', null=True, blank=True
     )
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    priority = models.CharField(
-        max_length=10,
-        choices=PRIORITY_CHOICES,
-        default='medium'
-    )
+    priority = models.CharField(max_length=10, choices=PRIORITY_CHOICES, default='medium')
     is_completed = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 

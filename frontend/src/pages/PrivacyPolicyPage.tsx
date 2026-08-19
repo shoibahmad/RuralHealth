@@ -16,7 +16,9 @@ export function PrivacyPolicyPage() {
                         </div>
                         <div>
                             <h1 className="text-3xl font-bold text-white">Privacy Policy</h1>
-                            <p className="text-slate-400">Last updated: {new Date().toLocaleDateString()}</p>
+                            <p className="text-slate-400">
+                                Last updated: {new Date().toLocaleDateString()}
+                            </p>
                         </div>
                     </div>
 
@@ -24,20 +26,29 @@ export function PrivacyPolicyPage() {
                         <section>
                             <h2 className="text-xl font-bold text-white mb-3">1. Introduction</h2>
                             <p>
-                                RuralHealthAI ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our health screening platform.
+                                RuralHealthAI ("we," "our," or "us") is committed to protecting your
+                                privacy. This Privacy Policy explains how we collect, use, disclose,
+                                and safeguard your information when you use our health screening
+                                platform.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">2. Information We Collect</h2>
-                            <h3 className="text-lg font-semibold text-white mb-2">2.1 Personal Information</h3>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                2. Information We Collect
+                            </h2>
+                            <h3 className="text-lg font-semibold text-white mb-2">
+                                2.1 Personal Information
+                            </h3>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Name, age, gender, and contact information</li>
                                 <li>Village/location data</li>
                                 <li>Health worker credentials and role information</li>
                             </ul>
 
-                            <h3 className="text-lg font-semibold text-white mb-2 mt-4">2.2 Health Information</h3>
+                            <h3 className="text-lg font-semibold text-white mb-2 mt-4">
+                                2.2 Health Information
+                            </h3>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Vital signs (blood pressure, heart rate, BMI)</li>
                                 <li>Lab results (glucose, cholesterol levels)</li>
@@ -45,7 +56,9 @@ export function PrivacyPolicyPage() {
                                 <li>Risk assessment scores and health recommendations</li>
                             </ul>
 
-                            <h3 className="text-lg font-semibold text-white mb-2 mt-4">2.3 Technical Information</h3>
+                            <h3 className="text-lg font-semibold text-white mb-2 mt-4">
+                                2.3 Technical Information
+                            </h3>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Device information and IP address</li>
                                 <li>Browser type and version</li>
@@ -54,7 +67,9 @@ export function PrivacyPolicyPage() {
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">3. How We Use Your Information</h2>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                3. How We Use Your Information
+                            </h2>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>To provide health screening and risk assessment services</li>
                                 <li>To generate personalized health recommendations</li>
@@ -68,7 +83,8 @@ export function PrivacyPolicyPage() {
                         <section>
                             <h2 className="text-xl font-bold text-white mb-3">4. Data Security</h2>
                             <p>
-                                We implement industry-standard security measures to protect your information:
+                                We implement industry-standard security measures to protect your
+                                information:
                             </p>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>End-to-end encryption for data transmission</li>
@@ -80,8 +96,13 @@ export function PrivacyPolicyPage() {
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">5. Data Sharing and Disclosure</h2>
-                            <p>We do not sell your personal information. We may share your data only in the following circumstances:</p>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                5. Data Sharing and Disclosure
+                            </h2>
+                            <p>
+                                We do not sell your personal information. We may share your data
+                                only in the following circumstances:
+                            </p>
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>With your assigned health worker for care coordination</li>
                                 <li>With health officers for population health management</li>
@@ -97,7 +118,9 @@ export function PrivacyPolicyPage() {
                             <ul className="list-disc pl-6 space-y-2">
                                 <li>Access your personal and health information</li>
                                 <li>Request correction of inaccurate data</li>
-                                <li>Request deletion of your data (subject to legal requirements)</li>
+                                <li>
+                                    Request deletion of your data (subject to legal requirements)
+                                </li>
                                 <li>Opt-out of non-essential data collection</li>
                                 <li>Receive a copy of your data in a portable format</li>
                                 <li>Withdraw consent at any time</li>
@@ -107,35 +130,49 @@ export function PrivacyPolicyPage() {
                         <section>
                             <h2 className="text-xl font-bold text-white mb-3">7. Data Retention</h2>
                             <p>
-                                We retain your information for as long as necessary to provide services and comply with legal obligations. Health records are typically retained for 7 years as per healthcare regulations.
+                                We retain your information for as long as necessary to provide
+                                services and comply with legal obligations. Health records are
+                                typically retained for 7 years as per healthcare regulations.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">8. Children's Privacy</h2>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                8. Children's Privacy
+                            </h2>
                             <p>
-                                Our services are not directed to children under 13. We do not knowingly collect information from children without parental consent.
+                                Our services are not directed to children under 13. We do not
+                                knowingly collect information from children without parental
+                                consent.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">9. International Data Transfers</h2>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                9. International Data Transfers
+                            </h2>
                             <p>
-                                Your data is stored on secure servers located in India. If you access our services from outside India, your data may be transferred internationally.
+                                Your data is stored on secure servers located in India. If you
+                                access our services from outside India, your data may be transferred
+                                internationally.
                             </p>
                         </section>
 
                         <section>
-                            <h2 className="text-xl font-bold text-white mb-3">10. Changes to This Policy</h2>
+                            <h2 className="text-xl font-bold text-white mb-3">
+                                10. Changes to This Policy
+                            </h2>
                             <p>
-                                We may update this Privacy Policy periodically. We will notify you of significant changes via email or platform notification.
+                                We may update this Privacy Policy periodically. We will notify you
+                                of significant changes via email or platform notification.
                             </p>
                         </section>
 
                         <section>
                             <h2 className="text-xl font-bold text-white mb-3">11. Contact Us</h2>
                             <p>
-                                If you have questions about this Privacy Policy or wish to exercise your rights, please contact us:
+                                If you have questions about this Privacy Policy or wish to exercise
+                                your rights, please contact us:
                             </p>
                             <div className="bg-slate-800/50 p-6 rounded-2xl mt-4 border border-white/5 space-y-3">
                                 <div className="flex items-start gap-4">
@@ -153,7 +190,8 @@ export function PrivacyPolicyPage() {
                                 <div className="flex items-start gap-4">
                                     <div className="text-teal-400 font-bold w-20">Address:</div>
                                     <div className="text-white leading-relaxed">
-                                        Integral University, Lucknow,<br />
+                                        Integral University, Lucknow,
+                                        <br />
                                         Uttar Pradesh, India
                                     </div>
                                 </div>
