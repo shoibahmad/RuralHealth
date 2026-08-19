@@ -25,8 +25,11 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Local databases (never commit real patient data)
+*.db
+*.sqlite3
+
 # Logs
 *.log
 npm-debug.log*
 RENDER_DEPLOYMENT.md
-TESTING_OFFLINE.md

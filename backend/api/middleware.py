@@ -1,35 +1,37 @@
-import time
 import logging
-import json
+import time
 
 logger = logging.getLogger(__name__)
 
+
 class RequestLogMiddleware:
+    """Log every request as METHOD PATH - STATUS - DURATION."""
+
     def __init__(self, get_response):
         self.get_response = get_response
 
     def __call__(self, request):
         start_time = time.time()
-        
-        # Process the request
+
         response = self.get_response(request)
-        
+
         duration = time.time() - start_time
-        
-        # Color codes for terminal output
-        # Green for success, Red for error, Yellow for redirect/other
+
+        # Server errors are worth an ERROR record; client errors a WARNING.
         if response.status_code >= 500:
-            color = "\033[91m" # Red
+            level = logging.ERROR
         elif response.status_code >= 400:
-            color = "\033[93m" # Yellow
+            level = logging.WARNING
         else:
-            color = "\033[92m" # Green
-        
-        reset = "\033[0m"
-        
-        # Format: [METHOD] PATH - STATUS - DURATION
-        log_message = f"{color}[{request.method}] {request.get_full_path()} - {response.status_code} - {duration:.4f}s{reset}"
-        
-        print(log_message)
-        
+            level = logging.INFO
+
+        logger.log(
+            level,
+            '%s %s - %s - %.4fs',
+            request.method,
+            request.get_full_path(),
+            response.status_code,
+            duration,
+        )
+
         return response
