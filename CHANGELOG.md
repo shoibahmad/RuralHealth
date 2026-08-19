@@ -85,6 +85,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   daemon; the build context went from 446 MB to 1.3 MB.
 - Removed two committed SQLite databases from version control and added
   `*.db` / `*.sqlite3` to `.gitignore`.
+- Added `.gitattributes` pinning shell scripts to LF. Without it a Windows
+  checkout gave `docker-entrypoint.sh` CRLF endings and the container died at
+  startup with `env: 'bash': No such file or directory`.
 
 ### Known limitations
 
