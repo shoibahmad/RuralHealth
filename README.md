@@ -4,6 +4,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Node 22+](https://img.shields.io/badge/node-22+-green.svg)](https://nodejs.org/)
+[![Tests](https://img.shields.io/badge/tests-571%20passing-brightgreen.svg)](#-testing--quality)
+[![Coverage](https://img.shields.io/badge/coverage-92%25%20backend%20%7C%2094%25%20frontend-brightgreen.svg)](#-testing--quality)
 
 **RuralHealthAI** is a mission-critical digital health platform designed to bring advanced diagnostic capabilities to frontline health workers in underserved rural areas. By transitioning from manual paper-based logs to a smart, AI-driven, and offline-capable system, the platform enables early identification of Non-Communicable Diseases (NCDs) like Hypertension, Diabetes, and cardiovascular risks.
 
@@ -100,10 +102,11 @@ export GEMINI_API_KEY=your-key-here   # read by docker compose
    python -m venv venv
    source venv/bin/activate  # On Windows: venv\Scripts\activate
    ```
-2. Install dependencies. Use `requirements-dev.txt` for the test and lint
-   toolchain, or `requirements.txt` for runtime only:
+2. Install dependencies. `requirements.lock.txt` pins the exact resolved
+   set and is what CI installs; `requirements-dev.txt` carries the loose
+   ranges used to regenerate it:
    ```bash
-   pip install -r requirements-dev.txt
+   pip install -r requirements.lock.txt
    ```
 3. Create your environment file from the template and fill it in:
    ```bash
@@ -136,28 +139,33 @@ export GEMINI_API_KEY=your-key-here   # read by docker compose
 
 Every command below runs in CI on each push and pull request.
 
-### Backend
+From the repository root, one command runs everything CI runs:
 
 ```bash
-cd backend
-pytest                  # 248 tests
-pytest --cov            # with a coverage report (currently 92%)
-ruff check .            # lint and import ordering
-ruff format .           # apply formatting
+npm run verify          # lint + typecheck + tests + build, both stacks
 ```
 
-### Frontend
+Or use the Makefile: `make help` lists every target.
 
-```bash
-cd frontend
-npm run test            # 232 tests
-npm run test:coverage   # with a coverage report
-npm run lint            # ESLint, under a warning budget
-npm run typecheck       # TypeScript, no emit
-npm run build           # type check plus production bundle
-```
+### Individual commands
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions, and
+| Command | What it does |
+| :--- | :--- |
+| `npm test` | Both suites: 248 backend + 323 frontend |
+| `npm run test:coverage` | Both suites with coverage gates enforced |
+| `npm run lint` | ruff and eslint, zero warnings tolerated |
+| `npm run typecheck` | TypeScript, no emit |
+| `npm run build` | Production frontend bundle |
+| `npm run format` | Apply ruff format and prettier |
+| `npm run audit:deps` | npm audit plus pip-audit against the lockfiles |
+
+Coverage is gated in CI and the build fails below the floor: **85% backend**
+(currently 92.4%) and **85% frontend lines** (currently 94.2%, measured over
+the logic layers; see `frontend/vitest.config.ts` for what is excluded and
+why).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions,
+[SECURITY.md](SECURITY.md) for the security posture, and
 [CHANGELOG.md](CHANGELOG.md) for the change history.
 
 ---
@@ -203,6 +211,11 @@ For interactive documentation, use the built-in **API Docs** page within the app
 ## 🧭 Project Layout
 
 ```
+package.json          # Root scripts driving both stacks
+Makefile              # Same commands as make targets
+.env.example          # Every environment variable, with placeholders
+docker-compose.yml    # Postgres plus the app, one command
+
 backend/
   api/
     views/            # Endpoints split by domain (auth, patients, screenings, ...)
@@ -210,11 +223,13 @@ backend/
     serializers.py    # Request validation and response shaping
     ai_service.py     # Gemini client wrapper, lazily configured
     tests/            # pytest suite, one module per domain area
+  requirements.lock.txt  # Fully pinned dependency set
   ruralhealth/        # Django project settings and URL configuration
 frontend/
   src/
-    lib/              # Pure logic: schemas, risk scoring, OCR mapping
-    services/         # Firestore and offline sync layers
+    lib/              # Pure logic: schemas, risk scoring, OCR mapping, logging
+    services/         # Firestore, offline sync and dashboard aggregation
+    context/          # Providers, with their contexts and hooks split out
     pages/            # Route components
     components/       # Shared and feature-specific UI
 ```
