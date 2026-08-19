@@ -15,8 +15,9 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "../../lib/utils";
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { translations } from "../../lib/translations";
+import { useSpeechSynthesis } from "../../hooks/useSpeechSynthesis";
 
 interface AIAnalysisModalProps {
     isOpen: boolean;
@@ -34,24 +35,8 @@ export function AIAnalysisModal({
     language = "en",
 }: AIAnalysisModalProps) {
     const [localLanguage, setLocalLanguage] = useState<"en" | "hi">(language);
-    const [isSpeaking, setIsSpeaking] = useState(false);
-    const isSpeakingRef = useRef(false);
-    const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
-    const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
+    const { isSpeaking, speak, stop } = useSpeechSynthesis();
     const t = translations[localLanguage];
-
-    // Pre-load voices immediately
-    useEffect(() => {
-        const load = () => {
-            const v = window.speechSynthesis.getVoices();
-            if (v.length > 0) setAvailableVoices(v);
-        };
-        load();
-        window.speechSynthesis.onvoiceschanged = load;
-        return () => {
-            window.speechSynthesis.onvoiceschanged = null;
-        };
-    }, []);
 
     // Reset the language selection whenever the caller changes it or the modal
     // reopens. Adjusting during render is what React recommends here; an effect
@@ -62,33 +47,11 @@ export function AIAnalysisModal({
         setLocalLanguage(language);
     }
 
-    useEffect(() => {
-        return () => {
-            window.speechSynthesis.cancel();
-            isSpeakingRef.current = false;
-            setIsSpeaking(false);
-        };
-    }, []);
-
-    useEffect(() => {
-        let interval: ReturnType<typeof setInterval>;
-        if (isSpeaking) {
-            interval = setInterval(() => {
-                if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
-                    window.speechSynthesis.resume();
-                }
-            }, 10000);
-        }
-        return () => clearInterval(interval);
-    }, [isSpeaking]);
-
     if (!isOpen || !analysis) return null;
 
     const handleSpeech = () => {
         if (isSpeaking) {
-            window.speechSynthesis.cancel();
-            isSpeakingRef.current = false;
-            setIsSpeaking(false);
+            stop();
             return;
         }
 
@@ -111,77 +74,9 @@ export function AIAnalysisModal({
         const textToSpeak = clean(rawText);
         if (!textToSpeak) return;
 
-        // Reset memory-locked utterance
-        window.speechSynthesis.cancel();
-
-        setTimeout(() => {
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.lang = localLanguage === "en" ? "en-US" : "hi-IN";
-
-            // Critical Chrome Fix: Keep a reference to prevent garbage collection
-            utteranceRef.current = utterance;
-
-            const voices =
-                availableVoices.length > 0 ? availableVoices : window.speechSynthesis.getVoices();
-            let voice: SpeechSynthesisVoice | undefined;
-
-            if (localLanguage === "hi") {
-                voice =
-                    voices.find(
-                        (v) =>
-                            (v.lang.toLowerCase().includes("hi") ||
-                                v.name.toLowerCase().includes("hindi")) &&
-                            v.name.includes("Google"),
-                    ) ||
-                    voices.find(
-                        (v) =>
-                            (v.lang.toLowerCase().includes("hi") ||
-                                v.name.toLowerCase().includes("hindi")) &&
-                            v.name.includes("Microsoft"),
-                    ) ||
-                    voices.find(
-                        (v) =>
-                            v.lang.toLowerCase().includes("hi") ||
-                            v.name.toLowerCase().includes("hindi"),
-                    ) ||
-                    voices.find(
-                        (v) =>
-                            v.lang.toLowerCase().includes("in") &&
-                            (v.lang.toLowerCase().includes("hi") ||
-                                v.name.toLowerCase().includes("hin")),
-                    );
-            } else {
-                voice =
-                    voices.find((v) => v.lang.includes("en") && v.name.includes("Google")) ||
-                    voices.find((v) => v.lang.includes("en-US")) ||
-                    voices.find((v) => v.lang.includes("en"));
-            }
-
-            if (voice) utterance.voice = voice;
-            utterance.rate = 0.9;
-            utterance.pitch = 1.0;
-            utterance.volume = 1.0;
-
-            utterance.onstart = () => {
-                setIsSpeaking(true);
-                isSpeakingRef.current = true;
-            };
-            utterance.onend = () => {
-                setIsSpeaking(false);
-                isSpeakingRef.current = false;
-                utteranceRef.current = null;
-            };
-            utterance.onerror = (e) => {
-                console.error("Critical Speech Error Code:", e.error);
-                setIsSpeaking(false);
-                isSpeakingRef.current = false;
-                utteranceRef.current = null;
-            };
-
-            window.speechSynthesis.speak(utteranceRef.current);
-            window.speechSynthesis.resume();
-        }, 50); // 50ms delay after cancel and before speak avoids most interruptions
+        speak(textToSpeak, localLanguage);
     };
+
 
     const getRiskStyles = (level: string) => {
         switch (level) {
