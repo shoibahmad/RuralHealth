@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+__pycache__
+*.pyc
+venv
+.git
+.gitignore
+.vscode
+ruralhealth.db
+ruralhealth_django.db
