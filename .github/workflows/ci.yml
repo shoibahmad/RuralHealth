@@ -115,8 +115,8 @@ jobs:
         working-directory: frontend
         run: npm run build
 
-  audit:
-    name: Dependency audit
+  security:
+    name: Security & vulnerability scan (SAST)
     runs-on: ubuntu-latest
 
     steps:
@@ -132,18 +132,23 @@ jobs:
         with:
           python-version: "3.13"
 
-      - name: Audit npm dependencies
+      - name: Run frontend dependency audit
         working-directory: frontend
         run: npm audit --audit-level=high
 
-      - name: Audit Python dependencies
+      - name: Run Python SAST security scan (bandit)
         run: |
           python -m pip install --upgrade pip
+          pip install bandit
+          bandit -r backend/api -x backend/api/tests -s B105 -q
+
+      - name: Run Python dependency vulnerability audit
+        run: |
           pip install pip-audit
           pip-audit -r backend/requirements.lock.txt
 
-  docker:
-    name: Docker image
+  smoke-test:
+    name: Fresh-clone container smoke test
     runs-on: ubuntu-latest
 
     steps:

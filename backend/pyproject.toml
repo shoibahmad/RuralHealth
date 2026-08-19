@@ -48,3 +48,8 @@ ignore = [
 
 [tool.ruff.format]
 quote-style = "preserve"
+
+[tool.bandit]
+exclude_dirs = ["venv", "api/tests", "api/migrations"]
+skips = ["B101"]
+
