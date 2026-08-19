@@ -1,6 +1,10 @@
-"""Shared fixtures for the API test suite."""
-
+import os
 import uuid
+
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'ruralhealth.settings')
+django.setup()
 
 import pytest
 from django.contrib.auth import get_user_model

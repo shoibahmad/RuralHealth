@@ -52,6 +52,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'api.middleware.RequestLogMiddleware',
+    'api.error_tracking.ErrorTrackingMiddleware',
 ]
 
 ROOT_URLCONF = 'ruralhealth.urls'

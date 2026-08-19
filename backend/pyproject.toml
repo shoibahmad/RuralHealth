@@ -1,5 +1,5 @@
 [tool.pytest.ini_options]
-DJANGO_SETTINGS_MODULE = "ruralhealth.settings"
+django_settings_module = "ruralhealth.settings"
 python_files = ["test_*.py", "*_test.py"]
 testpaths = ["api/tests"]
 addopts = "-ra --strict-markers"
@@ -43,6 +43,8 @@ ignore = [
 [tool.ruff.lint.per-file-ignores]
 # Re-export modules deliberately import names they do not use.
 "api/views/__init__.py" = ["F401"]
+# conftest.py must initialize Django before importing models
+"api/tests/conftest.py" = ["E402"]
 
 [tool.ruff.format]
 quote-style = "preserve"
