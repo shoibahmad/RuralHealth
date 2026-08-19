@@ -31,7 +31,7 @@ RUN npm run build
 
 # Stage 2: Build the backend and serve the application
 # Matches the Python version the CI matrix tests against.
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # libpq-dev and gcc are needed to build psycopg2 against PostgreSQL.
 RUN apt-get update \
