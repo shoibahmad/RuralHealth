@@ -3,15 +3,18 @@ Django settings for RuralHealthAI project.
 """
 
 import os
-from pathlib import Path
 from datetime import timedelta
+from pathlib import Path
+
+import dj_database_url
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-import dj_database_url
-
-# ... existing code ...
+# Load backend/.env so a fresh clone only needs `cp .env.example .env`.
+# Real environment variables always win over the file.
+load_dotenv(BASE_DIR / '.env', override=False)
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-YOUR_DEV_KEY_HERE')
