@@ -29,4 +29,11 @@ class ResizeObserverStub {
     disconnect() {}
 }
 
+class IntersectionObserverStub {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+}
+
 window.ResizeObserver = ResizeObserverStub as unknown as typeof ResizeObserver;
+window.IntersectionObserver = IntersectionObserverStub as unknown as typeof IntersectionObserver;
