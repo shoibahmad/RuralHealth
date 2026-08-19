@@ -1,3 +1,5 @@
+import { formatDateWith } from "../lib/dates";
+import type { PatientHistory } from "../services/types";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -17,7 +19,7 @@ import {
 export function PatientScreeningHistory() {
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<PatientHistory | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
 
@@ -42,16 +44,17 @@ export function PatientScreeningHistory() {
                 full_name: user.displayName || user.full_name || 'Patient',
                 age: 0,
                 gender: 'Not Set',
-                village: 'Not Set'
+                village: 'Not Set',
+                created_at: new Date().toISOString(),
             };
 
-            const historyData = {
+            const historyData: PatientHistory = {
                 patient,
                 screenings,
                 appointments,
                 recommendations: [], // Add recommendation fetching if available in logic
                 total_screenings: screenings.length,
-                latest_screening: screenings[0]
+                latest_screening: screenings[0] ?? null,
             };
 
             setData(historyData);
@@ -90,8 +93,8 @@ export function PatientScreeningHistory() {
     const { screenings } = data;
 
     // Prepare chart data
-    const chartData = screenings.slice().reverse().map((s: any) => ({
-        date: new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    const chartData = screenings.slice().reverse().map((s) => ({
+        date: formatDateWith(s.created_at, { month: 'short', day: 'numeric' }),
         risk_score: s.risk_score || 0,
         systolic_bp: s.systolic_bp || 0,
         glucose: s.glucose_level || 0
@@ -237,14 +240,14 @@ export function PatientScreeningHistory() {
                             </tr>
                         </thead>
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                            {screenings.map((screening: any) => (
+                            {screenings.map((screening) => (
                                 <tr
                                     key={screening.id}
                                     onClick={() => navigate(`/patient/screenings/${screening.id}`)}
                                     className="hover:bg-white/5 transition-colors cursor-pointer"
                                 >
                                     <td className="p-6 font-medium text-white">
-                                        {new Date(screening.created_at).toLocaleDateString('en-US', {
+                                        {formatDateWith(screening.created_at, {
                                             year: 'numeric',
                                             month: 'short',
                                             day: 'numeric'

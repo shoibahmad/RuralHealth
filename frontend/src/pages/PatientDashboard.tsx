@@ -1,41 +1,31 @@
+import type { Appointment, Patient, Screening } from "../services/types";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Activity, Calendar, AlertCircle, CheckCircle, PlusCircle, TrendingUp } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Card } from "../components/ui/card";
 
+/**
+ * The patient's own dashboard payload.
+ *
+ * Ids are strings because this data comes from Firestore; the numeric ids in
+ * the earlier shape were left over from the Django REST endpoints.
+ */
+/** A piece of advice derived locally from the latest screening. */
+interface AdviceCard {
+    id: number;
+    title: string;
+    description: string;
+    category: string;
+    priority: string;
+}
+
 interface DashboardData {
-    patient: {
-        id: number;
-        full_name: string;
-        age: number;
-        gender: string;
-        village: string;
-        phone: string;
-    };
+    patient: Patient;
     total_screenings: number;
-    latest_screening: {
-        id: number;
-        risk_level: string;
-        risk_score: number;
-        created_at: string;
-        systolic_bp?: number;
-        diastolic_bp?: number;
-        heart_rate?: number;
-    } | null;
-    upcoming_appointments: Array<{
-        id: number;
-        scheduled_date: string;
-        reason: string;
-        status: string;
-    }>;
-    active_recommendations: Array<{
-        id: number;
-        title: string;
-        description: string;
-        category: string;
-        priority: string;
-    }>;
+    latest_screening: Screening | null;
+    upcoming_appointments: Appointment[];
+    active_recommendations: AdviceCard[];
 }
 
 // import { useAuth } from "../context/AuthContext"; // Already imported
@@ -66,27 +56,23 @@ export function PatientDashboard() {
             ]);
 
             // If getPatient(user.uid) returns null (because user is in 'users' not 'patients'), uses AuthContext
-            const patientData = patientProfile || {
+            // Patients who registered themselves live in `users`, not
+            // `patients`, so fall back to the signed-in profile.
+            const patientData: Patient = patientProfile ?? {
                 id: user.uid,
                 full_name: user.displayName || user.full_name || 'Patient',
                 age: 0, // 0 indicates not set
                 gender: 'Not Set',
                 village: 'Not Set',
-                phone: user.phone || ''
+                phone: user.phone || '',
+                created_at: new Date().toISOString(),
             };
 
-            const upcoming = appointments
-                .filter(a => a.status === 'scheduled')
-                .map(a => ({
-                    id: a.id,
-                    scheduled_date: a.scheduled_date,
-                    reason: a.reason,
-                    status: a.status
-                }));
+            const upcoming = appointments.filter(a => a.status === 'scheduled');
 
             // Derive active recommendations
             const latest = screenings[0] || null;
-            const recommendations = [];
+            const recommendations: AdviceCard[] = [];
 
             if (latest) {
                 if (latest.risk_level === 'High') {
@@ -121,11 +107,11 @@ export function PatientDashboard() {
             }
 
             setData({
-                patient: patientData as any,
+                patient: patientData,
                 total_screenings: screenings.length,
-                latest_screening: latest as any,
-                upcoming_appointments: upcoming as any,
-                active_recommendations: recommendations as any
+                latest_screening: latest,
+                upcoming_appointments: upcoming,
+                active_recommendations: recommendations,
             });
 
         } catch (err) {

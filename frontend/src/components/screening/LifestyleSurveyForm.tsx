@@ -1,3 +1,4 @@
+import type { ScreeningFormValues } from "../../lib/schemas";
 import { Activity, Wine, Cigarette } from "lucide-react";
 import { Label } from "../ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
@@ -5,8 +6,8 @@ import { VoiceEntryBanner } from "./VoiceEntryBanner";
 import { translations } from "../../lib/translations";
 
 interface LifestyleSurveyFormProps {
-    data: any;
-    updateData: (data: any) => void;
+    data: ScreeningFormValues;
+    updateData: (data: ScreeningFormValues) => void;
     language: "en" | "hi";
 }
 

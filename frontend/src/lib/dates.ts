@@ -45,6 +45,17 @@ export function formatDateTime(value: DateLike, placeholder = "—"): string {
     return date ? date.toLocaleString() : placeholder;
 }
 
+/** Locale date string using explicit Intl options. */
+export function formatDateWith(
+    value: DateLike,
+    options: Intl.DateTimeFormatOptions,
+    locale = "en-US",
+    placeholder = "—",
+): string {
+    const date = toDate(value);
+    return date ? date.toLocaleDateString(locale, options) : placeholder;
+}
+
 /** Milliseconds since the epoch, or 0 so sorts stay stable. */
 export function toEpoch(value: DateLike): number {
     return toDate(value)?.getTime() ?? 0;

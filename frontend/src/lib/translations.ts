@@ -1,5 +1,10 @@
 
-export const translations: any = {
+/** A translation bundle: every UI string keyed by its identifier. */
+export type TranslationBundle = Record<string, string>;
+
+export type Language = "en" | "hi";
+
+export const translations: Record<Language, TranslationBundle> = {
   en: {
     // Demographics
     full_name: "Full Name",

@@ -34,6 +34,22 @@ export interface Screening {
   synced?: boolean;
 }
 
+/**
+ * A queued offline write.
+ *
+ * IndexedDB indexes cannot key on booleans, so `synced` is persisted as 0 or 1
+ * and queried through UNSYNCED_KEY rather than `false`.
+ */
+export interface SyncQueueRecord {
+  id?: number;
+  type: 'patient' | 'screening';
+  data: Record<string, unknown>;
+  timestamp: number;
+}
+
+/** Index key matching records that have not yet been synced. */
+const UNSYNCED_KEY = IDBKeyRange.only(0);
+
 class IndexedDBService {
   private db: IDBDatabase | null = null;
 
@@ -166,7 +182,10 @@ class IndexedDBService {
   }
 
   // Sync queue operations
-  async addToSyncQueue(type: 'patient' | 'screening', data: any): Promise<void> {
+  async addToSyncQueue(
+    type: 'patient' | 'screening',
+    data: SyncQueueRecord['data'],
+  ): Promise<void> {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(['sync_queue'], 'readwrite');
@@ -178,7 +197,7 @@ class IndexedDBService {
     });
   }
 
-  async getSyncQueue(): Promise<any[]> {
+  async getSyncQueue(): Promise<SyncQueueRecord[]> {
     if (!this.db) await this.init();
     return new Promise((resolve, reject) => {
       const transaction = this.db!.transaction(['sync_queue'], 'readonly');
@@ -209,7 +228,7 @@ class IndexedDBService {
       const transaction = this.db!.transaction(['patients'], 'readonly');
       const store = transaction.objectStore('patients');
       const index = store.index('synced');
-      const request = index.getAll(false as any);
+      const request = index.getAll(UNSYNCED_KEY);
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);
@@ -222,7 +241,7 @@ class IndexedDBService {
       const transaction = this.db!.transaction(['screenings'], 'readonly');
       const store = transaction.objectStore('screenings');
       const index = store.index('synced');
-      const request = index.getAll(false as any);
+      const request = index.getAll(UNSYNCED_KEY);
 
       request.onsuccess = () => resolve(request.result);
       request.onerror = () => reject(request.error);

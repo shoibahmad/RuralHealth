@@ -1,3 +1,5 @@
+import { formatDateWith } from "../lib/dates";
+import type { PatientHistory } from "../services/types";
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -19,7 +21,7 @@ export function PatientHistoryPage() {
     const { id } = useParams();
     const { user } = useAuth();
     const navigate = useNavigate();
-    const [data, setData] = useState<any>(null);
+    const [data, setData] = useState<PatientHistory | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -73,8 +75,8 @@ export function PatientHistoryPage() {
     const screenings = data.screenings || [];
 
     // Prepare chart data
-    const chartData = screenings.slice().reverse().map((s: any) => ({
-        date: new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+    const chartData = screenings.slice().reverse().map((s) => ({
+        date: formatDateWith(s.created_at, { month: 'short', day: 'numeric' }),
         risk_score: s.risk_score || 0,
         systolic_bp: s.systolic_bp || 0,
         glucose: s.glucose_level || 0
@@ -229,14 +231,14 @@ export function PatientHistoryPage() {
                             </tr>
                         </thead>
                         <tbody className="text-sm text-slate-300 divide-y divide-white/5">
-                            {screenings.map((screening: any) => (
+                            {screenings.map((screening) => (
                                 <tr
                                     key={screening.id}
                                     onClick={() => navigate(user?.role === 'patient' || !user ? `/patient/screenings/${screening.id}` : `/dashboard/screenings/${screening.id}`)}
                                     className="hover:bg-white/5 transition-colors cursor-pointer"
                                 >
                                     <td className="p-6 font-medium text-white">
-                                        {new Date(screening.created_at).toLocaleDateString('en-US', {
+                                        {formatDateWith(screening.created_at, {
                                             year: 'numeric',
                                             month: 'short',
                                             day: 'numeric'
@@ -279,7 +281,7 @@ export function PatientHistoryPage() {
                 >
                     <h2 className="text-lg font-bold text-white mb-4">Health Recommendations</h2>
                     <div className="space-y-3">
-                        {data.recommendations.slice(0, 5).map((rec: any) => (
+                        {data.recommendations.slice(0, 5).map((rec) => (
                             <div key={rec.id} className="p-4 rounded-xl bg-slate-900/50 border border-white/5">
                                 <div className="flex items-start justify-between">
                                     <div className="flex-1">

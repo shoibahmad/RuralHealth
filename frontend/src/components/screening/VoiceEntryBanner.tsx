@@ -1,3 +1,4 @@
+import type { ScreeningFormValues } from "../../lib/schemas";
 import { useState, useCallback } from "react";
 import { Mic, Activity } from "lucide-react";
 import { Button } from "../ui/button";
@@ -6,8 +7,8 @@ import { useSpeechRecognition } from "../../hooks/useSpeechRecognition";
 
 
 interface VoiceEntryBannerProps {
-    data: any;
-    updateData: (data: any) => void;
+    data: ScreeningFormValues;
+    updateData: (data: ScreeningFormValues) => void;
     title?: string;
     description?: string;
     language: "en" | "hi";

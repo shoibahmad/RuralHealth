@@ -34,6 +34,7 @@ export type {
     HealthWorkerWithStats,
     Patient,
     PatientDetail,
+    PatientHistory,
     Recommendation,
     Screening,
     User,

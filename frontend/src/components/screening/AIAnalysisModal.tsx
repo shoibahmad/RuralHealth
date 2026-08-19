@@ -1,3 +1,4 @@
+import type { AiInsights } from "../../services/types";
 import { Button } from "../ui/button";
 import { X, Sparkles, Activity, AlertTriangle, CheckCircle2, FlaskConical, ClipboardCheck, ArrowRight, ShieldCheck, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,7 +9,7 @@ import { translations } from "../../lib/translations";
 interface AIAnalysisModalProps {
     isOpen: boolean;
     onClose: () => void;
-    analysis: any;
+    analysis: AiInsights | null;
     patientName?: string;
     language?: 'en' | 'hi';
 }
@@ -45,7 +46,7 @@ export function AIAnalysisModal({ isOpen, onClose, analysis, patientName, langua
     }, []);
 
     useEffect(() => {
-        let interval: any;
+        let interval: ReturnType<typeof setInterval>;
         if (isSpeaking) {
             interval = setInterval(() => {
                 if (window.speechSynthesis.speaking && !window.speechSynthesis.paused) {
@@ -69,9 +70,13 @@ export function AIAnalysisModal({ isOpen, onClose, analysis, patientName, langua
         // Clean up text for synthesis (remove markdown **)
         const clean = (txt: string) => txt.replace(/\*\*/g, '').replace(/[\n\r]/g, ' ').trim();
 
+        // Every field on the analysis is optional: the model may omit any of
+        // them, and the Hindi variants are absent whenever it replies in English.
+        const list = (values?: string[]) => (values ?? []).join(', ');
+
         const rawText = localLanguage === 'en'
-            ? `${analysis.summary}. Concerns: ${analysis.concerns.join(', ')}. Recommendations: ${analysis.recommendations.join(', ')}`
-            : `${analysis.summary_hi || analysis.summary}. मुख्य समस्याएं: ${(analysis.concerns_hi || analysis.concerns).join(', ')}. सलाह: ${(analysis.recommendations_hi || analysis.recommendations).join(', ')}`;
+            ? `${analysis.summary ?? ''}. Concerns: ${list(analysis.concerns)}. Recommendations: ${list(analysis.recommendations)}`
+            : `${analysis.summary_hi || analysis.summary || ''}. मुख्य समस्याएं: ${list(analysis.concerns_hi || analysis.concerns)}. सलाह: ${list(analysis.recommendations_hi || analysis.recommendations)}`;
 
         const textToSpeak = clean(rawText);
         if (!textToSpeak) return;
@@ -163,7 +168,7 @@ export function AIAnalysisModal({ isOpen, onClose, analysis, patientName, langua
         }
     };
 
-    const risk = getRiskStyles(analysis.risk_level);
+    const risk = getRiskStyles(analysis.risk_level ?? 'Low');
 
     const containerVariants = {
         hidden: { opacity: 0, scale: 0.9, y: 20 },

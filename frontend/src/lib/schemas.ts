@@ -140,6 +140,14 @@ export type ScreeningFormData = z.output<typeof ScreeningFormSchema>;
 export type PatientDemographics = z.output<typeof PatientDemographicsSchema>;
 export type Vitals = z.output<typeof VitalsSchema>;
 
+/**
+ * Raw wizard form state.
+ *
+ * Every field is held as a string because inputs, OCR output and speech
+ * transcription all arrive as text; ScreeningFormSchema coerces on submit.
+ */
+export type ScreeningFormValues = Record<string, string>;
+
 export interface ValidationResult<T> {
     success: boolean;
     data?: T;

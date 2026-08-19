@@ -1,3 +1,4 @@
+import type { ScreeningFormValues } from "../../lib/schemas";
 import { useState } from "react";
 import { Upload, Loader2, CheckCircle2, FlaskConical, Beaker, Activity, AlertCircle } from "lucide-react";
 import { Button } from "../ui/button";
@@ -8,8 +9,8 @@ import { cn } from "../../lib/utils";
 import { translations } from "../../lib/translations";
 
 interface LabResultsUploadFormProps {
-    data: any;
-    updateData: (data: any) => void;
+    data: ScreeningFormValues;
+    updateData: (data: ScreeningFormValues) => void;
     language: "en" | "hi";
     patientName?: string;
     onNameMismatch?: (extractedName: string) => void;

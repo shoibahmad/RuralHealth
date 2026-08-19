@@ -1,3 +1,4 @@
+import { formatDateTime, toEpoch } from "../lib/dates";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
@@ -53,7 +54,7 @@ export function AppointmentsPage() {
                 : data;
 
             // Sort by date desc
-            filtered.sort((a, b) => new Date(b.scheduled_date).getTime() - new Date(a.scheduled_date).getTime());
+            filtered.sort((a, b) => toEpoch(b.scheduled_date) - toEpoch(a.scheduled_date));
 
             setAppointments(filtered);
         } catch (error) {
@@ -208,7 +209,7 @@ export function AppointmentsPage() {
                                             <div className="flex items-center gap-4 mt-3">
                                                 <span className="text-xs text-slate-500 flex items-center gap-1">
                                                     <Clock className="h-3 w-3" />
-                                                    {new Date(appointment.scheduled_date).toLocaleString()}
+                                                    {formatDateTime(appointment.scheduled_date)}
                                                 </span>
                                                 {getStatusBadge(appointment.status)}
                                             </div>

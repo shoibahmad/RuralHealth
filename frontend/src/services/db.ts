@@ -328,7 +328,7 @@ class DatabaseService {
 
     // ==================== CACHE ====================
 
-    async setCache(key: string, data: any, ttl: number = 3600000): Promise<void> {
+    async setCache<T>(key: string, data: T, ttl: number = 3600000): Promise<void> {
         const db = await this.getDB();
         const cacheItem = {
             key,
@@ -346,7 +346,7 @@ class DatabaseService {
         });
     }
 
-    async getCache(key: string): Promise<any | null> {
+    async getCache<T>(key: string): Promise<T | null> {
         const db = await this.getDB();
         return new Promise((resolve, reject) => {
             const transaction = db.transaction(['cache'], 'readonly');

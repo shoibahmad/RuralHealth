@@ -122,6 +122,18 @@ export interface PatientDetail extends Patient {
     recommendations: Recommendation[];
 }
 
+/** Everything shown on a patient's history view. */
+export interface PatientHistory {
+    patient: Patient;
+    total_screenings: number;
+    screenings: Screening[];
+    appointments: Appointment[];
+    recommendations: Recommendation[];
+    latest_screening?: Screening | null;
+    upcoming_appointments?: Appointment[];
+    active_recommendations?: Recommendation[];
+}
+
 export interface VillageStats {
     village: string;
     total: number;

@@ -1,9 +1,11 @@
+import { riskUtils } from "../../lib/riskUtils";
+import type { ScreeningFormValues } from "../../lib/schemas";
 import { translations } from "../../lib/translations";
 import { AlertTriangle, Activity, Thermometer, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 
 interface RiskAssessmentReviewProps {
-    data: any;
+    data: ScreeningFormValues;
     language: "en" | "hi";
 }
 
@@ -56,9 +58,10 @@ export function RiskAssessmentReview({ data, language }: RiskAssessmentReviewPro
                         <div className="flex justify-between border-b border-white/5 pb-2">
                             <span className="text-slate-400">BMI</span>
                             <span className="text-white font-medium">
-                                {data.weight_kg && data.height_cm
-                                    ? (data.weight_kg / ((data.height_cm / 100) ** 2)).toFixed(1)
-                                    : "N/A"}
+                                {riskUtils.calculateBMI(
+                                    Number(data.height_cm),
+                                    Number(data.weight_kg),
+                                ) ?? "N/A"}
                             </span>
                         </div>
                         <div className="flex justify-between border-b border-white/5 pb-2">

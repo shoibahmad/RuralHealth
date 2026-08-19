@@ -1,3 +1,4 @@
+import type { ScreeningFormValues } from "../../lib/schemas";
 import { Activity } from "lucide-react";
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
@@ -5,8 +6,8 @@ import { VoiceEntryBanner } from "./VoiceEntryBanner";
 import { translations } from "../../lib/translations";
 
 interface VitalsEntryFormProps {
-    data: any;
-    updateData: (data: any) => void;
+    data: ScreeningFormValues;
+    updateData: (data: ScreeningFormValues) => void;
     language: "en" | "hi";
 }
 
