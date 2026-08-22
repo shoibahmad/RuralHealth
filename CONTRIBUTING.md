@@ -73,7 +73,7 @@ make verify        # the same, via make
 
 | Command | What it checks |
 | :--- | :--- |
-| `pytest` | The full test suite (248 tests) |
+| `pytest` | The full test suite (251 tests) |
 | `pytest --cov --cov-fail-under=85` | Tests plus the enforced coverage gate |
 | `ruff check .` | Lint and import ordering |
 | `ruff format .` | Apply formatting |
@@ -84,7 +84,7 @@ make verify        # the same, via make
 
 | Command | What it checks |
 | :--- | :--- |
-| `npm run test` | The full vitest suite (323 tests) |
+| `npm run test` | The full vitest suite (408 tests across 44 test files) |
 | `npm run test:coverage` | Tests plus the enforced coverage gate |
 | `npm run lint` | ESLint, zero warnings tolerated |
 | `npm run typecheck` | TypeScript, with no emit |

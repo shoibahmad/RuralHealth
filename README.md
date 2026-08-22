@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Node 22+](https://img.shields.io/badge/node-22+-green.svg)](https://nodejs.org/)
-[![Tests](https://img.shields.io/badge/tests-571%20passing-brightgreen.svg)](#-testing--quality)
+[![Tests](https://img.shields.io/badge/tests-659%20passing-brightgreen.svg)](#-testing--quality)
 [![Coverage](https://img.shields.io/badge/coverage-92%25%20backend%20%7C%2094%25%20frontend-brightgreen.svg)](#-testing--quality)
 
 **RuralHealthAI** is a mission-critical digital health platform designed to bring advanced diagnostic capabilities to frontline health workers in underserved rural areas. By transitioning from manual paper-based logs to a smart, AI-driven, and offline-capable system, the platform enables early identification of Non-Communicable Diseases (NCDs) like Hypertension, Diabetes, and cardiovascular risks.
