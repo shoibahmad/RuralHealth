@@ -24,17 +24,13 @@ vi.mock("recharts", async () => {
 
 const mockStats: DashboardStats = {
     total_patients: 120,
-    screenings_today: 15,
-    high_risk_cases: 8,
-    follow_ups_needed: 12,
-    village_coverage: 6,
-    active_health_workers: 4,
-    monthly_trend: [{ month: "Jan", count: 45 }],
+    total_screenings: 150,
+    high_risk_patients: 8,
+    pending_sync: 0,
     risk_distribution: { High: 8, Medium: 22, Low: 90 },
     age_distribution: { "20-29": 30, "30-39": 40 },
     gender_distribution: [{ gender: "Female", count: 70 }, { gender: "Male", count: 50 }],
-    village_stats: [{ village: "Rampur", patient_count: 50, screening_count: 60, high_risk_count: 3 }],
-};
+} as unknown as DashboardStats;
 
 describe("SystemAnalyticsPage", () => {
     beforeEach(() => {

@@ -3,7 +3,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { WorkerDetailPage } from "./WorkerDetailPage";
 import { firestoreService, type Patient, type DashboardStats } from "../services/firestoreService";
-import { doc, getDoc } from "firebase/firestore";
+import { getDoc } from "firebase/firestore";
 
 vi.mock("../services/firestoreService", () => ({
     firestoreService: {
@@ -35,17 +35,13 @@ vi.mock("recharts", async () => {
 
 const mockStats: DashboardStats = {
     total_patients: 25,
-    screenings_today: 4,
-    high_risk_cases: 3,
-    follow_ups_needed: 2,
-    village_coverage: 2,
-    active_health_workers: 1,
-    monthly_trend: [],
+    total_screenings: 30,
+    high_risk_patients: 3,
+    pending_sync: 0,
     risk_distribution: { High: 3, Medium: 7, Low: 15 },
     age_distribution: {},
     gender_distribution: [],
-    village_stats: [],
-};
+} as unknown as DashboardStats;
 
 const mockPatients: Patient[] = [
     {
@@ -54,8 +50,9 @@ const mockPatients: Patient[] = [
         age: 34,
         gender: "Female",
         village: "Rampur",
+        created_at: "2026-01-01T10:00:00Z",
         latest_risk_level: "High",
-        screening_count: 2,
+        screening_count: 3,
     },
 ];
 

@@ -17,13 +17,14 @@ const mockWorkers: HealthWorkerWithStats[] = [
         full_name: "Priya Sharma",
         email: "priya@example.com",
         role: "health_worker",
-        assigned_village: "Rampur",
-        patients_count: 15,
-        screenings_count: 42,
-        high_risk_count: 5,
         is_active: true,
         created_at: "2026-01-01T00:00:00Z",
-    },
+        stats: {
+            total_patients: 15,
+            total_screenings: 42,
+            high_risk_patients: 5,
+        },
+    } as unknown as HealthWorkerWithStats,
 ];
 
 describe("HealthWorkersPage", () => {

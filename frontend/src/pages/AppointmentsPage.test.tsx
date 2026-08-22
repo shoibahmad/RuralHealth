@@ -31,12 +31,11 @@ const mockAppointments: Appointment[] = [
     {
         id: "a1",
         patient_id: "p1",
-        patient_name: "Anita Sharma",
         scheduled_date: "2026-03-01T10:00:00Z",
         reason: "Follow-up blood pressure check",
         status: "scheduled",
         created_at: "2026-01-01T10:00:00Z",
-    },
+    } as unknown as Appointment,
 ];
 
 const mockPatients: Patient[] = [
@@ -46,6 +45,7 @@ const mockPatients: Patient[] = [
         age: 34,
         gender: "Female",
         village: "Rampur",
+        created_at: "2026-01-01T10:00:00Z",
     },
 ];
 

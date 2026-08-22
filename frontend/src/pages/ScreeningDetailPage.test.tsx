@@ -21,9 +21,8 @@ const mockScreening: Screening = {
     heart_rate: 80,
     glucose_level: 160,
     cholesterol_level: 220,
-    bmi: 28.5,
     ai_insights: "Patient shows elevated cardiovascular risk markers.",
-};
+} as unknown as Screening;
 
 describe("ScreeningDetailPage", () => {
     beforeEach(() => {

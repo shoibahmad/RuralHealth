@@ -47,11 +47,12 @@ const mockScreenings: Screening[] = [
     {
         id: "s1",
         patient_id: "p1",
+        risk_score: 85,
         created_at: "2026-01-10T10:00:00Z",
         risk_level: "High",
         symptoms: ["Chest pain"],
         risk_factors: ["Hypertension"],
-    } as Screening,
+    } as unknown as Screening,
 ];
 
 describe("AnalyticsPage", () => {

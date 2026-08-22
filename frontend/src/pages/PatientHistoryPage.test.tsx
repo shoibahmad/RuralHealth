@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { PatientHistoryPage } from "./PatientHistoryPage";
-import { firestoreService, type Patient, type Screening, type Appointment } from "../services/firestoreService";
+import { firestoreService, type Patient, type Screening } from "../services/firestoreService";
 import { useAuth } from "../context/useAuth";
 
 vi.mock("../context/useAuth", () => ({
