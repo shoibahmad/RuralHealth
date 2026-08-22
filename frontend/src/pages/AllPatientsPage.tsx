@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Search, Filter, Activity, Edit, X, Trash2 } from "lucide-react";
 import { Button } from "../components/ui/button";
@@ -7,7 +7,8 @@ import { Label } from "../components/ui/label";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
-import { firestoreService, type Patient } from "../services/firestoreService";
+import { type Patient } from "../services/firestoreService";
+import { usePatientList } from "../hooks/usePatientList";
 import { createLogger } from "../lib/logger";
 import { formatDate } from "../lib/dates";
 import { errorMessage } from "../lib/errors";
@@ -16,61 +17,31 @@ const log = createLogger("AllPatientsPage");
 
 export function AllPatientsPage() {
     const navigate = useNavigate();
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [riskFilter, setRiskFilter] = useState("");
-    const [page, setPage] = useState(1);
-    const [total, setTotal] = useState(0);
+    const { showToast } = useToast();
+    const {
+        patients,
+        loading,
+        searchTerm,
+        setSearchTerm,
+        riskFilter,
+        setRiskFilter,
+        page,
+        setPage,
+        totalCount: total,
+        totalPages,
+        deletePatient,
+        updatePatient,
+        refetch,
+    } = usePatientList({ pageSize: 20 });
+
     const [editingPatient, setEditingPatient] = useState<Patient | null>(null);
     const [showEditModal, setShowEditModal] = useState(false);
     const [patientToDelete, setPatientToDelete] = useState<Patient | null>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const { showToast } = useToast();
-
-    const fetchPatients = useCallback(async () => {
-        setLoading(true);
-        try {
-            // Fetch all patients (Officer view)
-            const allPatients = await firestoreService.getPatients();
-
-            // Client-side Filter
-            let filtered = allPatients;
-            if (searchTerm) {
-                const lower = searchTerm.toLowerCase();
-                filtered = filtered.filter(
-                    (p) =>
-                        p.full_name.toLowerCase().includes(lower) ||
-                        p.village.toLowerCase().includes(lower) ||
-                        (p.phone && p.phone.includes(lower)),
-                );
-            }
-
-            if (riskFilter) {
-                filtered = filtered.filter((p) => p.latest_risk_level === riskFilter);
-            }
-
-            setTotal(filtered.length);
-
-            // Pagination
-            const start = (page - 1) * 20;
-            const paginated = filtered.slice(start, start + 20);
-
-            setPatients(paginated);
-        } catch (error) {
-            log.error("Failed to fetch patients", error);
-        } finally {
-            setLoading(false);
-        }
-    }, [page, riskFilter, searchTerm]);
-
-    useEffect(() => {
-        fetchPatients();
-    }, [fetchPatients]);
 
     const handleSearch = () => {
         setPage(1);
-        fetchPatients();
+        refetch();
     };
 
     const handleEditPatient = (patient: Patient) => {
@@ -79,12 +50,10 @@ export function AllPatientsPage() {
     };
 
     const handleUpdatePatient = async () => {
-        if (!editingPatient) return;
+        if (!editingPatient?.id) return;
 
         try {
-            if (!editingPatient.id) return;
-
-            await firestoreService.updatePatient(editingPatient.id, {
+            const success = await updatePatient(editingPatient.id, {
                 full_name: editingPatient.full_name,
                 age: editingPatient.age,
                 gender: editingPatient.gender,
@@ -92,31 +61,34 @@ export function AllPatientsPage() {
                 phone: editingPatient.phone,
             });
 
-            setShowEditModal(false);
-            fetchPatients();
+            if (success) {
+                showToast("Patient updated successfully", "success");
+                setShowEditModal(false);
+            } else {
+                showToast("Failed to update patient", "error");
+            }
         } catch (error) {
             log.error("Failed to update patient", error);
+            showToast(errorMessage(error, "Failed to update patient"), "error");
         }
     };
 
     const handleConfirmDelete = async () => {
         if (!patientToDelete?.id) return;
-        setLoading(true);
         try {
-            await firestoreService.deletePatient(patientToDelete.id);
-            showToast("Patient deleted successfully", "success");
-            setIsDeleteModalOpen(false);
-            setPatientToDelete(null);
-            fetchPatients();
+            const success = await deletePatient(patientToDelete.id);
+            if (success) {
+                showToast("Patient deleted successfully", "success");
+                setIsDeleteModalOpen(false);
+                setPatientToDelete(null);
+            } else {
+                showToast("Failed to delete patient", "error");
+            }
         } catch (error: unknown) {
             log.error("Failed to delete patient", error);
             showToast(errorMessage(error, "Failed to delete patient"), "error");
-        } finally {
-            setLoading(false);
         }
     };
-
-    const totalPages = Math.ceil(total / 20);
 
     return (
         <div className="space-y-8 pb-8">

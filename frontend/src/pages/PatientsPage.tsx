@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import {
     Users,
@@ -14,7 +14,8 @@ import {
 } from "lucide-react";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import { firestoreService, type Patient, type PatientDetail } from "../services/firestoreService";
+import { firestoreService, type PatientDetail } from "../services/firestoreService";
+import { usePatientList } from "../hooks/usePatientList";
 import { useToast } from "../context/useToast";
 import { ConfirmationModal } from "../components/ui/confirmation-modal";
 import { createLogger } from "../lib/logger";
@@ -25,47 +26,22 @@ const log = createLogger("PatientsPage");
 
 export function PatientsPage() {
     const { showToast } = useToast();
-    const [patients, setPatients] = useState<Patient[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState("");
+    const {
+        patients,
+        loading,
+        searchTerm,
+        setSearchTerm,
+        riskFilter,
+        setRiskFilter,
+        deletePatient,
+    } = usePatientList();
+
     const [selectedPatient, setSelectedPatient] = useState<PatientDetail | null>(null);
     const [showDetailModal, setShowDetailModal] = useState(false);
-    const [riskFilter, setRiskFilter] = useState<string>("");
 
     // Confirmation Modal State
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
-
-    const fetchPatients = useCallback(async () => {
-        try {
-            const allPatients = await firestoreService.getPatients();
-
-            let filtered = allPatients;
-            if (searchTerm) {
-                const lower = searchTerm.toLowerCase();
-                filtered = filtered.filter(
-                    (p) =>
-                        p.full_name.toLowerCase().includes(lower) ||
-                        p.village.toLowerCase().includes(lower) ||
-                        (p.phone && p.phone.includes(lower)),
-                );
-            }
-
-            if (riskFilter) {
-                filtered = filtered.filter((p) => p.latest_risk_level === riskFilter);
-            }
-
-            setPatients(filtered);
-        } catch (error) {
-            log.error("Failed to fetch patients", error);
-        } finally {
-            setLoading(false);
-        }
-    }, [searchTerm, riskFilter]);
-
-    useEffect(() => {
-        fetchPatients();
-    }, [fetchPatients]);
 
     const fetchPatientDetail = async (id: string) => {
         try {
@@ -97,9 +73,12 @@ export function PatientsPage() {
         if (!deleteId) return;
         setIsDeleting(true);
         try {
-            await firestoreService.deletePatient(deleteId);
-            showToast("Patient deleted successfully", "success");
-            fetchPatients();
+            const success = await deletePatient(deleteId);
+            if (success) {
+                showToast("Patient deleted successfully", "success");
+            } else {
+                showToast("Failed to delete patient", "error");
+            }
         } catch (error) {
             log.error("Failed to delete patient", error);
             showToast(errorMessage(error, "Failed to delete patient"), "error");
