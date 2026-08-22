@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>42/42</span>
+                <span class='fraction'>47/47</span>
             </div>
         
             
@@ -151,7 +151,14 @@
 <a name='L86'></a><a href='#L86'>86</a>
 <a name='L87'></a><a href='#L87'>87</a>
 <a name='L88'></a><a href='#L88'>88</a>
-<a name='L89'></a><a href='#L89'>89</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L89'></a><a href='#L89'>89</a>
+<a name='L90'></a><a href='#L90'>90</a>
+<a name='L91'></a><a href='#L91'>91</a>
+<a name='L92'></a><a href='#L92'>92</a>
+<a name='L93'></a><a href='#L93'>93</a>
+<a name='L94'></a><a href='#L94'>94</a>
+<a name='L95'></a><a href='#L95'>95</a>
+<a name='L96'></a><a href='#L96'>96</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -216,13 +223,20 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">6x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">6x</span>
 <span class="cline-any cline-yes">6x</span>
@@ -249,7 +263,7 @@
 &nbsp;
 export interface RiskResult {
     score: number;
-    level: 'Low' | 'Medium' | 'High';
+    level: "Low" | "Medium" | "High";
     notes: string;
 }
 &nbsp;
@@ -265,7 +279,7 @@ export const riskUtils = {
         }
 &nbsp;
         // Smoking
-        if (data.smoking_status === 'smoker') {
+        if (data.smoking_status === "smoker") {
             score += 2;
             notes.push("Smoker (+2)");
         }
@@ -285,14 +299,14 @@ export const riskUtils = {
         }
 &nbsp;
         // Determine Level
-        let level: 'Low' | 'Medium' | 'High' = 'Low';
-        if (score &gt;= 4) level = 'High';
-        else if (score &gt;= 2) level = 'Medium';
+        let level: "Low" | "Medium" | "High" = "Low";
+        if (score &gt;= 4) level = "High";
+        else if (score &gt;= 2) level = "Medium";
 &nbsp;
         return {
             score,
             level,
-            notes: notes.join(", ") || "No significant risk factors identified."
+            notes: notes.join(", ") || "No significant risk factors identified.",
         };
     },
 &nbsp;
@@ -303,20 +317,27 @@ export const riskUtils = {
         return bmi;
     },
 &nbsp;
-    generateInsights(data: RiskFactors &amp; { riskLevel: string, bmi?: number, glucose?: number }): string {
+    generateInsights(
+        data: RiskFactors &amp; { riskLevel: string; bmi?: number; glucose?: number },
+    ): string {
         let insights = `**AI Health Assessment**\n\nBased on the screening data, the patient is categorized as **${data.riskLevel} Risk**.\n\n**Key Observations:**\n`;
 &nbsp;
-        if (data.age &gt; 50) insights += `- Patient age (${data.age}) increases susceptibility to chronic conditions.\n`;
-        if (data.bmi &amp;&amp; data.bmi &gt; 25) insights += `- BMI of ${data.bmi} indicates overweight/obesity, a major risk factor.\n`;
-        if (data.systolic_bp &amp;&amp; data.systolic_bp &gt; 130) insights += `- Elevated Systolic BP (${data.systolic_bp} mmHg) suggests hypertension.\n`;
-        if (data.smoking_status === 'smoker') insights += `- Smoking history significantly elevates cardiovascular risk.\n`;
-        if (data.glucose &amp;&amp; data.glucose &gt; 140) insights += `- Random glucose level of ${data.glucose} mg/dL requires further diabetes screening.\n`;
+        if (data.age &gt; 50)
+            insights += `- Patient age (${data.age}) increases susceptibility to chronic conditions.\n`;
+        if (data.bmi &amp;&amp; data.bmi &gt; 25)
+            insights += `- BMI of ${data.bmi} indicates overweight/obesity, a major risk factor.\n`;
+        if (data.systolic_bp &amp;&amp; data.systolic_bp &gt; 130)
+            insights += `- Elevated Systolic BP (${data.systolic_bp} mmHg) suggests hypertension.\n`;
+        if (data.smoking_status === "smoker")
+            insights += `- Smoking history significantly elevates cardiovascular risk.\n`;
+        if (data.glucose &amp;&amp; data.glucose &gt; 140)
+            insights += `- Random glucose level of ${data.glucose} mg/dL requires further diabetes screening.\n`;
 &nbsp;
         insights += `\n**Recommendations:**\n`;
-        if (data.riskLevel === 'High') {
+        if (data.riskLevel === "High") {
             insights += `1. **Immediate Referral**: Schedule appointment with Medical Officer within 24 hours.\n`;
             insights += `2. **BP Monitoring**: Daily blood pressure checks recommended.\n`;
-        } else if (data.riskLevel === 'Medium') {
+        } else if (data.riskLevel === "Medium") {
             insights += `1. **Lifestyle Change**: Reduce salt intake and increase physical activity.\n`;
             insights += `2. **Follow-up**: Re-screen in 1 month.\n`;
         } else {
@@ -325,7 +346,7 @@ export const riskUtils = {
         }
 &nbsp;
         return insights;
-    }
+    },
 };
 &nbsp;</pre></td></tr></table></pre>
 
@@ -334,7 +355,7 @@ export const riskUtils = {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-19T15:40:15.760Z
+                at 2026-08-22T17:58:45.556Z
             </div>
         <script src="../prettify.js"></script>
         <script>

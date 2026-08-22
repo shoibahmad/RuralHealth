@@ -381,12 +381,11 @@
 <a name='L316'></a><a href='#L316'>316</a>
 <a name='L317'></a><a href='#L317'>317</a>
 <a name='L318'></a><a href='#L318'>318</a>
-<a name='L319'></a><a href='#L319'>319</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L319'></a><a href='#L319'>319</a>
+<a name='L320'></a><a href='#L320'>320</a>
+<a name='L321'></a><a href='#L321'>321</a>
+<a name='L322'></a><a href='#L322'>322</a>
+<a name='L323'></a><a href='#L323'>323</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -589,12 +588,19 @@
 <span class="cline-any cline-yes">3x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-yes">2x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -644,6 +650,8 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">4x</span>
 <span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -703,15 +711,10 @@
  * Sync Service for handling online/offline data synchronization
  */
 &nbsp;
-import { db } from './db';
-import type {
-    LocalPatient,
-    LocalScreening,
-    QueuedScreeningData,
-    SyncQueueItem,
-} from './db';
+import { db } from "./db";
+import type { LocalPatient, LocalScreening, QueuedScreeningData, SyncQueueItem } from "./db";
 &nbsp;
-export type SyncStatus = 'idle' | 'syncing' | 'error' | 'success';
+export type SyncStatus = "idle" | "syncing" | "error" | "success";
 &nbsp;
 export interface SyncResult {
     success: boolean;
@@ -738,8 +741,8 @@ function errorMessage(error: unknown): string {
  * "not recorded" rather than zero.
  */
 function toFloat(value: string | number | undefined | null): number | undefined {
-    if (value === undefined || value === null || value === '') return undefined;
-    const parsed = typeof value === 'number' ? <span class="branch-0 cbranch-no" title="branch not covered" >value : p</span>arseFloat(value);
+    if (value === undefined || value === null || value === "") return undefined;
+    const parsed = typeof value === "number" ? <span class="branch-0 cbranch-no" title="branch not covered" >value : p</span>arseFloat(value);
     return Number.isNaN(parsed) ? undefined : parsed;
 }
 &nbsp;
@@ -749,7 +752,7 @@ function toInt(value: string | number | undefined | null): number | undefined {
 }
 &nbsp;
 function toText(value: string | number | undefined | null): string | undefined {
-    <span class="missing-if-branch" title="else path not taken" >E</span>if (value === undefined || <span class="branch-1 cbranch-no" title="branch not covered" >value === null || <span class="branch-2 cbranch-no" title="branch not covered" >v</span>alue === '') r</span>eturn undefined;
+    <span class="missing-if-branch" title="else path not taken" >E</span>if (value === undefined || <span class="branch-1 cbranch-no" title="branch not covered" >value === null || <span class="branch-2 cbranch-no" title="branch not covered" >v</span>alue === "") r</span>eturn undefined;
 <span class="cstat-no" title="statement not covered" >    return String(value);</span>
 }
 &nbsp;
@@ -773,7 +776,7 @@ class SyncService {
     }
 &nbsp;
     private notifyListeners(status: SyncStatus) {
-        this.listeners.forEach(cb =&gt; cb(status));
+        this.listeners.forEach((cb) =&gt; cb(status));
     }
 &nbsp;
     // Save patient locally (for offline use)
@@ -783,10 +786,10 @@ class SyncService {
             localId,
             synced: false,
             data: {
-                full_name: String(patientData.full_name ?? <span class="branch-1 cbranch-no" title="branch not covered" >'')</span>,
+                full_name: String(patientData.full_name ?? <span class="branch-1 cbranch-no" title="branch not covered" >"")</span>,
                 age: toInt(patientData.age) ?? 0,
-                gender: String(patientData.gender ?? ''),
-                village: String(patientData.village ?? ''),
+                gender: String(patientData.gender ?? ""),
+                village: String(patientData.village ?? ""),
                 phone: patientData.phone ? String(patientData.phone) : undefined,
             },
             createdAt: new Date(),
@@ -794,13 +797,13 @@ class SyncService {
 &nbsp;
         await db.savePatient(localPatient);
         await db.addToSyncQueue({
-            type: 'patient',
-            action: 'create',
+            type: "patient",
+            action: "create",
             localId,
             data: localPatient.data,
         });
 &nbsp;
-        console.log('Patient saved locally:', localId);
+        console.log("Patient saved locally:", localId);
         return localId;
     }
 &nbsp;
@@ -831,35 +834,35 @@ class SyncService {
 &nbsp;
         await db.saveScreening(localScreening);
         await db.addToSyncQueue({
-            type: 'screening',
-            action: 'create',
+            type: "screening",
+            action: "create",
             localId,
             data: { ...localScreening.data, patientLocalId },
         });
 &nbsp;
-        console.log('Screening saved locally:', localId);
+        console.log("Screening saved locally:", localId);
         return localId;
     }
 &nbsp;
     // Sync all pending data to server
     async syncAll(): Promise&lt;SyncResult&gt; {
         if (this.isSyncing) {
-            console.log('Sync already in progress');
-            return { success: false, synced: 0, failed: 0, errors: ['Sync already in progress'] };
+            console.log("Sync already in progress");
+            return { success: false, synced: 0, failed: 0, errors: ["Sync already in progress"] };
         }
 &nbsp;
         if (!this.isOnline()) {
-            console.log('Cannot sync: offline');
-            return { success: false, synced: 0, failed: 0, errors: ['Device is offline'] };
+            console.log("Cannot sync: offline");
+            return { success: false, synced: 0, failed: 0, errors: ["Device is offline"] };
         }
 &nbsp;
         if (!this.token) {
-            console.log('Cannot sync: no auth token');
-            return { success: false, synced: 0, failed: 0, errors: ['Not authenticated'] };
+            console.log("Cannot sync: no auth token");
+            return { success: false, synced: 0, failed: 0, errors: ["Not authenticated"] };
         }
 &nbsp;
         this.isSyncing = true;
-        this.notifyListeners('syncing');
+        this.notifyListeners("syncing");
 &nbsp;
         const result: SyncResult = {
             success: true,
@@ -877,7 +880,7 @@ class SyncService {
 &nbsp;
             // First, get existing mappings from already synced patients
             const patients = await db.getAllPatients();
-            patients.forEach(p =&gt; {
+            patients.forEach((p) =&gt; {
                 <span class="missing-if-branch" title="else path not taken" >E</span>if (p.serverId) {
                     patientIdMap.set(p.localId, p.serverId);
                 }
@@ -885,7 +888,7 @@ class SyncService {
 &nbsp;
             for (const item of queue) {
                 try {
-                    if (item.type === 'patient') {
+                    if (item.type === "patient") {
                         const serverId = await this.syncPatient(item);
                         <span class="missing-if-branch" title="else path not taken" >E</span>if (serverId) {
                             patientIdMap.set(item.localId, serverId);
@@ -893,7 +896,7 @@ class SyncService {
                             await db.removeFromSyncQueue(item.id);
                             result.synced++;
                         }
-                    <span class="missing-if-branch" title="else path not taken" >E</span>} else if (item.type === 'screening') {
+                    <span class="missing-if-branch" title="else path not taken" >E</span>} else if (item.type === "screening") {
                         // Get patient server ID
                         const { patientLocalId } = item.data as QueuedScreeningData;
                         let patientServerId = patientIdMap.get(patientLocalId);
@@ -906,13 +909,20 @@ class SyncService {
 &nbsp;
                         if (!patientServerId) {
                             // Patient not synced yet, skip this screening
-                            console.log('Skipping screening - patient not yet synced:', patientLocalId);
+                            console.log(
+                                "Skipping screening - patient not yet synced:",
+                                patientLocalId,
+                            );
                             continue;
                         }
 &nbsp;
                         const serverId = await this.syncScreening(item, patientServerId);
                         <span class="missing-if-branch" title="else path not taken" >E</span>if (serverId) {
-                            await db.updateScreeningServerId(item.localId, serverId, patientServerId);
+                            await db.updateScreeningServerId(
+                                item.localId,
+                                serverId,
+                                patientServerId,
+                            );
                             await db.removeFromSyncQueue(item.id);
                             result.synced++;
                         }
@@ -930,26 +940,26 @@ class SyncService {
             }
 &nbsp;
             result.success = result.failed === 0;
-            this.notifyListeners(result.success ? 'success' : 'error');
+            this.notifyListeners(result.success ? "success" : "error");
         } catch (error: unknown) {
-<span class="cstat-no" title="statement not covered" >            console.error('Sync failed:', error);</span>
+<span class="cstat-no" title="statement not covered" >            console.error("Sync failed:", error);</span>
 <span class="cstat-no" title="statement not covered" >            result.success = false;</span>
 <span class="cstat-no" title="statement not covered" >            result.errors.push(errorMessage(error));</span>
-<span class="cstat-no" title="statement not covered" >            this.notifyListeners('error');</span>
+<span class="cstat-no" title="statement not covered" >            this.notifyListeners("error");</span>
         } finally {
             this.isSyncing = false;
-            setTimeout(() =&gt; this.notifyListeners('idle'), 3000);
+            setTimeout(() =&gt; this.notifyListeners("idle"), 3000);
         }
 &nbsp;
-        console.log('Sync result:', result);
+        console.log("Sync result:", result);
         return result;
     }
 &nbsp;
     private async syncPatient(item: SyncQueueItem): Promise&lt;number | null&gt; {
-        const response = await fetch('/api/screening/patients', {
-            method: 'POST',
+        const response = await fetch("/api/screening/patients", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.token}`,
             },
             body: JSON.stringify(item.data),
@@ -957,22 +967,24 @@ class SyncService {
 &nbsp;
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.detail || <span class="branch-1 cbranch-no" title="branch not covered" >'Failed to sync patient')</span>;
+            throw new Error(error.detail || <span class="branch-1 cbranch-no" title="branch not covered" >"Failed to sync patient")</span>;
         }
 &nbsp;
         const patient = await response.json();
         return patient.id;
     }
 &nbsp;
-    private async syncScreening(item: SyncQueueItem, patientServerId: number): Promise&lt;number | null&gt; {
+    private async syncScreening(
+        item: SyncQueueItem,
+        patientServerId: number,
+    ): Promise&lt;number | null&gt; {
         // patientLocalId is an offline-only key and must not reach the server.
-        const { patientLocalId: _localId, ...screeningData } =
-            item.data as QueuedScreeningData;
+        const { patientLocalId: _localId, ...screeningData } = item.data as QueuedScreeningData;
 &nbsp;
-        const response = await fetch('/api/screening/screenings', {
-            method: 'POST',
+        const response = await fetch("/api/screening/screenings", {
+            method: "POST",
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json",
                 Authorization: `Bearer ${this.token}`,
             },
             body: JSON.stringify({
@@ -983,7 +995,7 @@ class SyncService {
 &nbsp;
         <span class="missing-if-branch" title="if path not taken" >I</span>if (!response.ok) {
             const error = <span class="cstat-no" title="statement not covered" >await response.json();</span>
-<span class="cstat-no" title="statement not covered" >            throw new Error(error.detail || 'Failed to sync screening');</span>
+<span class="cstat-no" title="statement not covered" >            throw new Error(error.detail || "Failed to sync screening");</span>
         }
 &nbsp;
         const screening = await response.json();
@@ -1024,7 +1036,7 @@ export const syncService = new SyncService();
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-08-19T15:40:15.760Z
+                at 2026-08-22T17:58:45.556Z
             </div>
         <script src="../prettify.js"></script>
         <script>
