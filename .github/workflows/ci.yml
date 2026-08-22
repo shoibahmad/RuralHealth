@@ -158,7 +158,7 @@ jobs:
 
       # Proves a fresh clone still produces a runnable image.
       - name: Build image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
