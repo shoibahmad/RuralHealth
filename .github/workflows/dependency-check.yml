@@ -1,0 +1,52 @@
+name: Dependency Audit
+
+on:
+  schedule:
+    # Run every Monday at 00:00 UTC
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  npm-audit:
+    name: NPM Dependency Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Audit root and frontend dependencies
+        run: |
+          npm audit --audit-level=high || true
+          cd frontend && npm audit --audit-level=high || true
+
+  python-audit:
+    name: Python Safety & Pip Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+
+      - name: Install pip-audit & safety
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pip-audit safety
+
+      - name: Run pip-audit on backend dependencies
+        run: |
+          pip-audit -r backend/requirements.txt || true

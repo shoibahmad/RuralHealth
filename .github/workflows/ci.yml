@@ -203,3 +203,29 @@ jobs:
       - name: Stop the container
         if: always()
         run: docker rm -f ruralhealth || true
+
+  deploy-check:
+    name: Deployment artifact validation
+    needs: [backend, frontend, security, smoke-test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install root dependencies
+        run: npm ci
+
+      - name: Build frontend production bundle
+        run: npm run build
+
+      - name: Verify dist artifacts
+        run: |
+          test -f frontend/dist/index.html || { echo "index.html missing"; exit 1; }
+          test -d frontend/dist/assets || { echo "assets directory missing"; exit 1; }
+          echo "Production frontend build artifacts verified successfully."
